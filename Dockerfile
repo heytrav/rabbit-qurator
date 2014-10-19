@@ -11,6 +11,7 @@ RUN /bin/bash -c  \
         mkvirtualenv -p /usr/bin/python3.4 rabbitpy; \
         pip install -r requirements.txt"
 
+RUN echo ". /etc/bash_completion.d/virtualenvwrapper" >> $HOME/.bashrc 
 
 ENTRYPOINT  ["/bin/bash"]
 
