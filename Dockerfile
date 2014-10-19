@@ -5,7 +5,6 @@ WORKDIR /usr/local/d8o/rabbitpy
 RUN apt-get update
 RUN apt-get install -y virtualenvwrapper libncurses5-dev python3.4-dev
 RUN apt-get clean
-#ADD requirements.txt /usr/local/d8o/hasepy/
 RUN /bin/bash -c  \
         "source /etc/bash_completion.d/virtualenvwrapper ; \
         mkvirtualenv -p /usr/bin/python3.4 hasepy; \
@@ -13,6 +12,6 @@ RUN /bin/bash -c  \
 
 RUN echo ". /etc/bash_completion.d/virtualenvwrapper" >> $HOME/.bashrc
 
-ENTRYPOINT  ["/bin/bash"]
+#ENTRYPOINT  ["/bin/bash"]
 
 
