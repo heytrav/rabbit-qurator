@@ -5,10 +5,7 @@ Another place for rabbits to play
 
 #Description
 
-Rabbits share a lot of diseases, bugs and worms. That's because they're
-similar to rodents or something. I don't know what they are actually. Pythons
-probably eat rabbits, but there aren't any here so they spread everywhere and
-eat all the corn. In short, we need more Python so let's put it here.
+Rabbits in Python. At this stage just experimental stuff.
 
 #Setup
 
