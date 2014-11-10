@@ -9,7 +9,7 @@ docker run --name ${CONTAINERNAME} \
     -v /usr/local/d8o/rabbitpy:/usr/local/d8o/rabbitpy:rw  \
     -v /usr/local/d8o/domainsage:/usr/local/d8o/domainsage:r \
     --link rabbitmq:amq \
-    --link couchdb:couch \
+    --link beanbag:couch \
     --link kyoto:kyoto \
     --link rsyslogd:syslog \
     -p 0.0.0.0:$RABBITPY_PORT:$RABBITPY_PORT \
