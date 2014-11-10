@@ -1,10 +1,6 @@
-FROM ubuntu:trusty
+FROM docker.domarino.com/iwmn-python3.4:latest
 MAINTAINER Travis Holton <travis@ideegeo.com>
 
-RUN apt-get update
-RUN apt-get install -y virtualenvwrapper libncurses5-dev \
-    python3.4-dev libpgm-5.1-0 libzmq-dev libzmq3 git
-RUN apt-get clean
 WORKDIR /tmp
 ADD requirements.txt /tmp/
 RUN /bin/bash -c  \
