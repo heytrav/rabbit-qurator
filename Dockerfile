@@ -12,5 +12,8 @@ RUN echo ". /etc/bash_completion.d/virtualenvwrapper" >> $HOME/.bashrc
 RUN echo "workon rabbitpy" >> $HOME/.bashrc
 RUN echo "export PYTHONPATH=$PYTHONPATH:/usr/local/d8o/domainsage" >> $HOME/.bashrc
 WORKDIR /usr/local/d8o/rabbitpy
+ADD . /usr/local/d8o/rabbitpy
+RUN mkdir -p /etc/d8o/rabbitpy
+RUN git describe > /etc/d8o/rabbitpy/VERSION
 
 ENTRYPOINT  ["/bin/bash"]
