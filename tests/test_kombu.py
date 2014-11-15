@@ -31,22 +31,22 @@ class TestKombu(TestCase):
             :returns: TODO
 
             with Connection(**self.conn_dict) as conn:
-                simple_queue = conn.SimpleQueue('simple_queue')
+                test_queue = conn.SimpleQueue('test_queue')
                 message = 'hello world, sent at %s' % datetime.datetime.today()
-                simple_queue.put(message)
+                test_queue.put(message)
                 print('Sent: %s' % message)
-                simple_queue.close()
+                test_queue.close()
 
 
         def consumer():
             """Test behaviour of basic amqp consumer
 
             with Connection(**self.conn_dict) as conn:
-                simple_queue = conn.SimpleQueue('simple_queue')
-                message = simple_queue.get(block=True, timeout=1)
+                test_queue = conn.SimpleQueue('test_queue')
+                message = test_queue.get(block=True, timeout=1)
                 print('Received: %s' % message.payload)
                 message.ack()
-                simple_queue.close()
+                test_queue.close()
                 return message
         publisher()
         message = consumer()
