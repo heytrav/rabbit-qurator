@@ -18,7 +18,7 @@ class TestKombu(TestCase):
         'virtual_host': os.environ['AMQP_VHOST'],
     }
 
-        
+
 
 class SyncTest(TestKombu):
 
@@ -56,19 +56,11 @@ class SyncTest(TestKombu):
 
 class AsyncTest(TestKombu):
 
-    conn_dict = {
-        'hostname': os.environ['AMQ_PORT_5672_TCP_ADDR'],
-        'port': os.environ['AMQ_PORT_5672_TCP_PORT'],
-        'userid': os.environ['AMQP_USER'],
-        'password': os.environ['AMQP_PASSWORD'],
-        'ssl': False,
-        'virtual_host': os.environ['AMQP_VHOST'],
-    }
-
     def test_async_messaging(self):
         """Test the ConsumerMixin class """
         from kombu import Exchange, Queue, Consumer
         from kombu.pools import producers
+        from kombu.common import send_reply, uuid, collect_replies
 
         test_exchange = Exchange('rabbitpytests', type='direct')
         test_queues = [
@@ -76,31 +68,51 @@ class AsyncTest(TestKombu):
         ]
 
         # Start a consumer and wait
-        from threading import Thread
         def run_consumer():
             def on_message( body, message):
-                print("Called on_message")
-                message.ack()
-                print("Consumer got message: %r" % body)
+                print("Called on_message: ", message.properties)
+                print("Message channel: ", message.channel.channel_id)
                 self.assertRegex(
-                    body['data'], 
-                    r'Hello', 
+                    body['data'],
+                    r'Hello',
                     'Received "Hello, World" from producer.'
                 )
+                with Connection(**self.conn_dict) as conn:
+                    with producers[conn].acquire(block=True) as producer:
+                        send_reply(
+                            test_exchange, 
+                            message, 
+                            {'reply': 'Got it'},
+                            producer
+                        )
+                message.ack()
 
             with Connection(**self.conn_dict) as conn:
                 with Consumer(conn, test_queues, callbacks=[on_message]):
                     conn.drain_events(timeout=3)
 
-        t = Thread(target=run_consumer)
-        t.start()
 
         # have producer send a message
         with Connection(**self.conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:
                 payload = {'data': 'Hello, World'}
                 producer.publish(payload,
-                                exchange=test_exchange,
+                                 exchange=test_exchange,
                                  serializer='json',
-                                declare=[test_exchange],
-                                routing_key='testtask')
+                                 declare=[test_exchange],
+                                 routing_key='testtask',
+                                 **{
+                                     'reply_to': 'testtask',
+                                     'correlation_id': uuid()
+                                    })
+        run_consumer()
+        # check for a reply to the message.
+        with Connection(**self.conn_dict) as conn:
+            for i in collect_replies(conn, 
+                                     conn.channel(),
+                                     test_queues[0]):
+                print("Got reply: ", i)
+                self.assertIn('reply', i)
+                reply = i['reply']
+                self.assertEqual(reply, 'Got it')
+                
