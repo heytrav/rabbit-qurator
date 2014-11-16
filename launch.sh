@@ -11,6 +11,7 @@ docker run --name ${CONTAINERNAME} \
     -h  $CONTAINERNAME \
     -v /usr/local/d8o/rabbitpy:/usr/local/d8o/rabbitpy:rw  \
     -v /usr/local/d8o/domainsage:/usr/local/d8o/domainsage:r \
+    --link beanbag:beanbag \
     --link rabbitmq:amq \
     --link rsyslogd:syslog \
     -p 0.0.0.0:$RABBITPY_PORT:$RABBITPY_PORT \
