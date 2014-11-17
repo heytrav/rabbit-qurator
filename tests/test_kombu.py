@@ -59,15 +59,17 @@ class AsyncTest(TestKombu):
     def test_async_messaging(self):
         """Test the ConsumerMixin class """
         from kombu import Exchange, Queue, Consumer
+        from kombu.log import get_logger
         from kombu.pools import producers
         from kombu.common import send_reply, uuid, collect_replies
+        logger = get_logger(__name__)
 
         test_exchange = Exchange('rabbitpytests', type='direct')
         test_queues = [
             Queue('test1', test_exchange, routing_key='testtask'),
         ]
 
-        # Start a consumer and wait
+        # Server side listens for a message and replies to it
         def run_consumer():
             def on_message( body, message):
                 print("Called on_message: ", message.properties)
@@ -92,6 +94,7 @@ class AsyncTest(TestKombu):
                     conn.drain_events(timeout=3)
 
 
+        correlation_id = uuid()
         # have producer send a message
         with Connection(**self.conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:
@@ -103,16 +106,24 @@ class AsyncTest(TestKombu):
                                  routing_key='testtask',
                                  **{
                                      'reply_to': 'testtask',
-                                     'correlation_id': uuid()
+                                     'correlation_id': correlation_id
                                     })
         run_consumer()
         # check for a reply to the message.
+        def on_response(response, message):
+            if 'correlation_id' in message.properties: 
+                if correlation_id == message.properties['correlation_id']:
+                    logger.info("Correlation ids matched")
+                    message.ack()
+
         with Connection(**self.conn_dict) as conn:
             for i in collect_replies(conn, 
                                      conn.channel(),
-                                     test_queues[0]):
+                                     test_queues[0],
+                                     **{'callbacks': [on_response]}
+                                     ):
                 print("Got reply: ", i)
                 self.assertIn('reply', i)
                 reply = i['reply']
                 self.assertEqual(reply, 'Got it')
-                
+
