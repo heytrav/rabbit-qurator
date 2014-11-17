@@ -54,9 +54,9 @@ class SyncTest(TestKombu):
         self.assertRegex(message.payload, r'hello', 'Matches regex')
 
 
-class AsyncTest(TestKombu):
+class TestRPC(TestKombu):
 
-    def test_async_messaging(self):
+    def test_rpc_messaging(self):
         """Test the ConsumerMixin class """
         from kombu import Exchange, Queue, Consumer
         from kombu.log import get_logger
