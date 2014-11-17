@@ -7,7 +7,7 @@ from kombu import Connection
 
 class TestKombu(TestCase):
 
-    """Docstring for TestKombu. """
+    """Test Kombu interaction."""
 
     conn_dict = {
         'hostname': os.environ['AMQ_PORT_5672_TCP_ADDR'],
