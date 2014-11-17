@@ -67,6 +67,7 @@ class Worker(ConsumerMixin):
             logger.error('task raised excetion: %r', exc)
         message.ack()
 
+
 if __name__ == '__main__':
     from kombu import Connection
     from kombu.utils.debug import setup_logging
