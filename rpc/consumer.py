@@ -43,24 +43,27 @@ class Worker(ConsumerMixin):
         :message: message object
 
         """
-        print("Message: ", message.properties)
-        fun = body['fun']
-        args = body['args']
-        kwargs = body['kwargs']
-        logger.info('Got task: %s', reprcall(fun.__name__, args, kwargs))
-        try:
-            response = fun(*args, **kwdict(kwargs))
-        except Exception as exc:
-            logger.error('task raised excetion: %r', exc)
-        message.ack()
-        with Connection(**conn_dict) as conn:
-            with producers[conn].acquire(block=True) as producer:
-                send_reply(
-                    exchange,
-                    message,
-                    response,
-                    producer
-                )
+        # Only process if it is an RPC call
+        if 'reply_to' in message.properties:
+            print("Message: ", message.properties)
+            fun = body['fun']
+            args = body['args']
+            kwargs = body['kwargs']
+            logger.info('Got task: %s', reprcall(fun.__name__, args, kwargs))
+            try:
+                response = fun(*args, **kwdict(kwargs))
+            except Exception as exc:
+                logger.error('task raised excetion: %r' % exc)
+            with Connection(**conn_dict) as conn:
+                with producers[conn].acquire(block=True) as producer:
+                    logger.info('replying with response %r' % response )
+                    send_reply(
+                        exchange,
+                        message,
+                        response,
+                        producer
+                    )
+            message.ack()
 
 
 if __name__ == '__main__':
