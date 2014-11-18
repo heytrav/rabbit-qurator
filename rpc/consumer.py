@@ -1,7 +1,6 @@
 from kombu import Queue, Connection
 from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
-from kombu.utils import kwdict, reprcall
 from kombu.pools import producers
 from kombu.common import send_reply
 
@@ -49,28 +48,26 @@ class RpcConsumer(ConsumerMixin):
         """Callback for processing task.
 
         :body: body of message
-        :message: message object
+        :message: Message object
         """
         try:
             message.ack()
         except Exception as e:
-            logger.error('Unable to acknowledge AMQP message: %r' % e)
+            logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
     def process_rpc(self, body, message):
         """Handle specific message. This version only returns 'Hello, World!'.
-        Override to do other stuff.
+        Override this to do other stuff.
 
         :body: Body of message
         :message: Message object
 
         """
-        # Only process if it is an RPC call. Assume that 'reply_to' in the
-        # message properties means that it is RPC.
-        if 'reply_to' in message.properties:
-            logger.info("Message: %r", message.properties)
-            response = {'message': 'Hello, World!'}
-            self.respond_to_client(message, response)
+        logger.info("Processing message: {!r}".format(message.properties))
+        logger.info("Request data: {!r}".format(body))
+        response = {'message': 'Hello, World!'}
+        self.respond_to_client(message, response)
 
 
     def respond_to_client(self, message, response={}):
@@ -78,16 +75,22 @@ class RpcConsumer(ConsumerMixin):
 
         :response: datastructure that needs to go back to client.
         """
-        logger.info('Respond to client: %r' % response)
         with Connection(**conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:
-                logger.info('Replying with response %r' % response )
-                send_reply(
-                    client_exchange,
-                    message,
-                    response,
-                    producer
-                )
+                # Assume reply_to and correlation_id in message.
+                try:
+                    send_reply(
+                        client_exchange,
+                        message,
+                        response,
+                        producer
+                    )
+                except KeyError as e:
+                    logger.error('Missing key in request {!r}'.format(e))
+                except Exception as ex:
+                    logger.error('Unable to reply to request {!r}'.format(ex))
+                else:
+                    logger.info('Replied with response {!r}'.format(response))
 
 
 if __name__ == '__main__':

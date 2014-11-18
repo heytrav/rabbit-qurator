@@ -14,6 +14,5 @@ RUN echo "export PYTHONPATH=$PYTHONPATH:/usr/local/d8o/domainsage" >> $HOME/.bas
 WORKDIR /usr/local/d8o/rabbitpy
 ADD . /usr/local/d8o/rabbitpy
 RUN mkdir -p /etc/d8o/rabbitpy
-RUN git describe > /etc/d8o/rabbitpy/VERSION
 
 ENTRYPOINT  ["/bin/bash"]
