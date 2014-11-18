@@ -4,12 +4,11 @@ from kombu.log import get_logger
 
 
 from rpc import conn_dict
-from rpc.queues import exchange, queues
+from rpc.queues import consumer_exchange, client_queues
 
 
 logger = get_logger(__name__)
 
-sent_correlation_id = uuid()
 def send_as_rpc(connection, command_name, args=(), kwargs={}):
     """Send a RPC request
 
@@ -18,49 +17,46 @@ def send_as_rpc(connection, command_name, args=(), kwargs={}):
     :args: args meant for command
     :kwargs: kwargs meant for command
     """
-    routing_key = command_name
     payload = {
+        'command': command_name,
         'data': args,
         'meta': kwargs
     }
 
+    message_correlation_id = uuid()
     with producers[connection].acquire(block=True) as producer:
-        logger.info("Publishing request %r" % payload)
+        print("Publishing request %r" % payload)
         producer.publish(payload,
                          serializer='json',
-                         exchange=exchange,
-                         declare=[exchange],
-                         routing_key=routing_key,
+                         exchange=consumer_exchange,
+                         declare=[consumer_exchange],
+                         routing_key='server_version',
                          **{
-                             'reply_to': routing_key,
-                             'correlation_id': sent_correlation_id
+                             'reply_to': 'client_version',
+                             'correlation_id': message_correlation_id
                          })
+    return message_correlation_id
 
-def match_correlation_id(body, message):
-    """Match the correlation id sent to the one retrieved in the message. If
-    it matches, 'ack' the message.
-
-    :body: amqp request body
-    :message: amqp message
-    """
-
-    logger.info("Pulling message for comparison")
-    if 'correlation_id' in message.properties:
-        if correlation_id == sent_correlation_id:
-            logger.info("Correlation id matches")
-            message.ack()
 
 
 if __name__ == '__main__':
     from kombu import Connection
 
+
     with Connection(**conn_dict) as conn:
-        send_as_rpc(conn, 'version', args=('Kombu', ), kwargs={})
+        message_correlation_id = send_as_rpc(conn, 'version', args=('Kombu', ), kwargs={})
+        print("Message correlation id %s" % message_correlation_id)
+
+    def check_correlation(body, message):
+        print("Checking correlation id %r" % message.properties)
+        if 'correlation_id' in message.properties:
+            correlation_id = message.properties['correlation_id']
+            if correlation_id == message_correlation_id:
+                message.ack()
 
     with Connection(**conn_dict) as conn:
         for i in collect_replies(conn,
                                  conn.channel(),
-                                 queues[1],
-                                 callbacks=[match_correlation_id]):
+                                 client_queues[1],
+                                 callbacks=[check_correlation]):
             print("Got reply: ", i)
-

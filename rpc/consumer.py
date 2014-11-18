@@ -1,3 +1,4 @@
+import os
 from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
 from kombu.utils import kwdict, reprcall
@@ -5,7 +6,8 @@ from kombu.pools import producers
 from kombu.common import send_reply
 
 from rpc import conn_dict
-from rpc.queues import queues, exchange
+from rpc.queues import server_queues, producer_exchange
+
 
 logger = get_logger(__name__)
 
@@ -31,12 +33,12 @@ class Worker(ConsumerMixin):
         :returns: array of Consumer objects
 
         """
-        return [Consumer(queues=queues,
-                         accept=['json', 'pickle'],
-                         callbacks=[self.process_task])]
+        return [Consumer(queues=server_queues,
+                         accept=['json'],
+                         callbacks=[self.process_rpc])]
 
 
-    def process_task(self, body, message):
+    def process_rpc(self, body, message):
         """Callback for processing task.
 
         :body: body of message
@@ -46,24 +48,25 @@ class Worker(ConsumerMixin):
         # Only process if it is an RPC call
         if 'reply_to' in message.properties:
             print("Message: ", message.properties)
-            fun = body['fun']
-            args = body['args']
-            kwargs = body['kwargs']
-            logger.info('Got task: %s', reprcall(fun.__name__, args, kwargs))
-            try:
-                response = fun(*args, **kwdict(kwargs))
-            except Exception as exc:
-                logger.error('task raised excetion: %r' % exc)
+            command = body['command']
+            data = body['data']
+            meta = body['meta']
+            message.ack()
+            if command == 'version':
+                response = {'version': os.environ['VERSION']}
+            elif command == 'hello':
+                response = {'message': 'Hello, World!'}
+            else:
+                response = {'status': 'error', 'message': 'Unknown command'}
             with Connection(**conn_dict) as conn:
                 with producers[conn].acquire(block=True) as producer:
                     logger.info('replying with response %r' % response )
                     send_reply(
-                        exchange,
+                        producer_exchange,
                         message,
                         response,
                         producer
                     )
-            message.ack()
 
 
 if __name__ == '__main__':

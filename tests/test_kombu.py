@@ -111,6 +111,7 @@ class TestRPC(TestKombu):
         run_consumer()
         # check for a reply to the message.
         def on_response(response, message):
+            logger.info("Calling on_response callback.")
             if 'correlation_id' in message.properties: 
                 if correlation_id == message.properties['correlation_id']:
                     logger.info("Correlation ids matched")
@@ -120,8 +121,7 @@ class TestRPC(TestKombu):
             for i in collect_replies(conn, 
                                      conn.channel(),
                                      test_queues[0],
-                                     **{'callbacks': [on_response]}
-                                     ):
+                                     callbacks=[on_response]):
                 print("Got reply: ", i)
                 self.assertIn('reply', i)
                 reply = i['reply']

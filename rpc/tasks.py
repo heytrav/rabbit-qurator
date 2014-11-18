@@ -1,2 +1,6 @@
+import  simplejson as json
 def hello_task(who="world"):
-    print("Hello %s" %(who, ))
+    message = "Hello %s" %(who, )
+    return json.dumps({'message': message})
+
+
