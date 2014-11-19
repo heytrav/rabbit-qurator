@@ -80,5 +80,5 @@ def send_command(command_name,
 
 
 if __name__ == '__main__':
-    response = send_command('hello')
+    response = send_command('version')
     print("Got response: {!r}".format(response))

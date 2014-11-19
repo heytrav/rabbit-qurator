@@ -54,7 +54,7 @@ class RpcConsumer(ConsumerMixin):
             logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
-    def process_rpc(self, body, messae):
+    def process_rpc(self, body, message):
         """TODO: Docstring for process_rpc.
 
         :body: TODO
