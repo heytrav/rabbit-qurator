@@ -15,11 +15,6 @@ class RpcConsumer(ConsumerMixin):
 
     This code is based on the examples on the Kombu website.
     """
-    server_queues = [
-        Queue('hello_server_queue', 
-            exchange,
-            routing_key='hello_server_queue'),
-    ]
 
 
     def __init__(self, connection):
@@ -59,18 +54,15 @@ class RpcConsumer(ConsumerMixin):
             logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
-    def process_rpc(self, body, message):
-        """Handle specific message. This version only returns 'Hello, World!'.
-        Override this to do other stuff.
+    def process_rpc(self, body, messae):
+        """TODO: Docstring for process_rpc.
 
-        :body: Body of message
-        :message: Message object
+        :body: TODO
+        :messae: TODO
+        :returns: TODO
 
         """
-        logger.info("Processing message: {!r}".format(message.properties))
-        logger.info("Request data: {!r}".format(body))
-        response = {'message': 'Hello, World!'}
-        self.respond_to_client(message, response)
+        pass
 
 
     def respond_to_client(self, message, response={}):

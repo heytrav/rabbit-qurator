@@ -1,7 +1,6 @@
 
 
 
-import os
 from kombu import Queue
 from kombu.log import get_logger
 
@@ -12,14 +11,14 @@ from rpc.consumer import RpcConsumer
 logger = get_logger(__name__)
 
 
-class Version(RpcConsumer):
+class Hello(RpcConsumer):
 
-    """Version service"""
+    """Hello service"""
 
     server_queues = [
-        Queue('version_server_queue', 
+        Queue('hello_server_queue', 
             exchange,
-            routing_key='version_server_queue'),
+            routing_key='hello_server_queue'),
     ]
 
     def __init__(self, connection):
@@ -32,7 +31,7 @@ class Version(RpcConsumer):
 
         
     def process_rpc(self, body, message):
-        """Handle specific message. This version only returns 'Version, World!'.
+        """Handle specific message. This version only returns 'Hello, World!'.
         Override this to do other stuff.
 
         :body: Body of message
@@ -41,7 +40,7 @@ class Version(RpcConsumer):
         """
         logger.info("Processing message: {!r}".format(message.properties))
         logger.info("Request data: {!r}".format(body))
-        response = {'version': os.environ['VERSION']}
+        response = {'message': 'Hello, World!'}
         self.respond_to_client(message, response)
 
 
@@ -52,7 +51,7 @@ if __name__ == '__main__':
     setup_logging(loglevel='INFO', loggers=[''])
     with Connection(**conn_dict) as conn:
         try:
-            worker = Version(conn)
+            worker = Hello(conn)
             worker.run()
         except KeyboardInterrupt:
             print('bye bye')
