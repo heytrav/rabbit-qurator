@@ -1,3 +1,5 @@
+import types
+from functools import wraps
 from kombu import Queue, Connection
 from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
@@ -17,7 +19,7 @@ class RpcConsumer(ConsumerMixin):
     """
 
 
-    def __init__(self, connection):
+    def __init__(self, connection, callbacks=[], server_queues=[]):
         """RpcConsumer(connection)
 
         :connection: Connection object
@@ -26,7 +28,9 @@ class RpcConsumer(ConsumerMixin):
         ConsumerMixin.__init__(self)
         self.connection = connection
         # override and add more callbacks to do other processing stuff.
-        self.callbacks = [self.ack_message, self.process_rpc,]
+        self.callbacks = [self.ack_message] + callbacks
+        if len(server_queues):
+            self.server_queues = server_queues
 
 
     def get_consumers(self, Consumer, channel):
@@ -88,3 +92,18 @@ class RpcConsumer(ConsumerMixin):
                     logger.info('Replied with response {!r}'.format(response))
 
 
+
+class RpcCall:
+
+    """Wrapper class"""
+
+    def __init__(self, func):
+        """Wrap the desired function."""
+        wraps(func)(self)
+
+    def __call__(self, *args, **kwargs):
+        pass
+
+    def __get__(self, instance, cls):
+        pass
+        
