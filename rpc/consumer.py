@@ -17,7 +17,7 @@ class RpcConsumer(ConsumerMixin):
 
     This code is based on the examples on the Kombu website.
     """
-
+    server_queues = []
 
     def __init__(self, connection, callbacks=[], server_queues=[]):
         """RpcConsumer(connection)
@@ -41,7 +41,8 @@ class RpcConsumer(ConsumerMixin):
         :returns: array of Consumer objects
 
         """
-        return [Consumer(queues=self.server_queues,
+        return RpcConsumer.consumers
+        return [Consumer(queues=RpcConsumer.server_queues,
                          accept=['json'],
                          callbacks=self.callbacks)]
 
@@ -92,18 +93,32 @@ class RpcConsumer(ConsumerMixin):
                     logger.info('Replied with response {!r}'.format(response))
 
 
+def rpc_call():
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        name = func.__name__
+        queue_name = '.'.join(['rabbitpy', name])
+        queue_route = '.'.join([name, 'server'])
+        server_queue = Queue(queue_name, 
+                             exchange, 
+                             routing_key=queue_route)
+        consumer = Consmer(queues=[server_queue], 
+                           accept=['json'],
+                           callbacks=[func])
+
+        RpcConsumer.consumers.append(consumer)
 
 class RpcCall:
-
-    """Wrapper class"""
-
     def __init__(self, func):
-        """Wrap the desired function."""
         wraps(func)(self)
 
     def __call__(self, *args, **kwargs):
-        pass
+        return self.__wrapped__(*args, **kwargs)
+
 
     def __get__(self, instance, cls):
-        pass
+        if instance is None:
+            return self
+        else:
+            return types.MethodType(self, instance)
         
