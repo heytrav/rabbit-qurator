@@ -5,7 +5,7 @@ from kombu.pools import producers
 from kombu.common import send_reply
 
 from rpc import conn_dict
-from rpc.queues import client_exchange, consumer_exchange
+from rpc.queues import exchange
 
 logger = get_logger(__name__)
 
@@ -16,8 +16,9 @@ class RpcConsumer(ConsumerMixin):
     This code is based on the examples on the Kombu website.
     """
     server_queues = [
-        Queue('server_hello', consumer_exchange,
-              routing_key='server_hello')
+        Queue('hello_server_queue', 
+              exchange,
+              routing_key='hello_server_queue')
     ]
 
     def __init__(self, connection):
@@ -80,7 +81,7 @@ class RpcConsumer(ConsumerMixin):
                 # Assume reply_to and correlation_id in message.
                 try:
                     send_reply(
-                        client_exchange,
+                        exchange,
                         message,
                         response,
                         producer

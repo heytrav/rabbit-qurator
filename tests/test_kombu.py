@@ -61,6 +61,7 @@ class TestRPC(TestKombu):
     def test_rpc_messaging(self):
         """Test basic RPC interaction."""
         from kombu.log import get_logger
+        from rpc.client import check_correlation_id
         logger = get_logger(__name__)
 
         test_exchange = Exchange('rabbitpytests', type='direct')
@@ -109,19 +110,13 @@ class TestRPC(TestKombu):
                                      'correlation_id': correlation_id
                                     })
         run_consumer()
-        # check for a reply to the message.
-        def on_response(response, message):
-            logger.info("Calling on_response callback.")
-            if 'correlation_id' in message.properties:
-                if correlation_id == message.properties['correlation_id']:
-                    logger.info("Correlation ids matched")
-                    message.ack()
 
+        # check for a reply to the message.
         with Connection(**self.conn_dict) as conn:
             for i in collect_replies(conn,
                                      conn.channel(),
                                      test_queues[1],
-                                     callbacks=[on_response]):
+                                     callbacks=[check_correlation_id]):
                 print("Got reply: ", i)
                 self.assertIn('reply', i)
                 reply = i['reply']
