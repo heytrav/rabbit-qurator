@@ -88,14 +88,3 @@ class RpcConsumer(ConsumerMixin):
                     logger.info('Replied with response {!r}'.format(response))
 
 
-if __name__ == '__main__':
-    from kombu import Connection
-    from kombu.utils.debug import setup_logging
-
-    setup_logging(loglevel='INFO', loggers=[''])
-    with Connection(**conn_dict) as conn:
-        try:
-            worker = RpcConsumer(conn)
-            worker.run()
-        except KeyboardInterrupt:
-            print('bye bye')

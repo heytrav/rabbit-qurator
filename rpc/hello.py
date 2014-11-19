@@ -21,15 +21,6 @@ class Hello(RpcConsumer):
             routing_key='hello_server_queue'),
     ]
 
-    def __init__(self, connection):
-        """Constructor
-
-        :connection: TODO
-
-        """
-        RpcConsumer.__init__(self, connection)
-
-        
     def process_rpc(self, body, message):
         """Handle specific message. This version only returns 'Hello, World!'.
         Override this to do other stuff.
