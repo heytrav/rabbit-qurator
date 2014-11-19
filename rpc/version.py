@@ -1,3 +1,4 @@
+import os
 from kombu import Queue, Connection
 from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
@@ -9,18 +10,17 @@ from rpc.exchange import exchange
 
 logger = get_logger(__name__)
 
-class RpcConsumer(ConsumerMixin):
+class RpcVersion(ConsumerMixin):
 
     """Manage server side of RPC connection.
 
     This code is based on the examples on the Kombu website.
     """
     server_queues = [
-        Queue('hello_server_queue', 
+        Queue('version_server_queue',
             exchange,
-            routing_key='hello_server_queue'),
+            routing_key='version_server')
     ]
-
 
     def __init__(self, connection):
         """RpcConsumer(connection)
@@ -69,7 +69,7 @@ class RpcConsumer(ConsumerMixin):
         """
         logger.info("Processing message: {!r}".format(message.properties))
         logger.info("Request data: {!r}".format(body))
-        response = {'message': 'Hello, World!'}
+        response = {'version': os.environ['VERSION']}
         self.respond_to_client(message, response)
 
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     setup_logging(loglevel='INFO', loggers=[''])
     with Connection(**conn_dict) as conn:
         try:
-            worker = RpcConsumer(conn)
+            worker = RpcVersion(conn)
             worker.run()
         except KeyboardInterrupt:
             print('bye bye')

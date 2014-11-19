@@ -5,7 +5,7 @@ from kombu.log import get_logger
 
 
 from rpc import conn_dict
-from rpc.queues import exchange
+from rpc.exchange import exchange
 
 logger = get_logger(__name__)
 
@@ -24,6 +24,7 @@ def send_command(command_name,
         'command': command_name,
         'data': data
     }
+    logger.info("Preparing request {!r}".format(payload))
 
     if not server_queue:
         server_queue = '_'.join([command_name, 'server_queue'])
@@ -34,12 +35,14 @@ def send_command(command_name,
         client_queue = Queue(queue_name, 
                             exchange, 
                             routing_key=route_name)
+        logger.info("Set up client queue {!r}".format(client_queue))
 
     message_correlation_id = uuid()
     properties = {
         'reply_to': client_queue.routing_key,
         'correlation_id': message_correlation_id
     }
+    logger.info("Reply info: {!r}".format(properties))
     with Connection(**conn_dict) as connection:
         with producers[connection].acquire(block=True) as producer:
             logger.info("Publishing request %r" % payload)
@@ -55,6 +58,7 @@ def send_command(command_name,
                 raise
 
     def ack_message(body, message):
+        logger.info("Processing message: {!r}".format(message))
         if 'correlation_id' in message.properties:
             if message.properties['correlation_id'] == message_correlation_id:
                 message.ack()
@@ -64,11 +68,12 @@ def send_command(command_name,
                                  conn.channel(),
                                  client_queue,
                                  callbacks=[ack_message]):
+            print("Got message {!r}".format(i))
             return i
 
 
 
 
 if __name__ == '__main__':
-    response = send_command('hello')
+    response = send_command('version')
     print("Got response: {!r}".format(response))
