@@ -5,20 +5,21 @@ from kombu.log import get_logger
 
 
 from rpc import conn_dict
-from rpc.exchange import exchange
+from rpc.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
 
 def send_command(command_name,
                 data={},
-                server_queue=None,
-                client_queue=None):
+                server_routing_key=None,
+                client_queue=None,
+                exchange=None):
     """Send a RPC request
 
     :command_name: the command to execute (used as routing key)
     :data: dict with data to be sent
-    :server_queue: queue to send this to.
-    :client_queue: queue to reply to.
+    :server_routing_key: Server routing key. Will default to <command>.server
+    :client_queue: Queue to reply to. 
     """
 
     payload = {
@@ -27,12 +28,15 @@ def send_command(command_name,
     }
     logger.info("Preparing request {!r}".format(payload))
 
-    if not server_queue:
-        server_queue = '_'.join([command_name, 'server_queue'])
+    if not exchange:
+        exchange = default_exchange
+
+    if not server_routing_key:
+        server_routing_key = '.'.join([command_name, 'server'])
 
     if not client_queue:
-        route_name = '_'.join([command_name, 'client'])
-        queue_name = '_'.join([route_name, 'queue'])
+        queue_name = '.'.join(['rabbitpy', command_name, 'client'])
+        route_name = '.'.join([command_name, 'client'])
         client_queue = Queue(queue_name,
                             exchange,
                             routing_key=route_name)
@@ -52,7 +56,7 @@ def send_command(command_name,
                                 serializer='json',
                                 exchange=exchange,
                                 declare=[exchange],
-                                routing_key=server_queue,
+                                routing_key=server_routing_key,
                                  **properties)
             except Exception as e:
                 logger.error("Unable to publish to queue: {!r}".format(e))
@@ -76,5 +80,5 @@ def send_command(command_name,
 
 
 if __name__ == '__main__':
-    response = send_command('version')
+    response = send_command('hello')
     print("Got response: {!r}".format(response))

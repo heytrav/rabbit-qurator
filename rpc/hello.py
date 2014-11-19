@@ -12,9 +12,9 @@ class Hello(RpcConsumer):
     """Hello service"""
 
     server_queues = [
-        Queue('hello_server_queue', 
+        Queue('rabbitpy.hello', 
             exchange,
-            routing_key='hello_server_queue'),
+            routing_key='hello.server'),
     ]
 
     def process_rpc(self, body, message):

@@ -13,9 +13,9 @@ class Version(RpcConsumer):
     """Version service"""
 
     server_queues = [
-        Queue('version_server_queue', 
+        Queue('rabbitpy.version', 
             exchange,
-            routing_key='version_server_queue'),
+            routing_key='version.server'),
     ]
 
         

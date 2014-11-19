@@ -61,7 +61,6 @@ class TestRPC(TestKombu):
     def test_rpc_messaging(self):
         """Test basic RPC interaction."""
         from kombu.log import get_logger
-        from rpc.client import check_correlation_id
         logger = get_logger(__name__)
 
         test_exchange = Exchange('rabbitpytests', type='direct')
@@ -115,8 +114,7 @@ class TestRPC(TestKombu):
         with Connection(**self.conn_dict) as conn:
             for i in collect_replies(conn,
                                      conn.channel(),
-                                     test_queues[1],
-                                     callbacks=[check_correlation_id]):
+                                     test_queues[1]):
                 print("Got reply: ", i)
                 self.assertIn('reply', i)
                 reply = i['reply']
