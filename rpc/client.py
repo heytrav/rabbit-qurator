@@ -9,15 +9,16 @@ from rpc.exchange import exchange
 
 logger = get_logger(__name__)
 
-def send_command(command_name, 
-                data={}, 
+def send_command(command_name,
+                data={},
                 server_queue=None,
                 client_queue=None):
     """Send a RPC request
 
     :command_name: the command to execute (used as routing key)
     :data: dict with data to be sent
-    :server_queue: queue to send this to. 
+    :server_queue: queue to send this to.
+    :client_queue: queue to reply to.
     """
 
     payload = {
@@ -32,8 +33,8 @@ def send_command(command_name,
     if not client_queue:
         route_name = '_'.join([command_name, 'client'])
         queue_name = '_'.join([route_name, 'queue'])
-        client_queue = Queue(queue_name, 
-                            exchange, 
+        client_queue = Queue(queue_name,
+                            exchange,
                             routing_key=route_name)
         logger.info("Set up client queue {!r}".format(client_queue))
 
