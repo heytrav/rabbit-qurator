@@ -1,21 +1,13 @@
 from kombu import Queue
 from kombu.log import get_logger
-
-from rpc.exchange import exchange
-from rpc.consumer import RpcConsumer
+from rpc.consumer import RpcConsumer, rpc
 
 logger = get_logger(__name__)
 
-
+@rpc
 class Hello(RpcConsumer):
 
     """Hello service"""
-
-    server_queues = [
-        Queue('rabbitpy.hello', 
-            exchange,
-            routing_key='hello.server'),
-    ]
 
     def process_rpc(self, body, message):
         """Handle specific message. This version only returns 'Hello, World!'.

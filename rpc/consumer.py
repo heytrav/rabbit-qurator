@@ -17,9 +17,9 @@ class RpcConsumer(ConsumerMixin):
 
     This code is based on the examples on the Kombu website.
     """
-    server_queues = []
 
-    def __init__(self, connection, callbacks=[], server_queues=[]):
+
+    def __init__(self, connection):
         """RpcConsumer(connection)
 
         :connection: Connection object
@@ -28,9 +28,7 @@ class RpcConsumer(ConsumerMixin):
         ConsumerMixin.__init__(self)
         self.connection = connection
         # override and add more callbacks to do other processing stuff.
-        self.callbacks = [self.ack_message] + callbacks
-        if len(server_queues):
-            self.server_queues = server_queues
+        self.callbacks = [self.ack_message, self.process_rpc,]
 
 
     def get_consumers(self, Consumer, channel):
@@ -41,8 +39,7 @@ class RpcConsumer(ConsumerMixin):
         :returns: array of Consumer objects
 
         """
-        return RpcConsumer.consumers
-        return [Consumer(queues=RpcConsumer.server_queues,
+        return [Consumer(queues=self.server_queues,
                          accept=['json'],
                          callbacks=self.callbacks)]
 
@@ -92,33 +89,17 @@ class RpcConsumer(ConsumerMixin):
                 else:
                     logger.info('Replied with response {!r}'.format(response))
 
+def rpc(cls):
+    """Setup some of the rpc bits
 
-def rpc_call():
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        name = func.__name__
-        queue_name = '.'.join(['rabbitpy', name])
-        queue_route = '.'.join([name, 'server'])
-        server_queue = Queue(queue_name, 
-                             exchange, 
-                             routing_key=queue_route)
-        consumer = Consmer(queues=[server_queue], 
-                           accept=['json'],
-                           callbacks=[func])
+    :cls: TODO
+    :returns: TODO
 
-        RpcConsumer.consumers.append(consumer)
-
-class RpcCall:
-    def __init__(self, func):
-        wraps(func)(self)
-
-    def __call__(self, *args, **kwargs):
-        return self.__wrapped__(*args, **kwargs)
+    """
+    name = cls.__name__.lower()
+    queue_name = '.'.join(['rabbitpy', name])
+    routing_key = '.'.join([name, 'server'])
+    cls.server_queues = [Queue(queue_name, exchange, routing_key=routing_key)]
+    return cls
 
 
-    def __get__(self, instance, cls):
-        if instance is None:
-            return self
-        else:
-            return types.MethodType(self, instance)
-        
