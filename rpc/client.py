@@ -2,6 +2,7 @@ from kombu import Queue, Connection
 from kombu.pools import producers
 from kombu.common import uuid, collect_replies
 from kombu.log import get_logger
+from amqp import exceptions
 
 
 from rpc import conn_dict
@@ -69,16 +70,24 @@ def send_command(command_name,
                 message.ack()
 
     with Connection(**conn_dict) as conn:
-        for i in collect_replies(conn,
-                                 conn.channel(),
-                                 client_queue,
-                                 callbacks=[ack_message]):
-            print("Got message {!r}".format(i))
-            return i
+        
+        try:
+            for i in collect_replies(conn,
+                                    conn.channel(),
+                                    client_queue,
+                                    callbacks=[ack_message]):
+                print("Got message {!r}".format(i))
+                return i
+        except exceptions.AMQPError as amqp_error:
+            logger.error("Unable to retreive messages: {!r}".format(amqp_error))
+        except Exception as e:
+            raise e
 
 
 
 
 if __name__ == '__main__':
+    from kombu.utils.debug import setup_logging
+    setup_logging(loglevel='INFO', loggers=[''])
     response = send_command('version')
     print("Got response: {!r}".format(response))
