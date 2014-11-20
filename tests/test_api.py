@@ -18,7 +18,7 @@ class TestApi(TestCase):
 
         """
         pass
-        
+
     def test_queue_decoration(self):
         """Test that decorator creates queues correctly
         :returns: TODO
@@ -29,25 +29,20 @@ class TestApi(TestCase):
         @rpc
         class TestConsumer(RpcConsumer):
             pass
-        
+
 
         c = TestConsumer(Connection(**conn_dict))
         queues = c.server_queues
-        self.assertGreaterEqual(len(queues), 
-                                1, 
+        self.assertGreaterEqual(len(queues),
+                                1,
                                 'Consumer has at least one element')
-        self.assertIsInstance(queues[0], 
-                        Queue, 
-                        'server queues contains Queue object')
+        self.assertIsInstance(queues[0],
+                              Queue,
+                              'server queues contains Queue object')
 
-        self.assertEqual(queues[0].name, 
-                         'rabbitpy.testconsumer', 
+        self.assertEqual(queues[0].name,
+                         'rabbitpy.testconsumer',
                          'Expected queue name')
-        self.assertEqual(queues[0].routing_key, 
-                         'testconsumer.server', 
+        self.assertEqual(queues[0].routing_key,
+                         'testconsumer.server',
                          'Expected routing_key')
-
-
-
-
-                
