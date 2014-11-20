@@ -99,7 +99,10 @@ def rpc(cls):
     name = cls.__name__.lower()
     queue_name = '.'.join(['rabbitpy', name])
     routing_key = '.'.join([name, 'server'])
-    cls.server_queues = [Queue(queue_name, exchange, routing_key=routing_key)]
+    cls.server_queues = [Queue(queue_name, 
+                               exchange, 
+                               durable=False, 
+                               routing_key=routing_key)]
     return cls
 
 
