@@ -1,5 +1,7 @@
 FROM docker.domarino.com/iwmn-python3.4:latest
 MAINTAINER Travis Holton <travis@ideegeo.com>
+RUN apt-get update && apt-get install supervisor
+RUN mkdir /var/log/supervisor
 
 RUN useradd -U -m rabbitpy
 RUN mkdir -p /etc/d8o/rabbitpy
