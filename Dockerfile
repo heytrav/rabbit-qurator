@@ -1,6 +1,10 @@
 FROM docker.domarino.com/iwmn-python3.4:latest
 MAINTAINER Travis Holton <travis@ideegeo.com>
 
+RUN useradd -U -m rabbitpy
+RUN mkdir -p /etc/d8o/rabbitpy
+RUN chown rabbitpy /etc/d8o/rabbitpy
+USER rabbitpy
 WORKDIR /tmp
 ADD requirements.txt /tmp/
 RUN /bin/bash -c  \
@@ -13,7 +17,6 @@ RUN echo "workon rabbitpy" >> $HOME/.bashrc
 RUN echo "export PYTHONPATH=$PYTHONPATH:/usr/local/d8o/domainsage" >> $HOME/.bashrc
 WORKDIR /usr/local/d8o/rabbitpy
 ADD . /usr/local/d8o/rabbitpy
-RUN mkdir -p /etc/d8o/rabbitpy
 RUN git describe > /etc/d8o/rabbitpy/VERSION
 
 ENTRYPOINT  ["/bin/bash"]

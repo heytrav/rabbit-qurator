@@ -10,7 +10,6 @@ nose==1.3.4
 parse==1.6.5
 parse-type==0.3.4
 pycrypto==2.6.1
-python3-pika==0.9.14
 pytz==2014.7
 raygun4py==2.1.0
 simplejson==3.6.4
