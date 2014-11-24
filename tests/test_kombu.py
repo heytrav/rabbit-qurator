@@ -59,14 +59,16 @@ class TestRPC(TestKombu):
         logger = get_logger(__name__)
 
         test_exchange = Exchange('rabbitpytests', type='direct')
-        server_queue = Queue('server_queue', test_exchange, routing_key='testtask'),
-        client_queue = Queue('client_queue', test_exchange, routing_key='clienttask')
+        server_queue = Queue('server_queue', 
+                             test_exchange, 
+                             routing_key='testtask')
+        client_queue = Queue('client_queue', 
+                             test_exchange, 
+                             routing_key='clienttask')
 
         # Server side listens for a message and replies to it
         def run_consumer():
             def on_message( body, message):
-                logger.info("Called on_message: %r" % message.properties)
-                logger.info("Message channel: %s" % message.channel.channel_id)
                 self.assertRegex(
                     body['data'],
                     r'Hello',
@@ -83,7 +85,7 @@ class TestRPC(TestKombu):
                 message.ack()
 
             with Connection(**self.conn_dict) as conn:
-                with Consumer(conn, [server_queue], callbacks=[on_message]):
+                with Consumer(conn, [server_queue, client_queue], callbacks=[on_message]):
                     conn.drain_events(timeout=3)
 
 
