@@ -34,7 +34,7 @@ class FetchReply(object):
                                          conn.channel(),
                                          queue,
                                          callbacks=[self.ack_message]):
-                    print("Got message {!r}".format(i))
+                    logger.info("Received message {!r}".format(i))
                     if self.reply_received:
                         response = i
                         break
