@@ -18,7 +18,8 @@ class FetchReply(object):
     reply_received = False
 
     def fetch(self, correlation_id, queue):
-        """TODO: Docstring for fetch.
+        """Process the message queue and ack the one that matches the
+        correlation_id sent to the server.
 
         :correlation_id: Expected correlation id (uuid).
         :queue: The queue to read.
@@ -62,7 +63,7 @@ def send_command(command_name,
     :command_name: the command to execute (used as routing key)
     :data: dict with data to be sent
     :server_routing_key: Server routing key. Will default to <command>.server
-    :client_queue: Queue to reply to. 
+    :client_queue: Queue to reply to.
     """
 
     payload = {
@@ -107,9 +108,6 @@ def send_command(command_name,
                 raise
     reply = FetchReply()
     return reply.fetch(message_correlation_id, client_queue)
-
-
-
 
 
 if __name__ == '__main__':
