@@ -31,9 +31,9 @@ class FetchReply(object):
         with Connection(**conn_dict) as conn:
             try:
                 for i in collect_replies(conn,
-                                        conn.channel(),
-                                        queue,
-                                        callbacks=[self.ack_message]):
+                                         conn.channel(),
+                                         queue,
+                                         callbacks=[self.ack_message]):
                     print("Got message {!r}".format(i))
                     if self.reply_received:
                         response = i
