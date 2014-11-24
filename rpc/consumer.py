@@ -57,12 +57,12 @@ class RpcConsumer(ConsumerMixin):
 
 
     def process_rpc(self, body, message):
-        """TODO: Docstring for process_rpc.
+        """Override with whatever functionality is required by rpc or task.
 
-        :body: TODO
-        :messae: TODO
-        :returns: TODO
+        This is a callback that is passed on to the consumer mixin.
 
+        :body: dict containing data to be processed by rabbit
+        :message: object
         """
         pass
 

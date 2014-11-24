@@ -7,19 +7,13 @@ from kombu import Connection, Queue, Exchange, Consumer
 from kombu.common import send_reply, uuid, collect_replies
 from kombu.pools import producers
 
+from rpc import conn_dict as connection_data
+
 class TestKombu(TestCase):
 
     """Test Kombu interaction."""
 
-    conn_dict = {
-        'hostname': os.environ['AMQ_PORT_5672_TCP_ADDR'],
-        'port': os.environ['AMQ_PORT_5672_TCP_PORT'],
-        'userid': os.environ['AMQP_USER'],
-        'password': os.environ['AMQP_PASSWORD'],
-        'ssl': False,
-        'virtual_host': os.environ['AMQP_VHOST'],
-    }
-
+    conn_dict = connection_data
 
 
 class SyncTest(TestKombu):
@@ -61,13 +55,12 @@ class TestRPC(TestKombu):
     def test_rpc_messaging(self):
         """Test basic RPC interaction."""
         from kombu.log import get_logger
+        from rpc.client import FetchReply
         logger = get_logger(__name__)
 
         test_exchange = Exchange('rabbitpytests', type='direct')
-        test_queues = [
-            Queue('server_queue', test_exchange, routing_key='testtask'),
-            Queue('client_queue', test_exchange, routing_key='clienttask')
-        ]
+        server_queue = Queue('server_queue', test_exchange, routing_key='testtask'),
+        client_queue = Queue('client_queue', test_exchange, routing_key='clienttask')
 
         # Server side listens for a message and replies to it
         def run_consumer():
@@ -90,7 +83,7 @@ class TestRPC(TestKombu):
                 message.ack()
 
             with Connection(**self.conn_dict) as conn:
-                with Consumer(conn, test_queues, callbacks=[on_message]):
+                with Consumer(conn, [server_queue], callbacks=[on_message]):
                     conn.drain_events(timeout=3)
 
 
@@ -109,13 +102,8 @@ class TestRPC(TestKombu):
                                      'correlation_id': correlation_id
                                     })
         run_consumer()
-
-        # check for a reply to the message.
-        with Connection(**self.conn_dict) as conn:
-            for i in collect_replies(conn,
-                                     conn.channel(),
-                                     test_queues[1]):
-                print("Got reply: ", i)
-                self.assertIn('reply', i)
-                reply = i['reply']
-                self.assertEqual(reply, 'Got it')
+        f = FetchReply()
+        response = f.fetch(correlation_id, client_queue)
+        self.assertIn('reply', response)
+        reply = response['reply']
+        self.assertEqual(reply, 'Got it')
