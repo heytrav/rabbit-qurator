@@ -1,7 +1,7 @@
 import types
 from functools import wraps
-from kombu import Queue, Connection
-from kombu.mixins import ConsumerMixin
+from kombu import Queue, Connection, Consumer
+#from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
 from kombu.pools import producers
 from kombu.common import send_reply
@@ -11,7 +11,7 @@ from rpc.exchange import exchange
 
 logger = get_logger(__name__)
 
-class RpcConsumer(ConsumerMixin):
+class RpcConsumer(object):
 
     """Manage server side of RPC connection.
 
@@ -21,6 +21,7 @@ class RpcConsumer(ConsumerMixin):
     standard_server_queues = []
     standard_callbacks = []
     hase_callbacks = []
+    consumers = {}
 
 
     def __init__(self, connection):
@@ -29,35 +30,35 @@ class RpcConsumer(ConsumerMixin):
         :connection: Connection object
         """
         logger.debug("Called constructor.")
-        ConsumerMixin.__init__(self)
+        #ConsumerMixin.__init__(self)
         self.connection = connection
         # override and add more callbacks to do other processing stuff.
-        self.callbacks = [self.ack_message, self.process_rpc,]
+        #self.callbacks = [self.ack_message, self.process_rpc,]
 
 
-    def get_consumers(self, Consumer, channel):
-        """Get a set of consumers.
+    #def get_consumers(self, Consumer, channel):
+        #"""Get a set of consumers.
 
-        :Consumer: Consumer object
-        :channel: a channel
-        :returns: array of Consumer objects
+        #:Consumer: Consumer object
+        #:channel: a channel
+        #:returns: array of Consumer objects
 
-        """
-        return [Consumer(queues=self.standard_server_queues,
-                         accept=['json'],
-                         callbacks=self.standard_callbacks)]
+        #"""
+        #return [Consumer(queues=self.standard_server_queues,
+                         #accept=['json'],
+                         #callbacks=self.standard_callbacks)]
 
 
-    def ack_message(self, body, message):
-        """Callback for processing task.
+    #def ack_message(self, body, message):
+        #"""Callback for processing task.
 
-        :body: body of message
-        :message: Message object
-        """
-        try:
-            message.ack()
-        except Exception as e:
-            logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
+        #:body: body of message
+        #:message: Message object
+        #"""
+        #try:
+            #message.ack()
+        #except Exception as e:
+            #logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
     def rpc(self, func):
@@ -67,20 +68,25 @@ class RpcConsumer(ConsumerMixin):
 
         """
         name = func.__name__.lower()
+        if name not in self.consumers:
+            self.consumers[name] = []
+
         queue_name = '.'.join(['rabbitpy', name])
         routing_key = '.'.join([name, 'server'])
         queue = Queue(queue_name,
-                        exchange,
-                        durable=False,
-                        routing_key=routing_key)
-        self.standard_server_queues.append(queue)
+                      exchange,
+                      durable=False,
+                      routing_key=routing_key)
+        c = Consumer(self.connection)
+        c.add_queue(queue)
+        self.consumers[name].append(c)
         def decorate(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
                 def process_msg(body, message):
                     response = func(body)
                     self.respond_to_client(message, response)
-                self.standard_callbacks.append(process_msg)
+                c.register_callback(process_msg)
             return wrapper
         return decorate
 

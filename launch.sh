@@ -16,4 +16,7 @@ docker run --name ${CONTAINERNAME} \
     -p 0.0.0.0:$RABBITPY_PORT:$RABBITPY_PORT \
     -e RABBITPY_ENVIRONMENT=$IWMN_ENV \
     -e RAYGUN_API_KEY=$RAYGUN_API_KEY \
+    -e AMQP_USER=$AMQP_USER \
+    -e AMQP_PASS=$AMQP_PASS \
+    -e AMQP_VHOST=$AMQP_VHOST \
     docker.domarino.com/rabbitpy

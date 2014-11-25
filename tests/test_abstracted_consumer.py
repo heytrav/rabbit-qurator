@@ -1,47 +1,58 @@
 import os
 import sys
 from unittest import TestCase
+from unittest.mock import Mock, MagicMock
 from kombu import Connection
+
+from rpc import conn_dict
 from rpc.consumer import RpcConsumer
 
 class TestAbstractMQ(TestCase):
 
     """Test RabbitMQ interaction"""
 
-    def test_create_rpc(self):
+    def connection_factory(self):
+        """Return connection object
+        :returns: TODO
+
+        """
+        c = Connection(**conn_dict)
+        return c
+
+    def test_method_wrapping(self):
         """Test creating custom rpc endpoint."""
 
-        from rpc import conn_dict
-        c = Connection(**conn_dict)
-        consumer = RpcConsumer(c)
+        conn = self.connection_factory()
+        consumer = RpcConsumer(conn)
 
         @consumer.rpc
         def moffa(msg):
             return {"message": msg}
 
-        self.assertEqual(len(consumer.standard_server_queues), 
+        self.assertIn('moffa', consumer.consumers)
+        moffa_consumers = consumer.consumers['moffa']
+        self.assertEqual(len(moffa_consumers),
                          1, 
-                         'One function in queue')
+                         'One consumer')
+        self.assertEqual(moffa_consumers[0].queues[0].name,
+                         'rabbitpy.moffa',
+                         'Queue has expected name')
+        conn.release()
 
-        first_queue = consumer.standard_server_queues[0]
-        self.assertEqual(first_queue.name, 'rabbitpy.moffa')
-        self.assertEqual(first_queue.routing_key, 'moffa.server')
 
+    def test_standard_rpc(self):
+        """Check behaviour of wrapped function."""
+        conn = self.connection_factory()
+        consumer = RpcConsumer(conn)
+
+
+        checkit = MagicMock(return_value={"msg": "Got reply"})
         @consumer.rpc
-        def boffa(msg):
-            return {"data": 1}
+        def blah(*args, **kwargs):
+            return checkit(*args, **kwargs)
+        conn.release()
 
-        self.assertEqual(len(consumer.standard_server_queues), 
-                         2, 
-                         'Two function in queue')
-
-        second_queue = consumer.standard_server_queues[1]
-        self.assertEqual(second_queue.name, 'rabbitpy.boffa')
-        self.assertEqual(second_queue.routing_key, 'boffa.server')
-        c.release()
+            
 
         
-        
-                    
 
-        
