@@ -62,7 +62,9 @@ class RpcConsumer(object):
 
 
     def rpc(self, func=None, *, exchange=None, queue_name=None):
-        """Wrap around function.
+        """Wrap around function. This method is modelled after standard RPC
+        behaviour where the message sends a reply_to queue and a
+        correlation_id back to the client.
 
         :func: wrap with new standard rpc behaviour
         :exchange: Exchange object.
@@ -89,8 +91,10 @@ class RpcConsumer(object):
         c = Consumer(self.connection)
         c.add_queue(queue)
         def process_msg(body, message):
-            logger.info("Processing function {!r}".format(func.__name__))
+            logger.info("Processing function {!r} with data {!r}".format(func.__name__,
+                                                                         body))
             response = func(body)
+            message.ack()
             self.respond_to_client(message, response)
         c.register_callback(process_msg)
         c.consume()
@@ -118,19 +122,19 @@ class RpcConsumer(object):
 
 
 
-    def process_rpc(self, body, message):
-        """Override with whatever functionality is required by rpc or task.
+    #def process_rpc(self, body, message):
+        #"""Override with whatever functionality is required by rpc or task.
 
-        This is a callback that is passed on to the consumer mixin.
+        #This is a callback that is passed on to the consumer mixin.
 
-        :body: dict containing data to be processed by rabbit
-        :message: object
-        """
-        response = self.process_rpc_func(body)
+        #:body: dict containing data to be processed by rabbit
+        #:message: object
+        #"""
+        #response = self.process_rpc_func(body)
 
 
 
-    def respond_to_client(self, message, response={}):
+    def respond_to_client(self, message, response={}, exchange=None):
         """Send RPC response back to client.
 
         :response: datastructure that needs to go back to client.
