@@ -18,6 +18,10 @@ class RpcConsumer(ConsumerMixin):
     This code is based on the examples on the Kombu website.
     """
 
+    standard_server_queues = []
+    standard_callbacks = []
+    hase_callbacks = []
+
 
     def __init__(self, connection):
         """RpcConsumer(connection)
@@ -39,9 +43,9 @@ class RpcConsumer(ConsumerMixin):
         :returns: array of Consumer objects
 
         """
-        return [Consumer(queues=self.server_queues,
+        return [Consumer(queues=self.standard_server_queues,
                          accept=['json'],
-                         callbacks=self.callbacks)]
+                         callbacks=self.standard_callbacks)]
 
 
     def ack_message(self, body, message):
@@ -56,6 +60,46 @@ class RpcConsumer(ConsumerMixin):
             logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
+    def rpc(self, func):
+        """Wrap around function.
+
+        :func: wrap with new standard rpc behaviour
+
+        """
+        name = func.__name__.lower()
+        queue_name = '.'.join(['rabbitpy', name])
+        routing_key = '.'.join([name, 'server'])
+        queue = Queue(queue_name, 
+                        exchange, 
+                        durable=False, 
+                        routing_key=routing_key)
+        self.standard_server_queues.append(queue)
+        def decorate(func):
+            @wraps(func)
+            def wrapper(*args, **kwargs):
+                def process_msg(body, message):
+                    response = func(body)
+                    self.respond_to_client(message, response)
+                self.standard_callbacks.append(process_msg)
+            return wrapper
+        return decorate
+
+        
+    def hase(self, name=None):
+        """Wrap around function
+
+        :func: TODO
+        :returns: TODO
+
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            #push into consumer callbacks for hase style
+            return func(*args, **kwargs)
+        return wrapper
+
+
+
     def process_rpc(self, body, message):
         """Override with whatever functionality is required by rpc or task.
 
@@ -64,7 +108,8 @@ class RpcConsumer(ConsumerMixin):
         :body: dict containing data to be processed by rabbit
         :message: object
         """
-        pass
+        response = self.process_rpc_func(body)
+
 
 
     def respond_to_client(self, message, response={}):
