@@ -92,8 +92,8 @@ class RpcConsumer(ConsumerMixin):
 def rpc(cls):
     """Setup some of the rpc bits
 
-    :cls: TODO
-    :returns: TODO
+    :cls: Object
+    :returns: Same object but with server queues declared.
 
     """
     name = cls.__name__.lower()

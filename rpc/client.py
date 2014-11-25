@@ -106,6 +106,15 @@ def send_command(command_name,
             except Exception as e:
                 logger.error("Unable to publish to queue: {!r}".format(e))
                 raise
+    return message_correlation_id
+
+def retrieve_messages(message_correlation_id):
+    """Retrieve messages from the queue
+
+    :message_correlation_id: uuid sent with message
+    :returns: body of message from server
+
+    """
     reply = FetchReply()
     return reply.fetch(message_correlation_id, client_queue)
 
@@ -113,5 +122,6 @@ def send_command(command_name,
 if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
     setup_logging(loglevel='INFO', loggers=[''])
-    response = send_command('version')
+    msg_id = send_command('version')
+    response = retrieve_messages(msg_id)
     print("Got response: {!r}".format(response))

@@ -52,25 +52,28 @@ class SyncTest(TestKombu):
 
 class TestRPC(TestKombu):
 
-    def test_rpc_messaging(self):
+    def test_fetch_reply(self):
         """Test basic RPC interaction."""
         from kombu.log import get_logger
-        from rpc.client import FetchReply
+        from rpc.client import FetchReply, send_command
         logger = get_logger(__name__)
 
-        test_exchange = Exchange('rabbitpytests', type='direct')
-        server_queue = Queue('server_queue', 
-                             test_exchange, 
-                             routing_key='testtask')
-        client_queue = Queue('client_queue', 
-                             test_exchange, 
-                             routing_key='clienttask')
+        test_exchange = Exchange('rabbitpyrpctests', durable=False, type='direct')
+        server_queue = Queue('server_rpc_queue',
+                             test_exchange,
+                             durable=False,
+                             routing_key='test_rpc_task')
+        client_queue = Queue('client_rpc_queue',
+                             test_exchange,
+                             durable=False,
+                             routing_key='client_rpc_task')
 
         # Server side listens for a message and replies to it
         def run_consumer():
             def on_message( body, message):
+                logger.info("Received: {!r}".format(body))
                 self.assertRegex(
-                    body['data'],
+                    body['data']['message'],
                     r'Hello',
                     'Received "Hello, World" from producer.'
                 )
@@ -89,20 +92,26 @@ class TestRPC(TestKombu):
                     conn.drain_events(timeout=3)
 
 
-        correlation_id = uuid()
-        # have producer send a message
-        with Connection(**self.conn_dict) as conn:
-            with producers[conn].acquire(block=True) as producer:
-                payload = {'data': 'Hello, World'}
-                producer.publish(payload,
-                                 exchange=test_exchange,
-                                 serializer='json',
-                                 declare=[test_exchange],
-                                 routing_key='testtask',
-                                 **{
-                                     'reply_to': 'clienttask',
-                                     'correlation_id': correlation_id
-                                    })
+        payload = {'message': 'Hello, World'}
+        correlation_id = send_command('hello',
+                                      payload,
+                                      'test_rpc_task',
+                                      client_queue=client_queue,
+                                      exchange=test_exchange)
+        #correlation_id = uuid()
+        ## have producer send a message
+        #with Connection(**self.conn_dict) as conn:
+        #with producers[conn].acquire(block=True) as producer:
+        #payload = {'data': 'Hello, World'}
+        #producer.publish(payload,
+        #exchange=test_exchange,
+        #serializer='json',
+        #declare=[test_exchange],
+        #routing_key='testtask',
+        #**{
+        #'reply_to': 'clienttask',
+        #'correlation_id': correlation_id
+        #})
         run_consumer()
         f = FetchReply()
         response = f.fetch(correlation_id, client_queue)
