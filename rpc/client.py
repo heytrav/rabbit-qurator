@@ -72,7 +72,7 @@ def send_command(command_name,
     }
     logger.info("Preparing request {!r}".format(payload))
 
-    if not exchange:
+    if exchange is None:
         exchange = default_exchange
 
     if not server_routing_key:

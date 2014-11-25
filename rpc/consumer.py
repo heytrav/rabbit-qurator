@@ -61,10 +61,12 @@ class RpcConsumer(object):
             #logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
-    def rpc(self, func=None, *, exchange=default_exchange, queue_name=None):
+    def rpc(self, func=None, *, exchange=None, queue_name=None):
         """Wrap around function.
 
         :func: wrap with new standard rpc behaviour
+        :exchange: Exchange object.
+        :queue_name: defaults to "rabbitpy.<func.__name__>"
 
         """
         if func is None:
@@ -78,20 +80,25 @@ class RpcConsumer(object):
             routing_key = '.'.join([name, 'server'])
         else:
             routing_key = queue_name
+        if exchange is None:
+            exchange = default_exchange
         queue = Queue(queue_name,
                       exchange,
                       durable=False,
                       routing_key=routing_key)
         c = Consumer(self.connection)
         c.add_queue(queue)
+        def process_msg(body, message):
+            logger.info("Processing function {!r}".format(func.__name__))
+            response = func(body)
+            self.respond_to_client(message, response)
+        c.register_callback(process_msg)
+        c.consume()
         self.consumers[name].append(c)
         def decorate(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
-                def process_msg(body, message):
-                    response = func(body)
-                    self.respond_to_client(message, response)
-                c.register_callback(process_msg)
+                pass
             return wrapper
         return decorate
 
@@ -133,7 +140,7 @@ class RpcConsumer(object):
                 # Assume reply_to and correlation_id in message.
                 try:
                     send_reply(
-                        exchange,
+                        default_exchange,
                         message,
                         response,
                         producer

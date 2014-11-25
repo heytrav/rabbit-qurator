@@ -6,6 +6,7 @@ from kombu import Connection
 
 from rpc import conn_dict
 from rpc.consumer import RpcConsumer
+from rpc.client import send_command
 
 class TestAbstractMQ(TestCase):
 
@@ -62,6 +63,15 @@ class TestAbstractMQ(TestCase):
         @consumer.rpc
         def blah(*args, **kwargs):
             return checkit(*args, **kwargs)
+
+
+        payload = {"msg": "Hello"}
+        corr_id = send_command('blah', 
+                               payload)
+        conn.drain_events(timeout=1)
+        checkit.assert_called_with(
+            {'command': 'blah', 'data': payload}
+        )
         conn.release()
 
             
