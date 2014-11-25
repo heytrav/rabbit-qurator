@@ -1,6 +1,5 @@
 FROM docker.domarino.com/iwmn-python3.4:latest
 MAINTAINER Travis Holton <travis@ideegeo.com>
-RUN apt-get update && apt-get install -y supervisor
 
 RUN mkdir -p /etc/d8o/rabbitpy
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
