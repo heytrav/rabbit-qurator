@@ -1,7 +1,7 @@
 import os
 import sys
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, ANY
 from kombu import Connection
 
 from rpc import conn_dict
@@ -60,6 +60,7 @@ class TestAbstractMQ(TestCase):
 
 
         checkit = MagicMock(return_value={"msg": "Got reply"})
+        consumer.respond_to_client = MagicMock()
         @consumer.rpc
         def blah(*args, **kwargs):
             return checkit(*args, **kwargs)
@@ -71,6 +72,11 @@ class TestAbstractMQ(TestCase):
         conn.drain_events(timeout=1)
         checkit.assert_called_with(
             {'command': 'blah', 'data': payload}
+        )
+        consumer.respond_to_client.assert_called_with(
+            ANY, 
+            {"msg": "Got reply"},
+            ANY
         )
         conn.release()
 

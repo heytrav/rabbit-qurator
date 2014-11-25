@@ -1,7 +1,7 @@
 import types
 from functools import wraps, partial
 from kombu import Queue, Connection, Consumer
-#from kombu.mixins import ConsumerMixin
+from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
 from kombu.pools import producers
 from kombu.common import send_reply
@@ -11,7 +11,7 @@ from rpc.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
 
-class RpcConsumer(object):
+class RpcConsumer(ConsumerMixin):
 
     """Manage server side of RPC connection.
 
@@ -30,35 +30,22 @@ class RpcConsumer(object):
         :connection: Connection object
         """
         logger.debug("Called constructor.")
-        #ConsumerMixin.__init__(self)
+        ConsumerMixin.__init__(self)
         self.connection = connection
-        # override and add more callbacks to do other processing stuff.
-        #self.callbacks = [self.ack_message, self.process_rpc,]
 
 
-    #def get_consumers(self, Consumer, channel):
-        #"""Get a set of consumers.
+    def get_consumers(self, Consumer, channel):
+        """Get a set of consumers.
 
-        #:Consumer: Consumer object
-        #:channel: a channel
-        #:returns: array of Consumer objects
+        :Consumer: Consumer object
+        :channel: a channel
+        :returns: array of Consumer objects
 
-        #"""
-        #return [Consumer(queues=self.standard_server_queues,
-                         #accept=['json'],
-                         #callbacks=self.standard_callbacks)]
-
-
-    #def ack_message(self, body, message):
-        #"""Callback for processing task.
-
-        #:body: body of message
-        #:message: Message object
-        #"""
-        #try:
-            #message.ack()
-        #except Exception as e:
-            #logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
+        """
+        consumer_set = []
+        for i in self.consumers.keys():
+            consumer_set += self.consumers[i]
+        return consumer_set
 
 
     def rpc(self, func=None, *, exchange=None, queue_name=None):
@@ -139,17 +126,17 @@ class RpcConsumer(object):
 
 
 
-    def respond_to_client(self, message, response={}, exchange=None):
+    def respond_to_client(self, message, response={}, exchange=default_exchange):
         """Send RPC response back to client.
 
         :response: datastructure that needs to go back to client.
         """
-        with Connection(**conn_dict) as conn:
+        with self.connection as conn:
             with producers[conn].acquire(block=True) as producer:
                 # Assume reply_to and correlation_id in message.
                 try:
                     send_reply(
-                        default_exchange,
+                        exchange,
                         message,
                         response,
                         producer

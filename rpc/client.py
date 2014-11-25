@@ -108,6 +108,7 @@ def send_command(command_name,
                 raise
     return message_correlation_id
 
+
 def retrieve_messages(message_correlation_id):
     """Retrieve messages from the queue
 
