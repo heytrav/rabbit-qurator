@@ -7,7 +7,7 @@ from kombu.pools import producers
 from kombu.common import send_reply
 
 from rpc import conn_dict
-from rpc.exchange import exchange
+from rpc.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
 
@@ -61,7 +61,7 @@ class RpcConsumer(object):
             #logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
-    def rpc(self, func=None, *, queue_name=None):
+    def rpc(self, func=None, *, exchange=default_exchange, queue_name=None):
         """Wrap around function.
 
         :func: wrap with new standard rpc behaviour
@@ -69,9 +69,7 @@ class RpcConsumer(object):
         """
         if func is None:
             return partial(self.rpc, queue_name=queue_name)
-        else:
-            logger.info("func is {!r}".format(func))
-        
+
         name = func.__name__.lower()
         if name not in self.consumers:
             self.consumers[name] = []
