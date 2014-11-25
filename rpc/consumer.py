@@ -69,9 +69,9 @@ class RpcConsumer(ConsumerMixin):
         name = func.__name__.lower()
         queue_name = '.'.join(['rabbitpy', name])
         routing_key = '.'.join([name, 'server'])
-        queue = Queue(queue_name, 
-                        exchange, 
-                        durable=False, 
+        queue = Queue(queue_name,
+                        exchange,
+                        durable=False,
                         routing_key=routing_key)
         self.standard_server_queues.append(queue)
         def decorate(func):
@@ -84,7 +84,7 @@ class RpcConsumer(ConsumerMixin):
             return wrapper
         return decorate
 
-        
+
     def hase(self, name=None):
         """Wrap around function
 
