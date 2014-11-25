@@ -88,14 +88,19 @@ class RpcConsumer(object):
                       exchange,
                       durable=False,
                       routing_key=routing_key)
+
         c = Consumer(self.connection)
         c.add_queue(queue)
+
+        # The callback returned by this decorator doesn't really do anything. The process_msg
+        # function added to the consumer is what actually responds to messages
+        # from the client on this particular queue.
         def process_msg(body, message):
             logger.info("Processing function {!r} with data {!r}".format(func.__name__,
                                                                          body))
             response = func(body)
             message.ack()
-            self.respond_to_client(message, response)
+            self.respond_to_client(message, response, exchange)
         c.register_callback(process_msg)
         c.consume()
         self.consumers[name].append(c)
