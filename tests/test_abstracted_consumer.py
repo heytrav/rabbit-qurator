@@ -27,7 +27,7 @@ class TestAbstractMQ(TestCase):
 
         @consumer.rpc
         def moffa(msg):
-            return {"message": msg}
+            pass
 
         self.assertIn('moffa', consumer.consumers)
         moffa_consumers = consumer.consumers['moffa']
@@ -37,11 +37,23 @@ class TestAbstractMQ(TestCase):
         self.assertEqual(moffa_consumers[0].queues[0].name,
                          'rabbitpy.moffa',
                          'Queue has expected name')
+        @consumer.rpc(queue_name='boffa.moffa')
+        def boffa(msg):
+            pass
+
+
+        self.assertIn('boffa', consumer.consumers)
+        boffa_consumers = consumer.consumers['boffa']
+        boffa_queue = boffa_consumers[0].queues[0]
+        self.assertEqual(boffa_queue.name,
+                         'boffa.moffa',
+                         'Can specify queue name')
         conn.release()
 
 
     def test_standard_rpc(self):
         """Check behaviour of wrapped function."""
+
         conn = self.connection_factory()
         consumer = RpcConsumer(conn)
 

@@ -1,5 +1,5 @@
 import types
-from functools import wraps
+from functools import wraps, partial
 from kombu import Queue, Connection, Consumer
 #from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
@@ -61,18 +61,25 @@ class RpcConsumer(object):
             #logger.error('Unable to acknowledge AMQP message: {!r}'.format(e))
 
 
-    def rpc(self, func):
+    def rpc(self, func=None, *, queue_name=None):
         """Wrap around function.
 
         :func: wrap with new standard rpc behaviour
 
         """
+        if func is None:
+            return partial(self.rpc, queue_name=queue_name)
+        else:
+            logger.info("func is {!r}".format(func))
+        
         name = func.__name__.lower()
         if name not in self.consumers:
             self.consumers[name] = []
-
-        queue_name = '.'.join(['rabbitpy', name])
-        routing_key = '.'.join([name, 'server'])
+        if queue_name is None:
+            queue_name = '.'.join(['rabbitpy', name])
+            routing_key = '.'.join([name, 'server'])
+        else:
+            routing_key = queue_name
         queue = Queue(queue_name,
                       exchange,
                       durable=False,
