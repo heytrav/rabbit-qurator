@@ -1,6 +1,6 @@
 import types
 from functools import wraps, partial
-from kombu import Queue, Connection, Consumer
+from kombu import Queue, Connection
 from kombu.mixins import ConsumerMixin
 from kombu.log import get_logger
 from kombu.pools import producers
@@ -22,8 +22,6 @@ class RpcConsumer(ConsumerMixin):
     hase_queues = {}
     standard_callbacks ={}
     hase_callbacks ={}
-    consumers = {}
-
 
     def __init__(self, connection):
         """RpcConsumer(connection)
@@ -49,6 +47,7 @@ class RpcConsumer(ConsumerMixin):
             logger.info("Queues: {!r}".format(queues))
             c = Consumer( queues, callbacks=callbacks)
             consumer_set.append(c)
+            logger.info("Added consumer: {!r}".format(c))
 
         logger.info("Called get_consumers with {!r}".format(consumer_set))
         return consumer_set
@@ -69,8 +68,6 @@ class RpcConsumer(ConsumerMixin):
             return partial(cls.rpc, queue_name=queue_name)
 
         name = func.__name__.lower()
-        #if name not in self.consumers:
-            #self.consumers[name] = []
         if name not in cls.standard_server_queues:
             cls.standard_server_queues[name] = []
         if name not in cls.standard_callbacks:
@@ -98,9 +95,6 @@ class RpcConsumer(ConsumerMixin):
             cls.respond_to_client(message, response, exchange)
 
         cls.standard_callbacks[name].append(process_message)
-        #c = Consumer(self.connection, queues=[queue], callbacks=[process_msg])
-        #c.consume()
-        #self.consumers[name].append(c)
         def decorate(func):
             @wraps(func)
             def wrapper(*args, **kwargs):

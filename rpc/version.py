@@ -1,3 +1,4 @@
+import datetime
 from kombu import Connection
 from kombu.utils.debug import setup_logging
 from kombu.log import get_logger
@@ -13,6 +14,15 @@ def version(*args, **kwargs):
     with open('/etc/d8o/rabbitpy/VERSION') as f:
         version = f.read()
     return {'version': version.strip()}
+
+@RpcConsumer.rpc
+def current_time(*args, **kwargs):
+    """Return the current time
+
+    :returns: dict with the current time
+
+    """
+    return {'time': datetime.datetime.now().isoformat()}
 
 
 if __name__ == '__main__':
