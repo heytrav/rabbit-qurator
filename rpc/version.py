@@ -7,10 +7,7 @@ from rpc.consumer import RpcConsumer
 
 logger = get_logger(__name__)
 
-
-consumer = RpcConsumer(Connection(**conn_dict))
-
-@consumer.rpc
+@RpcConsumer.rpc
 def version(*args, **kwargs):
     """Return the current rabbitpy version."""
     with open('/etc/d8o/rabbitpy/VERSION') as f:
@@ -20,8 +17,11 @@ def version(*args, **kwargs):
 
 if __name__ == '__main__':
 
-    setup_logging(loglevel='DEBUG', loggers=[''])
-    try:
-        consumer.run()
-    except KeyboardInterrupt:
-        print('bye bye')
+    with Connection(**conn_dict) as conn:
+        setup_logging(loglevel='DEBUG', loggers=[''])
+
+        try:
+            consumer = RpcConsumer(conn)
+            consumer.run()
+        except KeyboardInterrupt:
+            print('bye bye')
