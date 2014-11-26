@@ -62,8 +62,6 @@ class TestAbstractMQ(TestCase):
 
         conn = self.connection_factory()
         consumer = RpcConsumer(conn)
-
-
         checkit = MagicMock(return_value={"msg": "Got reply"})
         # Temporarily store the respond_to_client function.
         respond_to_client = RpcConsumer.respond_to_client
