@@ -89,7 +89,7 @@ class RpcConsumer(ConsumerMixin):
             message.ack()
             self.respond_to_client(message, response, exchange)
         c = Consumer(self.connection, queues=[queue], callbacks=[process_msg])
-        #c.consume()
+        c.consume()
         self.consumers[name].append(c)
         def decorate(func):
             @wraps(func)
@@ -97,6 +97,17 @@ class RpcConsumer(ConsumerMixin):
                 pass
             return wrapper
         return decorate
+
+
+    def consume_queues(self):
+        """Call .consume() on all consumers.
+
+        
+
+        """
+        for i in self.consumers.keys():
+            consumer_set = self.consumers[i]
+            [c.consume() for c in consumer_set]
 
 
     def hase(self, name=None):
