@@ -14,7 +14,7 @@ class TestAbstractMQ(TestCase):
 
     def connection_factory(self):
         """Return connection object
-        :returns: TODO
+        :returns: Connection object
 
         """
         c = Connection(**conn_dict)
@@ -85,17 +85,14 @@ class TestAbstractMQ(TestCase):
         )
 
     def test_rpc_client(self):
-        """Check behaviour of client
-        :returns: TODO
-
-        """
+        """Check behaviour of client """
         conn = self.connection_factory()
         consumer = RpcConsumer(conn)
 
         @consumer.rpc
         def booya(*args, **kwargs):
             return {"msg": "Wooot"}
-        
+
         payload = {"msg": "Boooya"}
         client = RpcClient()
         corr_id = client.rpc('booya', payload)
@@ -105,6 +102,3 @@ class TestAbstractMQ(TestCase):
         reply = client.retrieve_messages()
         self.assertIn('msg', reply[0])
         self.assertEqual(reply[0]['msg'], 'Wooot')
-
-        
-

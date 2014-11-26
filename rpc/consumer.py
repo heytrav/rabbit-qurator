@@ -45,6 +45,8 @@ class RpcConsumer(ConsumerMixin):
         consumer_set = []
         for i in self.consumers.keys():
             consumer_set += self.consumers[i]
+
+        logger.info("Called get_consumers with {!r}".format(consumer_set))
         return consumer_set
 
 
@@ -76,8 +78,6 @@ class RpcConsumer(ConsumerMixin):
                       durable=False,
                       routing_key=routing_key)
 
-        c = Consumer(self.connection)
-        c.add_queue(queue)
 
         # The callback returned by this decorator doesn't really do anything. The process_msg
         # function added to the consumer is what actually responds to messages
@@ -88,8 +88,8 @@ class RpcConsumer(ConsumerMixin):
             response = func(body)
             message.ack()
             self.respond_to_client(message, response, exchange)
-        c.register_callback(process_msg)
-        c.consume()
+        c = Consumer(self.connection, queues=[queue], callbacks=[process_msg])
+        #c.consume()
         self.consumers[name].append(c)
         def decorate(func):
             @wraps(func)
@@ -113,19 +113,6 @@ class RpcConsumer(ConsumerMixin):
         return wrapper
 
 
-
-    #def process_rpc(self, body, message):
-        #"""Override with whatever functionality is required by rpc or task.
-
-        #This is a callback that is passed on to the consumer mixin.
-
-        #:body: dict containing data to be processed by rabbit
-        #:message: object
-        #"""
-        #response = self.process_rpc_func(body)
-
-
-
     def respond_to_client(self, message, response={}, exchange=default_exchange):
         """Send RPC response back to client.
 
@@ -147,21 +134,3 @@ class RpcConsumer(ConsumerMixin):
                     logger.error('Unable to reply to request {!r}'.format(ex))
                 else:
                     logger.info('Replied with response {!r}'.format(response))
-
-def rpc(cls):
-    """Setup some of the rpc bits
-
-    :cls: Object
-    :returns: Same object but with server queues declared.
-
-    """
-    name = cls.__name__.lower()
-    queue_name = '.'.join(['rabbitpy', name])
-    routing_key = '.'.join([name, 'server'])
-    cls.server_queues = [Queue(queue_name,
-                               exchange,
-                               durable=False,
-                               routing_key=routing_key)]
-    return cls
-
-

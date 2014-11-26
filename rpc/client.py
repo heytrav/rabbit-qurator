@@ -12,19 +12,16 @@ logger = get_logger(__name__)
 
 
 class RpcClient(object):
-
     """Process a RPC queue and fetch the response."""
 
     reply_received = False
     messages = {}
     reply_queue = []
 
-    def __init__(self, 
+    def __init__(self,
                  exchange=default_exchange,
                  client_queue=None):
-        """Constructor for client object.
-
-        """
+        """Constructor for client object. """
         self._exchange = exchange
         self._client_queue = client_queue
 
@@ -54,7 +51,6 @@ class RpcClient(object):
         response = self.reply_queue
         self.reply_queue = []
         return response
-
 
 
     def ack_message(self, body, message):
@@ -110,7 +106,6 @@ class RpcClient(object):
         logger.info("Reply info: {!r}".format(properties))
         with Connection(**conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:
-                logger.info("Publishing request %r" % payload)
                 try:
                     producer.publish(payload,
                                      serializer='json',
@@ -119,16 +114,17 @@ class RpcClient(object):
                                      routing_key=server_routing_key,
                                      **properties)
                     self.messages[message_correlation_id] = True
+                    logger.info("Published to exchange {!r}".format( self._exchange))
+                    logger.info("Published request %r" % payload)
                 except Exception as e:
                     logger.error("Unable to publish to queue: {!r}".format(e))
                     raise
 
 
-
-
 if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
     setup_logging(loglevel='INFO', loggers=[''])
-    msg_id = send_command('version')
-    response = retrieve_messages(msg_id)
+    c = RpcClient()
+    msg_id = c.rpc('version')
+    response = c.retrieve_messages()
     print("Got response: {!r}".format(response))
