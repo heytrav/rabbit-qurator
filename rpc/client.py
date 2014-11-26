@@ -11,13 +11,24 @@ from rpc.exchange import exchange as default_exchange
 logger = get_logger(__name__)
 
 
-class FetchReply(object):
+class RpcClient(object):
 
     """Process a RPC queue and fetch the response."""
 
     reply_received = False
+    messages = {}
+    reply_queue = []
 
-    def fetch(self, correlation_id, queue):
+    def __init__(self, 
+                 exchange=default_exchange,
+                 client_queue=None):
+        """Constructor for client object.
+
+        """
+        self._exchange = exchange
+        self._client_queue = client_queue
+
+    def retrieve_messages(self):
         """Process the message queue and ack the one that matches the
         correlation_id sent to the server.
 
@@ -26,98 +37,93 @@ class FetchReply(object):
         :returns: JSON object retrieved from the queue.
 
         """
-        self._correlation_id = correlation_id
-        response = None
+
+        logger.debug("Client queue: {!r}".format(self._client_queue))
         with Connection(**conn_dict) as conn:
+            logger.debug("connection is {!r}".format(conn))
             try:
                 for i in collect_replies(conn,
                                          conn.channel(),
-                                         queue,
+                                         self._client_queue,
                                          callbacks=[self.ack_message]):
                     logger.info("Received message {!r}".format(i))
-                    if self.reply_received:
-                        response = i
-                        break
             except exceptions.AMQPError as amqp_error:
                 logger.error("Unable to retreive messages: {!r}".format(amqp_error))
             except Exception as e:
                 raise e
+        response = self.reply_queue
+        self.reply_queue = []
         return response
+
 
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r}".format(message))
         if 'correlation_id' in message.properties:
-            if message.properties['correlation_id'] == self._correlation_id:
-                self.reply_received = True
-                message.ack()
-
-
-def send_command(command_name,
-                data={},
-                server_routing_key=None,
-                client_queue=None,
-                exchange=None):
-    """Send a RPC request
-
-    :command_name: the command to execute (used as routing key)
-    :data: dict with data to be sent
-    :server_routing_key: Server routing key. Will default to <command>.server
-    :client_queue: Queue to reply to.
-    """
-
-    payload = {
-        'command': command_name,
-        'data': data
-    }
-    logger.info("Preparing request {!r}".format(payload))
-
-    if exchange is None:
-        exchange = default_exchange
-
-    if not server_routing_key:
-        server_routing_key = '.'.join([command_name, 'server'])
-
-    if not client_queue:
-        queue_name = '.'.join(['rabbitpy', command_name, 'client'])
-        route_name = '.'.join([command_name, 'client'])
-        client_queue = Queue(queue_name,
-                             exchange,
-                             durable=False,
-                             routing_key=route_name)
-        logger.info("Set up client queue {!r}".format(client_queue))
-
-    message_correlation_id = uuid()
-    properties = {
-        'reply_to': client_queue.routing_key,
-        'correlation_id': message_correlation_id
-    }
-    logger.info("Reply info: {!r}".format(properties))
-    with Connection(**conn_dict) as connection:
-        with producers[connection].acquire(block=True) as producer:
-            logger.info("Publishing request %r" % payload)
+            corr_id = message.properties['correlation_id']
             try:
-                producer.publish(payload,
-                                serializer='json',
-                                exchange=exchange,
-                                declare=[exchange],
-                                routing_key=server_routing_key,
-                                 **properties)
-            except Exception as e:
-                logger.error("Unable to publish to queue: {!r}".format(e))
-                raise
-    return message_correlation_id
+                self.messages.pop(corr_id)
+                self.reply_queue.append(body)
+                message.ack()
+            except KeyError as e:
+                logger.info("Could not find {!r} in messages".format(corr_id))
 
 
-def retrieve_messages(message_correlation_id):
-    """Retrieve messages from the queue
+    def rpc(self,
+            command_name,
+            data={},
+            server_routing_key=None):
+        """Send a RPC request
 
-    :message_correlation_id: uuid sent with message
-    :returns: body of message from server
+        :command_name: the command to execute (used as routing key)
+        :data: dict with data to be sent
+        :client_queue: Queue for this particular request
+        :server_routing_key: Server routing key. Will default to <command>.server
+        """
 
-    """
-    reply = FetchReply()
-    return reply.fetch(message_correlation_id, client_queue)
+        self.reply_received = False
+        payload = {
+            'command': command_name,
+            'data': data
+        }
+        logger.info("Preparing request {!r}".format(payload))
+
+        if server_routing_key is None:
+            server_routing_key = '.'.join([command_name, 'server'])
+
+        if self._client_queue is None:
+            queue_name = '.'.join(['rabbitpy', command_name, 'client'])
+            route_name = '.'.join([command_name, 'client'])
+            self._client_queue = Queue(queue_name,
+                                 self._exchange,
+                                 durable=False,
+                                 routing_key=route_name)
+        logger.info("Set up client queue {!r} to {!r}".format(self._client_queue,
+                                                              server_routing_key))
+
+
+        message_correlation_id = uuid()
+        properties = {
+            'reply_to': self._client_queue.routing_key,
+            'correlation_id': message_correlation_id
+        }
+        logger.info("Reply info: {!r}".format(properties))
+        with Connection(**conn_dict) as conn:
+            with producers[conn].acquire(block=True) as producer:
+                logger.info("Publishing request %r" % payload)
+                try:
+                    producer.publish(payload,
+                                     serializer='json',
+                                     exchange=self._exchange,
+                                     declare=[self._exchange],
+                                     routing_key=server_routing_key,
+                                     **properties)
+                    self.messages[message_correlation_id] = True
+                except Exception as e:
+                    logger.error("Unable to publish to queue: {!r}".format(e))
+                    raise
+
+
 
 
 if __name__ == '__main__':

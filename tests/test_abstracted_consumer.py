@@ -6,7 +6,7 @@ from kombu import Connection
 
 from rpc import conn_dict
 from rpc.consumer import RpcConsumer
-from rpc.client import send_command
+from rpc.client import RpcClient
 
 class TestAbstractMQ(TestCase):
 
@@ -33,7 +33,7 @@ class TestAbstractMQ(TestCase):
         self.assertIn('moffa', consumer.consumers)
         moffa_consumers = consumer.consumers['moffa']
         self.assertEqual(len(moffa_consumers),
-                         1, 
+                         1,
                          'One consumer')
         self.assertEqual(moffa_consumers[0].queues[0].name,
                          'rabbitpy.moffa',
@@ -67,20 +67,44 @@ class TestAbstractMQ(TestCase):
 
 
         payload = {"msg": "Hello"}
-        corr_id = send_command('blah', 
-                               payload)
+
+        # Send message to server
+        client = RpcClient()
+        corr_id = client.rpc('blah', payload)
+
         conn.drain_events(timeout=1)
         checkit.assert_called_with(
             {'command': 'blah', 'data': payload}
         )
+        conn.release()
+        #response = client.retrieve_messages()
         consumer.respond_to_client.assert_called_with(
-            ANY, 
+            ANY,
             {"msg": "Got reply"},
             ANY
         )
-        conn.release()
 
-            
+    def test_rpc_client(self):
+        """Check behaviour of client
+        :returns: TODO
+
+        """
+        conn = self.connection_factory()
+        consumer = RpcConsumer(conn)
+
+        @consumer.rpc
+        def booya(*args, **kwargs):
+            return {"msg": "Wooot"}
+        
+        payload = {"msg": "Boooya"}
+        client = RpcClient()
+        corr_id = client.rpc('booya', payload)
+
+        conn.drain_events(timeout=1)
+        conn.release()
+        reply = client.retrieve_messages()
+        self.assertIn('msg', reply[0])
+        self.assertEqual(reply[0]['msg'], 'Wooot')
 
         
 
