@@ -24,6 +24,15 @@ def current_time(*args, **kwargs):
     """
     return {'time': datetime.datetime.now().isoformat()}
 
+@RpcConsumer.rpc(queue_name='hello.world')
+def say_hello(*args, **kwargs):
+    """Just say hi
+
+    :returns: dict with hello
+
+    """
+    return {'msg': 'Hello, World!'}
+
 
 if __name__ == '__main__':
 
