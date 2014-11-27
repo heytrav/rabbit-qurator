@@ -70,7 +70,7 @@ class IwmnConsumer(object):
 
         """
         if func is None:
-            return partial(self.rpc, queue_name=queue_name)
+            return partial(self.task, queue_name=queue_name)
 
         def process_message(body, message):
             logger.info("Processing function {!r} with data {!r}".format(func.__name__,

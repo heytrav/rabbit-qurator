@@ -4,12 +4,21 @@ from rpc.iwmnconsumer import IwmnConsumer
 
 consumer = IwmnConsumer()
 
+def retrieve_version():
+    """Retrieve the version of the rabbitpy application.
+    :returns: str representing the app version
+
+    """
+    with open('/etc/d8o/rabbitpy/VERSION') as f:
+        version = f.read()
+    return version.strip()
+    
+
+
 @consumer.rpc
 def version(*args, **kwargs):
     """Return the current rabbitpy version."""
-    with open('/etc/d8o/rabbitpy/VERSION') as f:
-        version = f.read()
-    return {'version': version.strip()}
+    return {'version': retrieve_version()}
 
 
 if __name__ == '__main__':

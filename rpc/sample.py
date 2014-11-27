@@ -29,7 +29,7 @@ def dispatcher(body):
         else:
             return {"error": "Unknown command"}
     except KeyError as ke:
-        message = "Error processing request {!r}".format(ke)
+        message = "Malformed request {!r}".format(ke)
         logger.error(message)
         return {"error": message}
     except Exception as e:
@@ -41,7 +41,7 @@ def dispatcher(body):
 def status_domain(data):
     """Return domain status."""
     return {
-        "available": True, "domain": dat}a['domain']
+        "available": True, "domain": data['domain']
     }
 
 
