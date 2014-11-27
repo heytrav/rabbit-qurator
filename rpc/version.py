@@ -17,7 +17,7 @@ if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
 
     from rpc import conn_dict
-    from rpc.consumer import Worker
+    from rpc.worker import Worker
 
     with Connection(**conn_dict) as conn:
         setup_logging(loglevel='DEBUG', loggers=[''])

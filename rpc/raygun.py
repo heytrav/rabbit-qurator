@@ -1,6 +1,6 @@
 import os
 from kombu.log import get_logger
-from rpc.consumer import Worker, rpc
+from rpc.worker import Worker, rpc
 
 from raygun4py import raygunprovider
 

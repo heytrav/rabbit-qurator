@@ -6,7 +6,7 @@ from kombu import Connection, Consumer
 from kombu.utils import nested
 
 from rpc import conn_dict
-from rpc.consumer import Worker
+from rpc.worker import Worker
 from rpc.iwmnconsumer import IwmnConsumer
 from rpc.client import RpcClient
 
