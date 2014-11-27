@@ -1,11 +1,11 @@
 from kombu import Queue
 from kombu.log import get_logger
-from rpc.consumer import RpcConsumer, rpc
+from rpc.consumer import Worker, rpc
 
 logger = get_logger(__name__)
 
 @rpc
-class Hello(RpcConsumer):
+class Hello(Worker):
 
     """Hello service"""
 

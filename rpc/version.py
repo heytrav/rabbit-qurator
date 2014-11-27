@@ -1,13 +1,6 @@
-import datetime
-from kombu import Connection
-from kombu.utils.debug import setup_logging
-from kombu.log import get_logger
 
-from rpc import conn_dict
-from rpc.consumer import RpcConsumer
 from rpc.iwmnconsumer import IwmnConsumer
 
-logger = get_logger(__name__)
 
 consumer = IwmnConsumer()
 
@@ -20,12 +13,17 @@ def version(*args, **kwargs):
 
 
 if __name__ == '__main__':
+    from kombu import Connection
+    from kombu.utils.debug import setup_logging
+
+    from rpc import conn_dict
+    from rpc.consumer import Worker
 
     with Connection(**conn_dict) as conn:
         setup_logging(loglevel='DEBUG', loggers=[''])
 
         try:
-            worker = RpcConsumer(conn, consumer)
+            worker = Worker(conn, consumer)
             worker.run()
         except KeyboardInterrupt:
             print('bye bye')

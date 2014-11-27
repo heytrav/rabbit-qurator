@@ -3,7 +3,7 @@ from kombu.log import get_logger
 
 logger = get_logger(__name__)
 
-class RpcConsumer(ConsumerMixin):
+class Worker(ConsumerMixin):
 
     """Manage server side of RPC connection.
 
@@ -11,7 +11,7 @@ class RpcConsumer(ConsumerMixin):
     """
 
     def __init__(self, connection, iwmn_consumer):
-        """RpcConsumer(connection)
+        """Worker(connection)
 
         :connection: Connection object
         """

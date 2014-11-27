@@ -1,10 +1,6 @@
 import datetime
-from kombu import Connection
-from kombu.utils.debug import setup_logging
 from kombu.log import get_logger
 
-from rpc import conn_dict
-from rpc.consumer import RpcConsumer
 from rpc.iwmnconsumer import IwmnConsumer
 
 logger = get_logger(__name__)
@@ -21,7 +17,7 @@ def current_time(*args, **kwargs):
     return {'time': datetime.datetime.now().isoformat()}
 
 @consumer.rpc(queue_name='rabbitpy.core.domain')
-def delegator(body):
+def dispatcher(body):
     """Implement hase like queue."""
 
     logger.info("Called method with {!r}".format(body))
@@ -33,23 +29,33 @@ def delegator(body):
         else:
             return {"error": "Unknown command"}
     except KeyError as ke:
-        logger.error("'command' key not available {!r}".format(ke))
-        return {"error": "Missing 'command' key!"}
+        message = "Error processing request {!r}".format(ke)
+        logger.error(message)
+        return {"error": message}
     except Exception as e:
+        message = "Unable to process request: {!r}".format(e)
+        logger.error(message)
         return {"error": "Unable to process request."}
+
 
 def status_domain(data):
     """Return domain status."""
-    return {"available": True, "domain": data['domain']}
+    return {
+        "available": True, "domain": dat}a['domain']
+    }
 
 
 if __name__ == '__main__':
+    from kombu import Connection
+    from kombu.utils.debug import setup_logging
+
+    from rpc import conn_dict
+    from rpc.consumer import Worker
 
     with Connection(**conn_dict) as conn:
         setup_logging(loglevel='DEBUG', loggers=[''])
-
         try:
-            worker = RpcConsumer(conn, consumer)
+            worker = Worker(conn, consumer)
             worker.run()
         except KeyboardInterrupt:
             print('bye bye')

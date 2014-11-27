@@ -1,13 +1,13 @@
 import os
 from kombu.log import get_logger
-from rpc.consumer import RpcConsumer, rpc
+from rpc.consumer import Worker, rpc
 
 from raygun4py import raygunprovider
 
 logger = get_logger(__name__)
 
 @rpc
-class Raygun(RpcConsumer):
+class Raygun(Worker):
 
     """Raygun service"""
 

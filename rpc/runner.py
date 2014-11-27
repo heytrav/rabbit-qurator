@@ -1,5 +1,5 @@
 import os
-from rpc import RpcConsumer, RpcCall
+from rpc import Worker, RpcCall
 
 
 @RpcCall
@@ -21,7 +21,7 @@ if __name__ == '__main__' :
     setup_logging(loglevel='INFO', loggers=[''])
     with Connection(**conn_dict) as conn:
         try:
-            worker = RpcConsumer(conn)
+            worker = Worker(conn)
             worker.run()
         except KeyboardInterrupt:
             print('bye bye')

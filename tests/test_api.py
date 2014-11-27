@@ -24,10 +24,10 @@ class TestApi(TestCase):
         :returns: TODO
 
         """
-        from rpc.consumer import RpcConsumer, rpc
+        from rpc.consumer import Worker, rpc
 
         @rpc
-        class TestConsumer(RpcConsumer):
+        class TestConsumer(Worker):
             pass
 
 
