@@ -7,6 +7,7 @@ from kombu.utils import nested
 
 from rpc import conn_dict
 from rpc.consumer import RpcConsumer
+from rpc.iwmnconsumer import IwmnConsumer
 from rpc.client import RpcClient
 
 class TestAbstractMQ(TestCase):
@@ -24,50 +25,41 @@ class TestAbstractMQ(TestCase):
     def test_method_wrapping(self):
         """Test creating custom rpc endpoint."""
 
-        RpcConsumer.standard_server_queues = {}
-        RpcConsumer.standard_callbacks = {}
-        conn = self.connection_factory()
-        consumer = RpcConsumer(conn)
+        consumer = IwmnConsumer()
 
-        @RpcConsumer.rpc
+        @consumer.rpc
         def moffa(msg):
             pass
 
-        self.assertIn('moffa', consumer.standard_server_queues)
-        moffa_queues = consumer.standard_server_queues['moffa']
+        self.assertIn('moffa', consumer.queues)
+        moffa_queues = consumer.queues['moffa']
         self.assertEqual(len(moffa_queues),
                          1,
                          'One consumer')
         self.assertEqual(moffa_queues[0].name,
                          'rabbitpy.moffa',
                          'Queue has expected name')
-        @RpcConsumer.rpc(queue_name='boffa.moffa')
+        @consumer.rpc(queue_name='boffa.moffa')
         def boffa(msg):
             pass
 
 
-        self.assertIn('boffa', consumer.standard_server_queues)
-        boffa_queues = consumer.standard_server_queues['boffa']
+        self.assertIn('boffa', consumer.queues)
+        boffa_queues = consumer.queues['boffa']
         boffa_queue = boffa_queues[0]
         self.assertEqual(boffa_queue.name,
                          'boffa.moffa',
                          'Can specify queue name')
-        conn.release()
 
 
     def test_standard_rpc(self):
         """Check behaviour of wrapped function."""
-        RpcConsumer.standard_server_queues = {}
-        RpcConsumer.standard_callbacks = {}
 
-        conn = self.connection_factory()
-        consumer = RpcConsumer(conn)
+        consumer = IwmnConsumer()
         checkit = MagicMock(return_value={"msg": "Got reply"})
-        # Temporarily store the respond_to_client function.
-        respond_to_client = RpcConsumer.respond_to_client
         # Now mock it!
-        RpcConsumer.respond_to_client = MagicMock()
-        @RpcConsumer.rpc
+        consumer.respond_to_client = MagicMock()
+        @consumer.rpc
         def blah(*args, **kwargs):
             return checkit(*args, **kwargs)
 
@@ -79,8 +71,9 @@ class TestAbstractMQ(TestCase):
         corr_id = client.rpc('blah', payload)
 
         # Synthetically drain events from queues
-        blah_queues = RpcConsumer.standard_server_queues['blah']
-        blah_callbacks = RpcConsumer.standard_callbacks['blah']
+        blah_queues = consumer.queues['blah']
+        blah_callbacks = consumer.callbacks['blah']
+        conn = self.connection_factory()
         with Consumer(conn, blah_queues, callbacks=blah_callbacks):
             conn.drain_events(timeout=1)
 
@@ -94,25 +87,23 @@ class TestAbstractMQ(TestCase):
             {"msg": "Got reply"},
             ANY
         )
-        # Unmock the respond_to_client function
-        RpcConsumer.respond_to_client = respond_to_client
 
 
     def test_rpc_client(self):
         """Check behaviour of client """
-        conn = self.connection_factory()
-        consumer = RpcConsumer(conn)
+        consumer = IwmnConsumer()
 
-        @RpcConsumer.rpc
+        @consumer.rpc
         def booya(*args, **kwargs):
             return {"msg": "Wooot"}
 
         payload = {"msg": "Boooya"}
         client = RpcClient()
         corr_id = client.rpc('booya', payload)
-        booya_queue = RpcConsumer.standard_server_queues['booya']
-        booya_callbacks = RpcConsumer.standard_callbacks['booya']
+        booya_queue = consumer.queues['booya']
+        booya_callbacks = consumer.callbacks['booya']
 
+        conn = self.connection_factory()
         with Consumer(conn, booya_queue, callbacks=booya_callbacks):
             conn.drain_events(timeout=1)
         conn.release()

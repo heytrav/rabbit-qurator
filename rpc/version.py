@@ -5,17 +5,19 @@ from kombu.log import get_logger
 
 from rpc import conn_dict
 from rpc.consumer import RpcConsumer
+from rpc.iwmnconsumer import IwmnConsumer
 
 logger = get_logger(__name__)
 
-@RpcConsumer.rpc
+consumer = IwmnConsumer()
+@consumer.rpc
 def version(*args, **kwargs):
     """Return the current rabbitpy version."""
     with open('/etc/d8o/rabbitpy/VERSION') as f:
         version = f.read()
     return {'version': version.strip()}
 
-@RpcConsumer.rpc
+@consumer.rpc
 def current_time(*args, **kwargs):
     """Return the current time
 
@@ -24,7 +26,7 @@ def current_time(*args, **kwargs):
     """
     return {'time': datetime.datetime.now().isoformat()}
 
-@RpcConsumer.rpc(queue_name='hello.world')
+@consumer.rpc(queue_name='hello.world')
 def say_hello(*args, **kwargs):
     """Just say hi
 
@@ -33,6 +35,19 @@ def say_hello(*args, **kwargs):
     """
     return {'msg': 'Hello, World!'}
 
+@consumer.rpc(queue_name='api.core.domain')
+def delegator(body, message):
+    """Implement hase like queue
+
+    :*args: TODO
+    :**kwargs: TODO
+    :returns: TODO
+
+    """
+    logger.info("Called method with {!r}".format(body))
+    if 'command' in body:
+        logger.info("yey")
+
 
 if __name__ == '__main__':
 
@@ -40,7 +55,7 @@ if __name__ == '__main__':
         setup_logging(loglevel='DEBUG', loggers=[''])
 
         try:
-            consumer = RpcConsumer(conn)
-            consumer.run()
+            worker = RpcConsumer(conn, consumer)
+            worker.run()
         except KeyboardInterrupt:
             print('bye bye')
