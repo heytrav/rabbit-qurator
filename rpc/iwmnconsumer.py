@@ -20,22 +20,21 @@ class IwmnConsumer(object):
     def __init__(self, queue_stem='rabbitpy'):
         """Constructor
 
-        :queue_stem: TODO
-        :returns: TODO
+        :queue_stem: Default prefix for queue
 
         """
         self._queue_stem = queue_stem
 
-    def _setup_queue(self, func, callback, exchange, queue_name):
-        """TODO: Docstring for _setup_queue.
+    def _wrap_function(self, function, callback, exchange, queue_name):
+        """Set up queue used in decorated function.
 
-        :func: TODO
-        :exchange: TODO
-        :queue_name: TODO
-        :returns: TODO
+        :func: wrapped function
+        :exchange: exchange to use
+        :queue_name: name of queue
+        :returns: wrapped function
 
         """
-        name = func.__name__.lower()
+        name = function.__name__.lower()
         if name not in self.queues:
             self.queues[name] = []
         if name not in self.callbacks:
@@ -76,10 +75,10 @@ class IwmnConsumer(object):
         def process_message(body, message):
             logger.info("Processing function {!r} with data {!r}".format(func.__name__,
                                                                          body))
-            response = func(body)
+            func(body)
             message.ack()
 
-        return self._setup_queue(func, process_message, exchange, queue_name)
+        return self._wrap_function(func, process_message, exchange, queue_name)
 
 
 
@@ -99,11 +98,11 @@ class IwmnConsumer(object):
             logger.info("Processing function {!r} with data {!r}".format(func.__name__,
                                                                          body))
             response = func(body)
+            logger.info("Received response {!r}".format(response))
             message.ack()
             self.respond_to_client(message, response, exchange)
 
-        return self._setup_queue(func,process_message, exchange, queue_name)
-
+        return self._wrap_function(func, process_message, exchange, queue_name)
 
 
     def respond_to_client(self, message, response={}, exchange=default_exchange):
