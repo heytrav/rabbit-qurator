@@ -125,8 +125,6 @@ if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
     setup_logging(loglevel='INFO', loggers=[''])
     c = RpcClient()
-    msg_id = c.rpc('status_domain', 
-                   {"domain": 'my-domain.com'},
-                   server_routing_key='rabbitpy.core.domain')
+    msg_id = c.rpc('version' )
     response = c.retrieve_messages()
     print("Got response: {!r}".format(response))
