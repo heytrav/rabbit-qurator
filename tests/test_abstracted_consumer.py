@@ -106,6 +106,6 @@ class TestAbstractMQ(TestCase):
         with Consumer(conn, booya_queue, callbacks=booya_callbacks):
             conn.drain_events(timeout=1)
         conn.release()
-        reply = client.retrieve_messages()
-        self.assertIn('msg', reply[0])
-        self.assertEqual(reply[0]['msg'], 'Wooot')
+        for reply in client.retrieve_messages():
+            self.assertIn('msg', reply)
+            self.assertEqual(reply['msg'], 'Wooot')

@@ -16,13 +16,13 @@ class RpcClient(object):
 
     reply_received = False
     messages = {}
-    reply_queue = []
 
     def __init__(self,
                  exchange=default_exchange,
                  client_queue=None):
         """Constructor for client object. """
         self._exchange = exchange
+        self.reply = None
         self._client_queue = client_queue
 
     def retrieve_messages(self):
@@ -44,13 +44,15 @@ class RpcClient(object):
                                          self._client_queue,
                                          callbacks=[self.ack_message]):
                     logger.info("Received message {!r}".format(i))
+                    if self.reply:
+                        response = self.reply
+                        self.reply = None
+                        yield response
             except exceptions.AMQPError as amqp_error:
                 logger.error("Unable to retreive messages: {!r}".format(amqp_error))
             except Exception as e:
                 raise e
-        response = self.reply_queue
-        self.reply_queue = []
-        return response
+        return None
 
 
     def ack_message(self, body, message):
@@ -59,7 +61,8 @@ class RpcClient(object):
             corr_id = message.properties['correlation_id']
             try:
                 self.messages.pop(corr_id)
-                self.reply_queue.append(body)
+                self.reply = body
+                #self.reply_queue.append(body)
                 message.ack()
             except KeyError as e:
                 logger.info("Could not find {!r} in messages".format(corr_id))
