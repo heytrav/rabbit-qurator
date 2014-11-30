@@ -4,13 +4,13 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 from werkzeug.exceptions import RequestTimeout
 
-from kombu import Connection, Consumer
+from kombu import Connection, Consumer, Exchange
 from kombu.pools import producers
 
 from raygun4py import raygunprovider, raygunmsgs
 
 from rpc import conn_dict
-from rpc.exchange import exchange
+#from rpc.exchange import exchange
 
 class TestRaygun(TestCase):
 
@@ -18,6 +18,10 @@ class TestRaygun(TestCase):
 
     def setUp(self):
         """Unit testy stuff.  """
+
+        self.exchange = Exchange('testrabbits', 
+                                 type='direct', 
+                                 durable=False)
 
         self.body = {
             "class": 'TestRaygun',

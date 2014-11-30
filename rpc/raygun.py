@@ -36,7 +36,7 @@ def send(msg):
 
 @consumer.task(queue_name='rabbitpy.raygun')
 def send_to_raygun(data):
-    """Fire information to raygun.
+    """Service endpoint for rabbitpy.raygun.
 
     :data: request data expected by raygun
 
