@@ -58,7 +58,6 @@ Alternative method for defining queues:
 consumer = IWMNConsumer(legacy=False)
 
 @consumer.rpc
-def my_rpc_method(data):
 def my_rpc_method(data);
     try:
         # do some stuff
