@@ -88,7 +88,7 @@ class RpcClient(object):
         logger.info("Preparing request {!r}".format(payload))
 
         if server_routing_key is None:
-            server_routing_key = '.'.join([command_name, 'server'])
+            server_routing_key = '.'.join([command_name])
 
         if self._client_queue is None:
             queue_name = '.'.join(['rabbitpy', command_name, 'client'])

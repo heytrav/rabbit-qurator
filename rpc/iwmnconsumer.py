@@ -10,20 +10,52 @@ from rpc.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
 
-class IwmnConsumer(object):
+class IWMNConsumer(object):
 
     """Manage Queue and callbacks for a set of Consumers"""
 
     queues = {}
     callbacks = {}
+    dispatch = {}
 
-    def __init__(self, queue_stem='rabbitpy'):
+    def __init__(self, legacy=True, queue=None):
         """Constructor
 
         :queue_stem: Default prefix for queue
 
         """
-        self._queue_stem = queue_stem
+        self._legacy = legacy
+        if legacy:
+            if queue is None:
+                raise Exception("'queue' is required for legacy implementation.")
+
+        self._queue = queue
+
+
+    def _hase_dispatch(self, body, message):
+        """Dispatch function calls to wrapped methods
+
+        :body: data for command. Note: this must contain  a key 'command'
+        which dispatch which callback will be called.
+        :returns: the data returned by the callback.
+        """
+        try:
+            command = body['command']
+            data = body['data']
+            callback = self.dispatch[command]
+            logger.debug("Calling {!r} with {!r}".format(command, data))
+        except KeyError as ke:
+            error_message = "Malformed request: {!r}".format(ke)
+            logger.error(error_message)
+            return {"error": error_message}
+        except Exception as e:
+            error_message = "Unable call method: {!r}".format(e)
+            logger.error(error_message)
+            return {"error": error_message}
+             
+        else:
+            return callback(data, message)
+        
 
     def _wrap_function(self, function, callback, exchange, queue_name):
         """Set up queue used in decorated function.
@@ -39,23 +71,30 @@ class IwmnConsumer(object):
             self.queues[name] = []
         if name not in self.callbacks:
             self.callbacks[name] = []
-        if queue_name is None:
-            queue_name = '.'.join([self._queue_stem, name])
-            routing_key = '.'.join([name, 'server'])
+        if self._legacy:
+            self.dispatch[name] = callback
+            self.callbacks[name].append(self._hase_dispatch)
+            # Set queue_name to whatever class was instantiated with.
+            queue_name = self._queue
         else:
-            routing_key = queue_name
+            self.callbacks[name].append(callback)
+
+        # If not set by instance, make same as function name.
+        if queue_name is None:
+            queue_name = name
+            
+        routing_key = queue_name
+        # Create the queue.
         queue = Queue(queue_name,
                       exchange,
                       durable=False,
                       routing_key=routing_key)
 
-
         self.queues[name].append(queue)
-        # The callback returned by this decorator doesn't really do anything. The process_msg
+        # The callback returned by the decorator don't really do anything. The process_msg
         # function added to the consumer is what actually responds to messages
         # from the client on this particular queue.
 
-        self.callbacks[name].append(callback)
         def decorate(func):
             @wraps(func)
             def wrapper(*args, **kwargs):
@@ -94,6 +133,7 @@ class IwmnConsumer(object):
         """
         if func is None:
             return partial(self.rpc, queue_name=queue_name)
+
         def process_message(body, message):
             logger.info("Processing function {!r} with data {!r}".format(func.__name__,
                                                                          body))

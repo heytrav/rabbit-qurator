@@ -3,7 +3,7 @@ import http.client
 from kombu.log import get_logger
 from raygun4py import raygunprovider
 
-from rpc.iwmnconsumer import IwmnConsumer
+from rpc.iwmnconsumer import IWMNConsumer
 from rpc.version import retrieve_version
 try:
     import ssl
@@ -12,7 +12,7 @@ except ImportError:
 
 logger = get_logger(__name__)
 
-consumer = IwmnConsumer()
+consumer = IWMNConsumer(legacy=False)
 
 def send(msg):
     """Sends request to raygun

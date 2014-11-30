@@ -1,11 +1,11 @@
 import datetime
 from kombu.log import get_logger
 
-from rpc.iwmnconsumer import IwmnConsumer
+from rpc.iwmnconsumer import IWMNConsumer
 
 logger = get_logger(__name__)
 
-consumer = IwmnConsumer()
+consumer = IWMNConsumer()
 
 @consumer.rpc
 def current_time(*args, **kwargs):

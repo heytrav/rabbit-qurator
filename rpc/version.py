@@ -1,8 +1,8 @@
 
-from rpc.iwmnconsumer import IwmnConsumer
+from rpc.iwmnconsumer import IWMNConsumer
 
 
-consumer = IwmnConsumer()
+consumer = IWMNConsumer(legacy=False)
 
 def retrieve_version():
     """Retrieve the version of the rabbitpy application.
