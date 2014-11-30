@@ -40,7 +40,7 @@ def my_rpc_method(data);
 
 ```
 
-This expects the client to send something like the `api.some.queue` queue:
+This expects the client to send something like the following to the queue `api.some.queue`:
 ```javascript
 {
     "command": "my_rpc_method",
