@@ -18,12 +18,19 @@ class IWMNConsumer(object):
     callbacks = {}
     dispatch = {}
 
-    def __init__(self, legacy=True, queue=None):
+    def __init__(self, 
+                 legacy=True, 
+                 queue=None,
+                 exchange=default_exchange):
         """Constructor
 
-        :queue_stem: Default prefix for queue
-
+        :legacy: Boolean flag. If True (default) it should try to emulate hase
+        functionality by dispatching calls to a single queue to different
+        functions. If False, assume that each method is its own queue.
+        :queue: Default name for queue
+        :exchange: Exchange to use. 
         """
+        self._exchange = exchange
         self._legacy = legacy
         if legacy:
             if queue is None:
@@ -57,7 +64,7 @@ class IWMNConsumer(object):
             return callback(data, message)
         
 
-    def _wrap_function(self, function, callback, exchange, queue_name):
+    def _wrap_function(self, function, callback, queue_name):
         """Set up queue used in decorated function.
 
         :func: wrapped function
@@ -86,7 +93,7 @@ class IWMNConsumer(object):
         routing_key = queue_name
         # Create the queue.
         queue = Queue(queue_name,
-                      exchange,
+                      self._exchange,
                       durable=False,
                       routing_key=routing_key)
 
@@ -103,7 +110,7 @@ class IWMNConsumer(object):
         return decorate
 
 
-    def task(self, func=None, *, exchange=default_exchange, queue_name=None):
+    def task(self, func=None, *, queue_name=None):
         """Wrap around a function that should be a task.
         The client should not expect anything to be returned.
 
@@ -117,17 +124,16 @@ class IWMNConsumer(object):
             func(body)
             message.ack()
 
-        return self._wrap_function(func, process_message, exchange, queue_name)
+        return self._wrap_function(func, process_message, queue_name)
 
 
 
-    def rpc(self, func=None, *, exchange=default_exchange, queue_name=None):
+    def rpc(self, func=None, *, queue_name=None):
         """Wrap around function. This method is modelled after standard RPC
         behaviour where the message sends a reply_to queue and a
         correlation_id back to the client.
 
         :func: wrap with new standard rpc behaviour
-        :exchange: Exchange object.
         :queue_name: defaults to "rabbitpy.<func.__name__>"
 
         """
@@ -140,12 +146,12 @@ class IWMNConsumer(object):
             response = func(body)
             logger.info("Received response {!r}".format(response))
             message.ack()
-            self.respond_to_client(message, response, exchange)
+            self.respond_to_client(message, response)
 
-        return self._wrap_function(func, process_message, exchange, queue_name)
+        return self._wrap_function(func, process_message, queue_name)
 
 
-    def respond_to_client(self, message, response={}, exchange=default_exchange):
+    def respond_to_client(self, message, response={}):
         """Send RPC response back to client.
 
         :response: datastructure that needs to go back to client.
@@ -155,7 +161,7 @@ class IWMNConsumer(object):
                 # Assume reply_to and correlation_id in message.
                 try:
                     send_reply(
-                        exchange,
+                        self._exchange,
                         message,
                         response,
                         producer

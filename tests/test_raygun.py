@@ -4,24 +4,32 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 from werkzeug.exceptions import RequestTimeout
 
-from kombu import Connection, Consumer, Exchange
+from kombu import Connection, Consumer, Exchange, Queue
 from kombu.pools import producers
 
 from raygun4py import raygunprovider, raygunmsgs
 
 from rpc import conn_dict
-#from rpc.exchange import exchange
+from rpc.exchange import exchange
 
-class TestRaygun(TestCase):
+from tests.test_rabbit import TestRabbitpy
+
+class TestRaygun(TestRabbitpy):
 
     """Test sending stuff to raygun"""
 
     def setUp(self):
         """Unit testy stuff.  """
 
-        self.exchange = Exchange('testrabbits', 
-                                 type='direct', 
-                                 durable=False)
+        TestRabbitpy.setUp(self)
+        self.queues = [
+            Queue('rabbitpy.raygun',
+                  exchange,
+                  durable=False,
+                  channel=self._connection,
+                  routing_key='rabbitpy.raygun')
+        ]
+        [i.declare(0) for i in self.queues]
 
         self.body = {
             "class": 'TestRaygun',
@@ -33,14 +41,14 @@ class TestRaygun(TestCase):
                 "key2": 22222
             },
             "request": {
-                #"headers": {
-                #"Content-Type": 'application/html',
-                #},
-                #"hostName": "localhost",
-                #"httpMethod": "GET",
-                #"queryString": "",
-                #"url": "http://api.iwantmyname.com",
-                #"ipAddress": "73.23.44.19",
+                "headers": {
+                "content-type": 'application/html',
+                },
+                "hostname": "localhost",
+                "httpmethod": "get",
+                "querystring": "",
+                "url": "http://api.iwantmyname.com",
+                "ipaddress": "73.23.44.19",
             }
         }
 
@@ -85,7 +93,7 @@ class TestRaygun(TestCase):
                                      routing_key='rabbitpy.raygun')
         with Connection(**conn_dict) as conn:
             with Consumer(conn, queues, callbacks=callbacks):
-                conn.drain_events(timeout=1) 
+                conn.drain_events(timeout=1)
 
         send = MagicMock()
         send.assert_called()
