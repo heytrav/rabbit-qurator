@@ -18,12 +18,15 @@ class RpcClient(object):
     messages = {}
 
     def __init__(self,
+                 legacy=True,
                  exchange=default_exchange,
                  client_queue=None):
         """Constructor for client object. """
+        self._legacy = legacy
         self._exchange = exchange
         self.reply = None
         self._client_queue = client_queue
+
 
     def retrieve_messages(self):
         """Process the message queue and ack the one that matches the
@@ -36,12 +39,15 @@ class RpcClient(object):
         """
 
         logger.debug("Client queue: {!r}".format(self._client_queue))
+        client_queue = Queue(self._client_queue,
+                             durable=False,
+                             routing_key=self._client_queue)
         with Connection(**conn_dict) as conn:
             logger.debug("connection is {!r}".format(conn))
             try:
                 for i in collect_replies(conn,
                                          conn.channel(),
-                                         self._client_queue,
+                                         client_queue,
                                          callbacks=[self.ack_message]):
                     logger.info("Received message {!r}".format(i))
                     if self.reply:
@@ -62,10 +68,36 @@ class RpcClient(object):
             try:
                 self.messages.pop(corr_id)
                 self.reply = body
-                #self.reply_queue.append(body)
                 message.ack()
             except KeyError as e:
                 logger.info("Could not find {!r} in messages".format(corr_id))
+
+
+    def _setup_payload(self, command_name, data):
+        """Setup the datastructure for either hase-like or standard.
+
+        :command_name: the name of the command
+        :data: data to be sent with the command
+        :returns: payload for the request
+
+        """
+        if self._legacy:
+            payload = {
+                'command': command_name,
+                'data': data
+            }
+        else:
+            payload = data
+        return payload
+
+
+    def _prepare_client_queue(self, command_name):
+        """Setup a client queue based on the command
+        :returns: TODO
+
+        """
+        if self._client_queue is None:
+            self._client_queue = '.'.join([command_name, 'client'])
 
 
     def rpc(self,
@@ -81,31 +113,54 @@ class RpcClient(object):
         """
 
         self.reply_received = False
-        payload = {
-            'command': command_name,
-            'data': data
-        }
+        payload = self._setup_payload(command_name, data)
         logger.info("Preparing request {!r}".format(payload))
 
         if server_routing_key is None:
             server_routing_key = '.'.join([command_name])
 
-        if self._client_queue is None:
-            queue_name = '.'.join(['rabbitpy', command_name, 'client'])
-            route_name = '.'.join([command_name, 'client'])
-            self._client_queue = Queue(queue_name,
-                                 self._exchange,
-                                 durable=False,
-                                 routing_key=route_name)
+        self._prepare_client_queue(command_name)
         logger.info("Set up client queue {!r} to {!r}".format(self._client_queue,
                                                               server_routing_key))
 
-
         message_correlation_id = uuid()
         properties = {
-            'reply_to': self._client_queue.routing_key,
+            'reply_to': self._client_queue,
             'correlation_id': message_correlation_id
         }
+        self._send_command(payload, server_routing_key, properties)
+        # Successful so store message correlation id for retrieval.
+        self.messages[message_correlation_id] = True
+
+
+
+    def task(self,
+             command_name,
+             data={},
+             server_routing_key=None):
+        """Send a RPC request
+
+        :command_name: the command to execute (used as routing key)
+        :data: dict with data to be sent
+        :client_queue: Queue for this particular request
+        :server_routing_key: Server routing key. Will default to <command>.server
+        """
+
+        self.reply_received = False
+        payload = self._setup_payload(command_name, data)
+        logger.info("Preparing request {!r}".format(payload))
+
+        if server_routing_key is None:
+            server_routing_key = command_name
+
+        self._prepare_client_queue(command_name)
+        logger.info("Set up client queue {!r} to {!r}".format(self._client_queue,
+                                                              server_routing_key))
+
+        self._send_command(payload, server_routing_key)
+
+
+    def _send_command(self, payload, server_routing_key, properties):
         logger.info("Reply info: {!r}".format(properties))
         with Connection(**conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:
@@ -116,7 +171,6 @@ class RpcClient(object):
                                      declare=[self._exchange],
                                      routing_key=server_routing_key,
                                      **properties)
-                    self.messages[message_correlation_id] = True
                     logger.info("Published to exchange {!r}".format( self._exchange))
                     logger.info("Published request %r" % payload)
                 except Exception as e:

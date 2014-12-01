@@ -25,9 +25,9 @@ Rabbits in Python. At this stage just experimental stuff.
 
 Create a hase like queue:
 ```python
-from rpc.iwmnconsumer import IWMNConsumer
+from rpc.queuerate import Queuerator
 
-legacy_consumer = IWMNConsumer(queue='api.some.queue')
+legacy_consumer = Queuerator(queue='api.some.queue')
 
 @legacy_consumer.rpc
 def my_rpc_method(data);
@@ -55,7 +55,7 @@ This expects the client to send something like the following to the queue `api.s
 Alternative method for defining queues:
 
 ```python
-consumer = IWMNConsumer(legacy=False)
+consumer = Queuerator(legacy=False)
 
 @consumer.rpc
 def my_rpc_method(data);

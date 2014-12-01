@@ -10,7 +10,7 @@ from rpc.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
 
-class IWMNConsumer(object):
+class Queuerator(object):
 
     """Manage Queue and callbacks for a set of Consumers"""
 
@@ -39,6 +39,17 @@ class IWMNConsumer(object):
         self._queue = queue
 
 
+    def _error(self, error, message):
+        """Return an error if caller sent an unknown command.
+
+        :error: Error data
+        :message: Message object
+
+        """
+        message.ack()
+        self.respond_to_client(message, error)
+
+
     def _hase_dispatch(self, body, message):
         """Dispatch function calls to wrapped methods
 
@@ -54,12 +65,13 @@ class IWMNConsumer(object):
         except KeyError as ke:
             error_message = "Malformed request: {!r}".format(ke)
             logger.error(error_message)
-            return {"error": error_message}
+            error = {"error": error_message, "sent": body}
+            self._error(error, message)
         except Exception as e:
             error_message = "Unable call method: {!r}".format(e)
             logger.error(error_message)
-            return {"error": error_message}
-             
+            error = {"error": error_message, "sent": body}
+            self._error(error, message)
         else:
             return callback(data, message)
         

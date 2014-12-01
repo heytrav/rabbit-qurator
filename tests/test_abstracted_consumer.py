@@ -5,7 +5,7 @@ from unittest.mock import Mock, MagicMock, ANY
 from kombu import Connection, Consumer, Exchange, Queue
 from kombu.utils import nested
 
-from rpc.iwmnconsumer import IWMNConsumer
+from rpc.queuerate import Queuerator
 from rpc.client import RpcClient
 
 from tests.test_rabbit import TestRabbitpy
@@ -19,19 +19,18 @@ class TestAbstractMQ(TestRabbitpy):
 
         TestRabbitpy.setUp(self)
 
-
         self.queues = [
             Queue('testapi.test.queue', 
                   self._exchange, 
                   channel=self._connection,
                   durable=False,
                   routing_key='testapi.test.queue'),
-            Queue('rabbitpy.testlegacy.client', 
+            Queue('testlegacy.client', 
                   self._exchange,
                   channel=self._connection,
                   durable=False,
                   routing_key='testlegacy.client'),
-            Queue('rabbitpy.yeahimafunction.client',
+            Queue('yeahimafunction.client',
                   self._exchange,
                   channel=self._connection,
                   durable=False,
@@ -56,11 +55,21 @@ class TestAbstractMQ(TestRabbitpy):
                   channel=self._connection,
                   durable=False,
                   routing_key='blah'),
-            Queue('rabbitpy.booya.client',
+            Queue('booya.client',
                   self._exchange,
                   channel=self._connection,
                   durable=False,
-                  routing_key='booya.client')
+                  routing_key='booya.client'),
+            Queue('random.test.queue',
+                  self._exchange,
+                  channel=self._connection,
+                  durable=False,
+                  routing_key='random.test.queue'),
+            Queue('flappy.client',
+                  self._exchange,
+                  channel=self._connection,
+                  durable=False,
+                  routing_key='flappy.client')
         ]
         [i.declare() for i in self.queues]
 
@@ -69,8 +78,8 @@ class TestAbstractMQ(TestRabbitpy):
     def test_method_wrapping(self):
         """Test creating custom rpc endpoint."""
 
-        consumer = IWMNConsumer(legacy=False,
-                                exchange=self._exchange)
+        consumer = Queuerator(legacy=False,
+                              exchange=self._exchange)
 
         @consumer.rpc
         def moffa(msg):
@@ -99,8 +108,8 @@ class TestAbstractMQ(TestRabbitpy):
     def test_standard_rpc(self):
         """Check behaviour of wrapped function."""
 
-        consumer = IWMNConsumer(legacy=False,
-                                exchange=self._exchange)
+        consumer = Queuerator(legacy=False,
+                              exchange=self._exchange)
         checkit = MagicMock(return_value={"msg": "Got reply"})
         # Now mock it!
         consumer.respond_to_client = MagicMock()
@@ -133,8 +142,8 @@ class TestAbstractMQ(TestRabbitpy):
 
     def test_rpc_client(self):
         """Check behaviour of client """
-        consumer = IWMNConsumer(legacy=False,
-                                exchange=self._exchange)
+        consumer = Queuerator(legacy=False,
+                              exchange=self._exchange)
 
         @consumer.rpc
         def booya(*args, **kwargs):
@@ -159,11 +168,11 @@ class TestAbstractMQ(TestRabbitpy):
 
         # This shouldn't work.
         with self.assertRaises(Exception) as ex:
-            consumer = IWMNConsumer()
+            consumer = Queuerator()
 
         # This should.
-        legacy_consumer = IWMNConsumer(queue='testapi.test.queue',
-                                       exchange=self._exchange)
+        legacy_consumer = Queuerator(queue='testapi.test.queue',
+                                     exchange=self._exchange)
         check_function = MagicMock(return_value={"result": "OK"})
         check_another_function = MagicMock(return_value={"result": "D'OH"})
 
@@ -197,16 +206,15 @@ class TestAbstractMQ(TestRabbitpy):
             consumer2 = Consumer(chan2, queue2, callbacks=test_callbacks2)
             consumer2.declare()
             with nested(consumer1,consumer2):
-                # I thought this would actually empty the queue, but
-                # apparently it doesn't.
-                # expect two events so drain twice.
                 client.rpc('testlegacy',
-                        {"x": 1},
-                        server_routing_key='testapi.test.queue')
+                           data={"x": 1},
+                           server_routing_key='testapi.test.queue')
 
                 client2.rpc('yeahimafunction',
                             {"y": 3},
                             server_routing_key='testapi.test.queue')
+                # I thought this would actually empty the entire queue, but
+                # apparently it doesn't.  Expect two events so drain twice.
                 conn.drain_events(timeout=1)
                 conn.drain_events(timeout=1)
 
@@ -220,3 +228,37 @@ class TestAbstractMQ(TestRabbitpy):
         for reply in client2.retrieve_messages():
             self.assertIn('result', reply)
             self.assertEqual(reply['result'], "D'OH")
+
+
+    def test_malformed_legacy_request(self):
+        """Check that we get an error message for a malformed request to the
+        legacy queue.
+
+        """
+        data_to_send = {"x": "1"}
+
+        server_queue = 'random.test.queue'
+        q = Queuerator(queue=server_queue,
+                       exchange=self._exchange)
+        @q.rpc
+        def flappy(data):
+            return {"data": "whatever"}
+
+        queues = q.queues['flappy']
+        q_callbacks = q.callbacks['flappy']
+
+        # Make client send payload without "command" and "data"
+        c = RpcClient(exchange=self._exchange, legacy=False)
+        c.rpc('flappy',
+                data_to_send, 
+                server_routing_key=server_queue)
+        conn = self._connection
+        with Consumer(conn, queues, callbacks=q_callbacks):
+            conn.drain_events(timeout=1)
+        for reply in c.retrieve_messages():
+            self.assertIn('error', reply)
+            message = reply['error']
+            self.assertRegex(message, 
+                             r'Malformed request',
+                             "Legacy queue requires client with legacy=True.")
+        

@@ -1,8 +1,8 @@
 
-from rpc.iwmnconsumer import IWMNConsumer
+from rpc.queuerate import Queuerator
 
 
-consumer = IWMNConsumer(legacy=False)
+consumer = Queuerator(legacy=False)
 
 def retrieve_version():
     """Retrieve the version of the rabbitpy application.
