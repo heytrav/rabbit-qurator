@@ -76,6 +76,13 @@ This expects the client to send the following to the `my_rpc_method` queue:
 ```
 
 
+#Supervisor
+
+See config files under `supervisor/`
+
+     supervisord -c /etc/supervisor/supervisord.conf
+
+
 #Note
 * The *hase-like* implementation is on by default.
 * When using the *hase-like* implementation, a queue name is required.
