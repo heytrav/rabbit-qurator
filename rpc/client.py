@@ -20,9 +20,11 @@ class RpcClient(object):
     def __init__(self,
                  legacy=True,
                  exchange=default_exchange,
+                 prefix=None,
                  client_queue=None):
         """Constructor for client object. """
         self._legacy = legacy
+        self._prefix = prefix
         self._exchange = exchange
         self.reply = None
         self._client_queue = client_queue
@@ -117,7 +119,10 @@ class RpcClient(object):
         logger.info("Preparing request {!r}".format(payload))
 
         if server_routing_key is None:
-            server_routing_key = '.'.join([command_name])
+            if self._prefix is None:
+                server_routing_key = command_name
+            else:
+                server_routing_key = '.'.join([self._prefix, command_name])
 
         self._prepare_client_queue(command_name)
         logger.info("Set up client queue {!r} to {!r}".format(self._client_queue,

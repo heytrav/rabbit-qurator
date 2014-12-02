@@ -85,8 +85,8 @@ class TestAbstractMQ(TestRabbitpy):
         payload = {"msg": "Hello"}
 
         # Send message to server
-        client = RpcClient(exchange=self._exchange)
-        client.rpc('blah', payload, server_routing_key='rabbitpy.blah')
+        client = RpcClient(exchange=self._exchange, prefix='rabbitpy')
+        client.rpc('blah', payload)
 
         # Synthetically drain events from queues
         blah_queues = consumer.queues['blah']
@@ -115,8 +115,8 @@ class TestAbstractMQ(TestRabbitpy):
             return {"msg": "Wooot"}
 
         payload = {"msg": "Boooya"}
-        client = RpcClient(exchange=self._exchange)
-        client.rpc('booya', payload, server_routing_key='rabbitpy.booya')
+        client = RpcClient(exchange=self._exchange, prefix='rabbitpy')
+        client.rpc('booya', payload)
         booya_queue = consumer.queues['booya']
         booya_callbacks = consumer.callbacks['booya']
 
