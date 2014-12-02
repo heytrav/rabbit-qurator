@@ -35,7 +35,6 @@ class RpcClient(object):
         self.reply = None
         self._client_queue = client_queue
 
-
     def retrieve_messages(self):
         """Process the message queue and ack the one that matches the
         correlation_id sent to the server.
@@ -64,11 +63,11 @@ class RpcClient(object):
                         self.reply = None
                         yield response
             except exceptions.AMQPError as amqp_error:
-                logger.error("Unable to retreive messages: {!r}".format(amqp_error))
+                logger.error("Unable to retreive "
+                             "messages: {!r}".format(amqp_error))
             except Exception as e:
                 raise e
         return None
-
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r}".format(message))
@@ -79,8 +78,7 @@ class RpcClient(object):
                 self.reply = body
                 message.ack()
             except KeyError as e:
-                logger.info("Could not find {!r} in messages".format(corr_id))
-
+                logger.info("Malformed message: ".format(e))
 
     def _setup_payload(self, command_name, data):
         """Setup the datastructure for either hase-like or standard.
@@ -99,7 +97,6 @@ class RpcClient(object):
             payload = data
         return payload
 
-
     def _prepare_client_queue(self, command_name):
         """Setup a client queue based on the command
         :returns: TODO
@@ -107,7 +104,6 @@ class RpcClient(object):
         """
         if self._client_queue is None:
             self._client_queue = '.'.join([command_name, 'client'])
-
 
     def rpc(self,
             command_name,
@@ -118,7 +114,8 @@ class RpcClient(object):
         :command_name: the command to execute (used as routing key)
         :data: dict with data to be sent
         :client_queue: Queue for this particular request
-        :server_routing_key: Server routing key. Will default to <command>.server
+        :server_routing_key: Server routing key. Will
+        default to <command>.server
         """
 
         self.reply_received = False
@@ -132,8 +129,9 @@ class RpcClient(object):
                 server_routing_key = '.'.join([self._prefix, command_name])
 
         self._prepare_client_queue(command_name)
-        logger.info("Set up client queue {!r} to {!r}".format(self._client_queue,
-                                                              server_routing_key))
+        logger.info("Set up client queue {!r} "
+                    "to {!r}".format(self._client_queue,
+                                     server_routing_key))
 
         message_correlation_id = uuid()
         properties = {
@@ -153,7 +151,8 @@ class RpcClient(object):
         :command_name: the command to execute (used as routing key)
         :data: dict with data to be sent
         :client_queue: Queue for this particular request
-        :server_routing_key: Server routing key. Will default to <command>.server
+        :server_routing_key: Server routing key. Will default
+        to <command>.server
         """
 
         self.reply_received = False
@@ -164,11 +163,11 @@ class RpcClient(object):
             server_routing_key = command_name
 
         self._prepare_client_queue(command_name)
-        logger.info("Set up client queue {!r} to {!r}".format(self._client_queue,
-                                                              server_routing_key))
+        logger.info("Set up client queue {!r} "
+                    "to {!r}".format(self._client_queue,
+                                     server_routing_key))
 
         self._send_command(payload, server_routing_key)
-
 
     def _send_command(self, payload, server_routing_key, properties):
         logger.info("Reply info: {!r}".format(properties))
@@ -181,7 +180,8 @@ class RpcClient(object):
                                      declare=[self._exchange],
                                      routing_key=server_routing_key,
                                      **properties)
-                    logger.info("Published to exchange {!r}".format( self._exchange))
+                    logger.info("Published to exchange "
+                                "{!r}".format(self._exchange))
                     logger.info("Published request %r" % payload)
                 except Exception as e:
                     logger.error("Unable to publish to queue: {!r}".format(e))

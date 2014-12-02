@@ -4,11 +4,13 @@ from kombu import Queue, Connection
 from kombu.pools import producers
 from kombu.log import get_logger
 from kombu.common import send_reply
+from amqp import exceptions
 
 from rpc import conn_dict
 from rabbit.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
+
 
 class Queuerator(object):
 
@@ -37,10 +39,10 @@ class Queuerator(object):
         self._legacy = legacy
         if legacy:
             if queue is None:
-                raise Exception("'queue' is required for legacy implementation.")
+                raise Exception("'queue' is required "
+                                " for legacy implementation.")
 
         self._queue = queue
-
 
     def _error(self, error, message):
         """Return an error if caller sent an unknown command.
@@ -51,7 +53,6 @@ class Queuerator(object):
         """
         message.ack()
         self.respond_to_client(message, error)
-
 
     def _hase_dispatch(self, body, message):
         """Dispatch function calls to wrapped methods
@@ -77,7 +78,6 @@ class Queuerator(object):
             self._error(error, message)
         else:
             return callback(data, message)
-
 
     def _wrap_function(self, function, callback, queue_name):
         """Set up queue used in decorated function.
@@ -113,9 +113,10 @@ class Queuerator(object):
                       routing_key=routing_key)
 
         self.queues[name].append(queue)
-        # The function returned by the decorator don't really do anything. The process_msg
-        # callback added to the consumer is what actually responds to messages
-        # from the client on this particular queue.
+        # The function returned by the decorator don't really do
+        # anything.  The process_msg callback added to the consumer
+        # is what actually responds to messages  from the client
+        # on this particular queue.
 
         def decorate(func):
             @wraps(func)
@@ -123,7 +124,6 @@ class Queuerator(object):
                 pass
             return wrapper
         return decorate
-
 
     def task(self, func=None, *, queue_name=None):
         """Wrap around a function that should be a task.
@@ -134,14 +134,12 @@ class Queuerator(object):
             return partial(self.task, queue_name=queue_name)
 
         def process_message(body, message):
-            logger.info("Processing function {!r} with data {!r}".format(func.__name__,
-                                                                         body))
+            logger.info("Processing function {!r} "
+                        "with data {!r}".format(func.__name__, body))
             func(body)
             message.ack()
 
         return self._wrap_function(func, process_message, queue_name)
-
-
 
     def rpc(self, func=None, *, queue_name=None):
         """Wrap around function. This method is modelled after standard RPC
@@ -156,15 +154,14 @@ class Queuerator(object):
             return partial(self.rpc, queue_name=queue_name)
 
         def process_message(body, message):
-            logger.info("Processing function {!r} with data {!r}".format(func.__name__,
-                                                                         body))
+            logger.info("Processing function {!r} "
+                        "with data {!r}".format(func.__name__, body))
             response = func(body)
             logger.info("Wrapped method returned:  {!r}".format(response))
             self.respond_to_client(message, response)
             message.ack()
 
         return self._wrap_function(func, process_message, queue_name)
-
 
     def respond_to_client(self, message, response={}):
         """Send RPC response back to client.
@@ -185,6 +182,9 @@ class Queuerator(object):
                         response,
                         producer
                     )
+                except exceptions.AMQPError as amqp_error:
+                    logger.error("Problem communicating "
+                                 "with rabbit {!r}".format(amqp_error))
                 except KeyError as e:
                     logger.error('Missing key in request {!r}'.format(e))
                 except Exception as ex:

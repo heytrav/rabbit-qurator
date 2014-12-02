@@ -4,6 +4,7 @@ from rabbit.queuerate import Queuerator
 
 consumer = Queuerator(legacy=False)
 
+
 def retrieve_version():
     """Retrieve the version of the rabbitpy application.
     :returns: str representing the app version
@@ -12,7 +13,6 @@ def retrieve_version():
     with open('/etc/d8o/rabbitpy/VERSION') as f:
         version = f.read()
     return version.strip()
-    
 
 
 @consumer.rpc

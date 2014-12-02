@@ -1,18 +1,13 @@
 import os
 import http.client
 from kombu.log import get_logger
-from raygun4py import raygunprovider
 
 from rabbit.queuerate import Queuerator
-from service.version import retrieve_version
-try:
-    import ssl
-except ImportError:
-    logger.error("No SSL support available.")
 
 logger = get_logger(__name__)
 
 consumer = Queuerator(legacy=False)
+
 
 def send(msg):
     """Sends request to raygun
@@ -32,7 +27,8 @@ def send(msg):
     conn.request('POST', '/entries', msg, headers)
     response = conn.getresponse()
     logger.info("Received: {!r} {!r}".format(response.status,
-                                                response.reason))
+                                             response.reason))
+
 
 @consumer.task(queue_name='rabbitpy.raygun')
 def send_to_raygun(data):
@@ -43,7 +39,7 @@ def send_to_raygun(data):
     """
     try:
         send(data)
-    except Exception  as e:
+    except Exception as e:
         logger.error("Exception: {!r}".format(e))
         raise e
 
