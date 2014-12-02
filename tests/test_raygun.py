@@ -56,7 +56,7 @@ class TestRaygun(TestRabbitpy):
     def test_send_to_raygun(self):
         """Send a request to raygun. """
 
-        from rpc.raygun import consumer, send_to_raygun, send
+        from service.raygun import consumer, send_to_raygun, send
 
         self.assertEqual(len(consumer.queues['send_to_raygun']),
                          1,

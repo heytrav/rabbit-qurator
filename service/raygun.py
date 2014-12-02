@@ -4,7 +4,7 @@ from kombu.log import get_logger
 from raygun4py import raygunprovider
 
 from rabbit.queuerate import Queuerator
-from rpc.version import retrieve_version
+from service.version import retrieve_version
 try:
     import ssl
 except ImportError:
