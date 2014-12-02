@@ -10,7 +10,7 @@ from kombu.pools import producers
 from raygun4py import raygunprovider, raygunmsgs
 
 from rpc import conn_dict
-from rpc.exchange import exchange
+from rabbit.exchange import exchange
 
 from tests.test_rabbit import TestRabbitpy
 

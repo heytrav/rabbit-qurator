@@ -5,7 +5,7 @@ from unittest.mock import Mock, MagicMock, ANY
 from kombu import Connection, Consumer, Exchange, Queue
 from kombu.utils import nested
 
-from rpc.queuerate import Queuerator
+from rabbit.queuerate import Queuerator
 from rpc.client import RpcClient
 
 from tests.test_rabbit import TestRabbitpy

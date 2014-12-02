@@ -3,7 +3,7 @@ import http.client
 from kombu.log import get_logger
 from raygun4py import raygunprovider
 
-from rpc.queuerate import Queuerator
+from rabbit.queuerate import Queuerator
 from rpc.version import retrieve_version
 try:
     import ssl
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
 
     from rpc import conn_dict
-    from rpc.worker import Worker
+    from rabbit.worker import Worker
 
     setup_logging(loglevel='DEBUG', loggers=[''])
     with Connection(**conn_dict) as conn:

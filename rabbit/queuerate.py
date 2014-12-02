@@ -6,7 +6,7 @@ from kombu.log import get_logger
 from kombu.common import send_reply
 
 from rpc import conn_dict
-from rpc.exchange import exchange as default_exchange
+from rabbit.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
 

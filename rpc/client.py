@@ -6,7 +6,7 @@ from amqp import exceptions
 
 
 from rpc import conn_dict
-from rpc.exchange import exchange as default_exchange
+from rabbit.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
 

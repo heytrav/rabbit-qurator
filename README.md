@@ -25,7 +25,7 @@ Rabbits in Python. At this stage just experimental stuff.
 
 Create a hase like queue:
 ```python
-from rpc.queuerate import Queuerator
+from rabbit.queuerate import Queuerator
 
 legacy_consumer = Queuerator(queue='api.some.queue')
 

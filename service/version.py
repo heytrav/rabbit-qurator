@@ -1,5 +1,5 @@
 
-from rpc.queuerate import Queuerator
+from rabbit.queuerate import Queuerator
 
 
 consumer = Queuerator(legacy=False)
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
 
     from rpc import conn_dict
-    from rpc.worker import Worker
+    from rabbit.worker import Worker
 
     with Connection(**conn_dict) as conn:
         setup_logging(loglevel='DEBUG', loggers=[''])
