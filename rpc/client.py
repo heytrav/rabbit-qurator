@@ -22,7 +22,13 @@ class RpcClient(object):
                  exchange=default_exchange,
                  prefix=None,
                  client_queue=None):
-        """Constructor for client object. """
+        """Constructor for client object.
+
+        :legacy: Boolean flag for hase-like (default) or standard rpc
+        :exchange: Exchange to use
+        :prefix: for automatic server routing key generation
+        :client_queue: name for the client queue. Default is <command>.client
+        """
         self._legacy = legacy
         self._prefix = prefix
         self._exchange = exchange
