@@ -15,7 +15,7 @@ def retrieve_version():
     
 
 
-@consumer.rpc(queue_name='')
+@consumer.rpc
 def version(*args, **kwargs):
     """Return the current rabbitpy version."""
     return {'version': retrieve_version()}

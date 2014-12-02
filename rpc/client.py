@@ -47,10 +47,11 @@ class RpcClient(object):
         """
 
         logger.debug("Client queue: {!r}".format(self._client_queue))
-        client_queue = Queue(self._client_queue,
-                             durable=False,
-                             routing_key=self._client_queue)
         with Connection(**conn_dict) as conn:
+            client_queue = Queue(self._client_queue,
+                                 durable=False,
+                                 exchange=self._exchange,
+                                 routing_key=self._client_queue)
             logger.debug("connection is {!r}".format(conn))
             try:
                 for i in collect_replies(conn,
@@ -143,8 +144,6 @@ class RpcClient(object):
         # Successful so store message correlation id for retrieval.
         self.messages[message_correlation_id] = True
 
-
-
     def task(self,
              command_name,
              data={},
@@ -192,7 +191,9 @@ class RpcClient(object):
 if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
     setup_logging(loglevel='INFO', loggers=[''])
-    c = RpcClient()
-    msg_id = c.rpc('version' )
-    response = c.retrieve_messages()
-    print("Got response: {!r}".format(response))
+    c = RpcClient(legacy=False, prefix='rabbitpy')
+    c.rpc('version')
+
+    gen = c.retrieve_messages()
+    for i in gen:
+        print("Response:\n\n{!r}".format(i))

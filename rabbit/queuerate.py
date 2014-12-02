@@ -18,8 +18,8 @@ class Queuerator(object):
     callbacks = {}
     dispatch = {}
 
-    def __init__(self, 
-                 legacy=True, 
+    def __init__(self,
+                 legacy=True,
                  queue=None,
                  prefix='rabbitpy',
                  exchange=default_exchange):
@@ -30,7 +30,7 @@ class Queuerator(object):
         functions. If False, assume that each method is its own queue.
         :prefix: Prefix for consumer queues. Defaults to 'rabbitpy'.
         :queue: Default name for queue
-        :exchange: Exchange to use. 
+        :exchange: Exchange to use.
         """
         self._exchange = exchange
         self._prefix = prefix
@@ -77,7 +77,7 @@ class Queuerator(object):
             self._error(error, message)
         else:
             return callback(data, message)
-        
+
 
     def _wrap_function(self, function, callback, queue_name):
         """Set up queue used in decorated function.
@@ -103,7 +103,7 @@ class Queuerator(object):
 
         # If not set by instance, make same as function name.
         if queue_name is None:
-            queue_name = '.'.join([self._prefix, name])            
+            queue_name = '.'.join([self._prefix, name])
 
         routing_key = queue_name
         # Create the queue.
@@ -159,7 +159,7 @@ class Queuerator(object):
             logger.info("Processing function {!r} with data {!r}".format(func.__name__,
                                                                          body))
             response = func(body)
-            logger.info("Received response {!r}".format(response))
+            logger.info("Wrapped method returned:  {!r}".format(response))
             self.respond_to_client(message, response)
             message.ack()
 
@@ -171,6 +171,10 @@ class Queuerator(object):
 
         :response: datastructure that needs to go back to client.
         """
+        logger.debug("Replying to queue {!r} with properties: {!r}".format(
+            message.properties['reply_to'],
+            message.properties['correlation_id']
+        ))
         with Connection(**conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:
                 # Assume reply_to and correlation_id in message.
@@ -186,4 +190,4 @@ class Queuerator(object):
                 except Exception as ex:
                     logger.error('Unable to reply to request {!r}'.format(ex))
                 else:
-                    logger.info('Reself.connectionplied with response {!r}'.format(response))
+                    logger.info('Replied with response {!r}'.format(response))
