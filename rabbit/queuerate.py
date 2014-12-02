@@ -21,17 +21,19 @@ class Queuerator(object):
     def __init__(self, 
                  legacy=True, 
                  queue=None,
-                 queue_stem='rabbitpy',
+                 prefix='rabbitpy',
                  exchange=default_exchange):
         """Constructor
 
         :legacy: Boolean flag. If True (default) it should try to emulate hase
         functionality by dispatching calls to a single queue to different
         functions. If False, assume that each method is its own queue.
+        :prefix: Prefix for consumer queues. Defaults to 'rabbitpy'.
         :queue: Default name for queue
         :exchange: Exchange to use. 
         """
         self._exchange = exchange
+        self._prefix = prefix
         self._legacy = legacy
         if legacy:
             if queue is None:
@@ -101,8 +103,8 @@ class Queuerator(object):
 
         # If not set by instance, make same as function name.
         if queue_name is None:
-            queue_name = name
-            
+            queue_name = '.'.join([self._prefix, name])            
+
         routing_key = queue_name
         # Create the queue.
         queue = Queue(queue_name,
@@ -111,8 +113,8 @@ class Queuerator(object):
                       routing_key=routing_key)
 
         self.queues[name].append(queue)
-        # The callback returned by the decorator don't really do anything. The process_msg
-        # function added to the consumer is what actually responds to messages
+        # The function returned by the decorator don't really do anything. The process_msg
+        # callback added to the consumer is what actually responds to messages
         # from the client on this particular queue.
 
         def decorate(func):

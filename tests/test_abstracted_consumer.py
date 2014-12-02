@@ -15,69 +15,35 @@ class TestAbstractMQ(TestRabbitpy):
     """Test RabbitMQ interaction"""
 
     def setUp(self):
-        """Setup unit tests """
+       """Setup unit tests """
 
         TestRabbitpy.setUp(self)
+        self.queues = []
 
-        self.queues = [
-            Queue('testapi.test.queue', 
-                  self._exchange, 
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='testapi.test.queue'),
-            Queue('testlegacy.client', 
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='testlegacy.client'),
-            Queue('yeahimafunction.client',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='yeahimafunction.client'),
-            Queue('booya',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='booya'),
-            Queue('moffa',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='moffa'),
-            Queue('boffa',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='boffa'),
-            Queue('blah',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='blah'),
-            Queue('booya.client',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='booya.client'),
-            Queue('random.test.queue',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='random.test.queue'),
-            Queue('flappy.client',
-                  self._exchange,
-                  channel=self._connection,
-                  durable=False,
-                  routing_key='flappy.client')
-        ]
-        [i.declare() for i in self.queues]
 
+    def pre_declare_queues(self, queues):
+        """Pre-declare any queues that will be used in tests.
+
+        :queues: list of names of queues
+
+        """
+
+        declared_queues = []
+        for queue_name in queues:
+            q = Queue(queue_name,
+                      self._exchange,
+                      channel=self._connection,
+                      durable=False,
+                      routing_key=queue_name)
+            q.declare()
+            declared_queues.append(q)
+        self.queues = declared_queues
 
 
     def test_method_wrapping(self):
         """Test creating custom rpc endpoint."""
 
+        self.pre_declare_queues(['rabbitpy.moffa', 'rabbitpy.boffa'])
         consumer = Queuerator(legacy=False,
                               exchange=self._exchange)
 
@@ -108,6 +74,7 @@ class TestAbstractMQ(TestRabbitpy):
     def test_standard_rpc(self):
         """Check behaviour of wrapped function."""
 
+        self.pre_declare_queues(['rabbitpy.blah', 'blah.client'])
         consumer = Queuerator(legacy=False,
                               exchange=self._exchange)
         checkit = MagicMock(return_value={"msg": "Got reply"})
@@ -142,6 +109,7 @@ class TestAbstractMQ(TestRabbitpy):
 
     def test_rpc_client(self):
         """Check behaviour of client """
+        self.pre_declare_queues(['rabbitpy.booya', 'booya.client'])
         consumer = Queuerator(legacy=False,
                               exchange=self._exchange)
 
@@ -166,6 +134,9 @@ class TestAbstractMQ(TestRabbitpy):
     def test_legacy_rabbit(self):
         """Test creation of legacy style rabbit. """
 
+        self.pre_declare_queues(['testapi.test.queue',
+                                 'testlegacy.client',
+                                 'yeahimafunction.client'])
         # This shouldn't work.
         with self.assertRaises(Exception) as ex:
             consumer = Queuerator()
@@ -235,6 +206,8 @@ class TestAbstractMQ(TestRabbitpy):
         legacy queue.
 
         """
+        self.pre_declare_queues(['random.test.queue',
+                                 'flappy.client'])
         data_to_send = {"x": "1"}
 
         server_queue = 'random.test.queue'
@@ -250,8 +223,8 @@ class TestAbstractMQ(TestRabbitpy):
         # Make client send payload without "command" and "data"
         c = RpcClient(exchange=self._exchange, legacy=False)
         c.rpc('flappy',
-                data_to_send, 
-                server_routing_key=server_queue)
+              data_to_send, 
+              server_routing_key=server_queue)
         conn = self._connection
         with Consumer(conn, queues, callbacks=q_callbacks):
             conn.drain_events(timeout=1)
@@ -261,4 +234,4 @@ class TestAbstractMQ(TestRabbitpy):
             self.assertRegex(message, 
                              r'Malformed request',
                              "Legacy queue requires client with legacy=True.")
-        
+
