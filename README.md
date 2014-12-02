@@ -55,7 +55,8 @@ This expects the client to send something like the following to the queue `api.s
 Alternative method for defining queues:
 
 ```python
-consumer = Queuerator(legacy=False)
+consumer = Queuerator(legacy=False,
+                      prefix='awesome')
 
 @consumer.rpc
 def my_rpc_method(data);
@@ -67,13 +68,16 @@ def my_rpc_method(data);
         return {"error": "There was an error! {!r}".format(e)}
 ```
 
-This expects the client to send the following to the `my_rpc_method` queue:
+This expects the client to send the following to the `awesome.my_rpc_method` queue:
 ```javascript
 {
     "domain": "something.com",
     ...
 }
 ```
+
+#### Note
+* `prefix` parameter to the constructor defaults to `rabbitpy`.
 
 
 #Supervisor
