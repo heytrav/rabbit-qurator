@@ -1,8 +1,5 @@
-import os
-import sys
-from unittest import TestCase
-from unittest.mock import Mock, MagicMock, ANY
-from kombu import Connection, Consumer, Exchange, Queue
+from unittest.mock import MagicMock, ANY
+from kombu import Consumer, Queue
 from kombu.utils import nested
 
 from rabbit.queuerate import Queuerator
@@ -10,16 +7,15 @@ from rpc.client import RpcClient
 
 from tests.test_rabbit import TestRabbitpy
 
+
 class TestAbstractMQ(TestRabbitpy):
 
     """Test RabbitMQ interaction"""
 
     def setUp(self):
-       """Setup unit tests """
-
+        """Setup unit tests """
         TestRabbitpy.setUp(self)
         self.queues = []
-
 
     def pre_declare_queues(self, queues):
         """Pre-declare any queues that will be used in tests.
@@ -39,11 +35,12 @@ class TestAbstractMQ(TestRabbitpy):
             declared_queues.append(q)
         self.queues = declared_queues
 
-
     def test_method_wrapping(self):
         """Test creating custom rpc endpoint."""
 
-        self.pre_declare_queues(['rabbitpy.moffa', 'rabbitpy.boffa'])
+        self.pre_declare_queues(['rabbitpy.moffa',
+                                 'rabbitpy.boffa',
+                                 'boffa.moffa'])
         consumer = Queuerator(legacy=False,
                               exchange=self._exchange)
 
@@ -57,8 +54,9 @@ class TestAbstractMQ(TestRabbitpy):
                          1,
                          'One consumer')
         self.assertEqual(moffa_queues[0].name,
-                         'moffa',
+                         'rabbitpy.moffa',
                          'Queue has expected name')
+
         @consumer.rpc(queue_name='boffa.moffa')
         def boffa(msg):
             pass
@@ -70,7 +68,6 @@ class TestAbstractMQ(TestRabbitpy):
                          'boffa.moffa',
                          'Can specify queue name')
 
-
     def test_standard_rpc(self):
         """Check behaviour of wrapped function."""
 
@@ -80,6 +77,7 @@ class TestAbstractMQ(TestRabbitpy):
         checkit = MagicMock(return_value={"msg": "Got reply"})
         # Now mock it!
         consumer.respond_to_client = MagicMock()
+
         @consumer.rpc
         def blah(*args, **kwargs):
             return checkit(*args, **kwargs)
@@ -88,7 +86,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         # Send message to server
         client = RpcClient(exchange=self._exchange)
-        corr_id = client.rpc('blah', payload)
+        client.rpc('blah', payload, server_routing_key='rabbitpy.blah')
 
         # Synthetically drain events from queues
         blah_queues = consumer.queues['blah']
@@ -100,12 +98,11 @@ class TestAbstractMQ(TestRabbitpy):
         checkit.assert_called_with(
             {'command': 'blah', 'data': payload}
         )
-        #response = client.retrieve_messages()
+        # response = client.retrieve_messages()
         consumer.respond_to_client.assert_called_with(
             ANY,
             {"msg": "Got reply"}
         )
-
 
     def test_rpc_client(self):
         """Check behaviour of client """
@@ -119,7 +116,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         payload = {"msg": "Boooya"}
         client = RpcClient(exchange=self._exchange)
-        corr_id = client.rpc('booya', payload)
+        client.rpc('booya', payload, server_routing_key='rabbitpy.booya')
         booya_queue = consumer.queues['booya']
         booya_callbacks = consumer.callbacks['booya']
 
@@ -130,7 +127,6 @@ class TestAbstractMQ(TestRabbitpy):
             self.assertIn('msg', reply)
             self.assertEqual(reply['msg'], 'Wooot')
 
-
     def test_legacy_rabbit(self):
         """Test creation of legacy style rabbit. """
 
@@ -138,7 +134,7 @@ class TestAbstractMQ(TestRabbitpy):
                                  'testlegacy.client',
                                  'yeahimafunction.client'])
         # This shouldn't work.
-        with self.assertRaises(Exception) as ex:
+        with self.assertRaises(Exception):
             consumer = Queuerator()
 
         # This should.
@@ -176,7 +172,7 @@ class TestAbstractMQ(TestRabbitpy):
             consumer1.declare()
             consumer2 = Consumer(chan2, queue2, callbacks=test_callbacks2)
             consumer2.declare()
-            with nested(consumer1,consumer2):
+            with nested(consumer1, consumer2):
                 client.rpc('testlegacy',
                            data={"x": 1},
                            server_routing_key='testapi.test.queue')
@@ -200,7 +196,6 @@ class TestAbstractMQ(TestRabbitpy):
             self.assertIn('result', reply)
             self.assertEqual(reply['result'], "D'OH")
 
-
     def test_malformed_legacy_request(self):
         """Check that we get an error message for a malformed request to the
         legacy queue.
@@ -213,6 +208,7 @@ class TestAbstractMQ(TestRabbitpy):
         server_queue = 'random.test.queue'
         q = Queuerator(queue=server_queue,
                        exchange=self._exchange)
+
         @q.rpc
         def flappy(data):
             return {"data": "whatever"}
@@ -223,7 +219,7 @@ class TestAbstractMQ(TestRabbitpy):
         # Make client send payload without "command" and "data"
         c = RpcClient(exchange=self._exchange, legacy=False)
         c.rpc('flappy',
-              data_to_send, 
+              data_to_send,
               server_routing_key=server_queue)
         conn = self._connection
         with Consumer(conn, queues, callbacks=q_callbacks):
@@ -231,7 +227,6 @@ class TestAbstractMQ(TestRabbitpy):
         for reply in c.retrieve_messages():
             self.assertIn('error', reply)
             message = reply['error']
-            self.assertRegex(message, 
+            self.assertRegex(message,
                              r'Malformed request',
                              "Legacy queue requires client with legacy=True.")
-
