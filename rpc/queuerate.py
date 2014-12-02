@@ -21,6 +21,7 @@ class Queuerator(object):
     def __init__(self, 
                  legacy=True, 
                  queue=None,
+                 queue_stem='rabbitpy',
                  exchange=default_exchange):
         """Constructor
 
@@ -157,8 +158,8 @@ class Queuerator(object):
                                                                          body))
             response = func(body)
             logger.info("Received response {!r}".format(response))
-            message.ack()
             self.respond_to_client(message, response)
+            message.ack()
 
         return self._wrap_function(func, process_message, queue_name)
 

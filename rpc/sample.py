@@ -5,7 +5,7 @@ from rpc.queuerate import Queuerator
 
 logger = get_logger(__name__)
 
-consumer = Queuerator()
+consumer = Queuerator(queue='rabbitpy.core.domain')
 
 @consumer.rpc
 def current_time(*args, **kwargs):
@@ -16,28 +16,8 @@ def current_time(*args, **kwargs):
     """
     return {'time': datetime.datetime.now().isoformat()}
 
-@consumer.rpc(queue_name='rabbitpy.core.domain')
-def dispatcher(body):
-    """Implement hase like queue."""
 
-    logger.info("Called method with {!r}".format(body))
-    try:
-        command = body['command']
-        data = body['data']
-        if command == 'status_domain':
-            return status_domain(data)
-        else:
-            return {"error": "Unknown command"}
-    except KeyError as ke:
-        message = "Malformed request {!r}".format(ke)
-        logger.error(message)
-        return {"error": message}
-    except Exception as e:
-        message = "Unable to process request: {!r}".format(e)
-        logger.error(message)
-        return {"error": "Unable to process request."}
-
-
+@consumer.rpc
 def status_domain(data):
     """Return domain status."""
     return {
