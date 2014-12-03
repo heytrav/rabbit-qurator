@@ -274,18 +274,20 @@ class TestAbstractMQ(TestRabbitpy):
                 return None 
 
     def test_task_fail(self):
-        """What happens when long running task fails to ack.  """
+        """What happens when a task fails.
+        Expected behaviour is that it does not ack and is left in the queue.
+        """
         from kombu import Exchange
         e = Exchange('', type='direct')
         # declare queue
-        consumer_queue = Queue('test.task.fail', 
+        consumer_queue = Queue('', 
                                e, 
                                channel=self._connection,
                                routing_key='test.task.fail')
-        client_queue = Queue('amation.client', 
+        client_queue = Queue('fail.client', 
                              e, 
                              channel=self._connection,
-                             routing_key='amation.client')
+                             routing_key='fail.client')
         consumer_queue.declare()
         client_queue.declare()
         self.queues.append(consumer_queue)
@@ -293,21 +295,69 @@ class TestAbstractMQ(TestRabbitpy):
 
         q = Queuerator(task_exchange=e, queue='test.task.fail')
         @q.task
-        def amation(data):
+        def fail(data):
             raise Exception('YOU FAIL!')
 
         client = RpcClient(exchange=e)
-        client.task('amation', {'x': 1}, server_routing_key='test.task.fail')
+        client.task('fail', {'x': 1}, server_routing_key='test.task.fail')
         
-        curr_queues = q.queues['amation']
-        curr_callbacks = q.callbacks['amation']
+        curr_queues = q.queues['fail']
+        curr_callbacks = q.callbacks['fail']
         def still_around(body, message):
-            print("Found {!r} with message "
-                  "properties: {!r}".format(body, message.properties))
+            self.assertFalse(message.acknowledged)
+            message.ack()
 
         curr_callbacks.append(still_around)
 
         with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
            self._connection.drain_events(timeout=1) 
+        consumer_queue.purge()
+        consumer_queue.delete()
+        client_queue.purge()
+
+
+    def test_task_succeed(self):
+        """What happens when a task succeeds.
+        
+        Expect it to be acked from the queue.
+        """
+        from kombu import Exchange
+        e = Exchange('', type='direct')
+        # declare queue
+        consumer_queue = Queue('', 
+                               e, 
+                               channel=self._connection,
+                               routing_key='test.task.succeed')
+        client_queue = Queue('succeed.client', 
+                             e, 
+                             channel=self._connection,
+                             routing_key='succeed.client')
+        consumer_queue.declare()
+        client_queue.declare()
+        self.queues.append(consumer_queue)
+        self.queues.append(client_queue)
+
+        q = Queuerator(task_exchange=e, queue='test.task.succeed')
+        @q.task
+        def succeed(data):
+            return None
+
+        client = RpcClient(exchange=e)
+        client.task('succeed', {'x': 1}, server_routing_key='test.task.succeed')
+        
+        curr_queues = q.queues['succeed']
+        curr_callbacks = q.callbacks['succeed']
+        def still_around(body, message):
+            print("Message: {!r}".format(message))
+            self.assertTrue(message.acknowledged)
+
+        curr_callbacks.append(still_around)
+
+        with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
+           self._connection.drain_events(timeout=1) 
+        consumer_queue.purge()
+        consumer_queue.delete()
+        client_queue.purge()
+
 
 

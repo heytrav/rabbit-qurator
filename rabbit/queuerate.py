@@ -142,14 +142,18 @@ class Queuerator(object):
             return partial(self.task, queue_name=queue_name)
 
         def process_message(body, message):
-            logger.info("Processing function {!r} "
-                        "with data {!r}".format(func.__name__, body))
+            logger.debug("Processing function {!r} "
+                        " in message: {!r} "
+                        "with data {!r}".format(func.__name__,
+                                                message,
+                                                body))
             try:
                 func(body)
             except Exception as e:
                 msg = "Problem processing task: {!r}".format(e)
                 logger.error(msg)
             else:
+                logger.debug("Ack'ing message.")
                 message.ack()
 
         return self._wrap_function(func, process_message, queue_name, task=True)
@@ -167,10 +171,10 @@ class Queuerator(object):
             return partial(self.rpc, queue_name=queue_name)
 
         def process_message(body, message):
-            logger.info("Processing function {!r} "
+            logger.debug("Processing function {!r} "
                         "with data {!r}".format(func.__name__, body))
             response = func(body)
-            logger.info("Wrapped method returned:  {!r}".format(response))
+            logger.debug("Wrapped method returned:  {!r}".format(response))
             self.respond_to_client(message, response)
             message.ack()
 
