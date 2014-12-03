@@ -19,7 +19,7 @@ def send(msg):
     api_key = os.environ['RAYGUN_API_KEY']
     logger.info("Using api key {!r}".format(api_key))
     headers = {
-        "X-ApiKey": os.environ['RAYGUN_API_KEY'],
+        "X-ApiKey": api_key,
         "Content-Type": 'application/json',
         "User-Agent": "raygun4py"
     }
