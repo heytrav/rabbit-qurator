@@ -280,14 +280,14 @@ class TestAbstractMQ(TestRabbitpy):
         from kombu import Exchange
         e = Exchange('', type='direct')
         # declare queue
-        consumer_queue = Queue('', 
+        consumer_queue = Queue('test.task.fail', 
                                e, 
                                channel=self._connection,
                                routing_key='test.task.fail')
-        client_queue = Queue('fail.client', 
+        client_queue = Queue('', 
                              e, 
-                             channel=self._connection,
-                             routing_key='fail.client')
+                             durable=False,
+                             channel=self._connection)
         consumer_queue.declare()
         client_queue.declare()
         self.queues.append(consumer_queue)
@@ -311,10 +311,6 @@ class TestAbstractMQ(TestRabbitpy):
 
         with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
            self._connection.drain_events(timeout=1) 
-        consumer_queue.purge()
-        consumer_queue.delete()
-        client_queue.purge()
-
 
     def test_task_succeed(self):
         """What happens when a task succeeds.
@@ -324,14 +320,14 @@ class TestAbstractMQ(TestRabbitpy):
         from kombu import Exchange
         e = Exchange('', type='direct')
         # declare queue
-        consumer_queue = Queue('', 
+        consumer_queue = Queue('test.task.succeed', 
                                e, 
                                channel=self._connection,
                                routing_key='test.task.succeed')
-        client_queue = Queue('succeed.client', 
+        client_queue = Queue('', 
                              e, 
-                             channel=self._connection,
-                             routing_key='succeed.client')
+                             durable=False,
+                             channel=self._connection)
         consumer_queue.declare()
         client_queue.declare()
         self.queues.append(consumer_queue)
@@ -355,9 +351,3 @@ class TestAbstractMQ(TestRabbitpy):
 
         with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
            self._connection.drain_events(timeout=1) 
-        consumer_queue.purge()
-        consumer_queue.delete()
-        client_queue.purge()
-
-
-
