@@ -248,7 +248,7 @@ class TestAbstractMQ(TestRabbitpy):
         client = RpcClient(exchange=self._exchange)
 
         request = {'request': 'my request'}
-        client.rpc('testing_default_exchange', 
+        client.rpc('testing_default_exchange',
                    request,
                    server_routing_key='default.queue.thing')
 
@@ -261,7 +261,7 @@ class TestAbstractMQ(TestRabbitpy):
             print("{!r}".format(reply))
             self.assertIn('x', reply)
             self.assertEqual(reply['data'], request)
-    
+
     def test_task_nondurable_exchange(self):
         """Task setup """
         from kombu import Exchange
@@ -271,7 +271,7 @@ class TestAbstractMQ(TestRabbitpy):
         with self.assertRaises(Exception):
             @q.task
             def amation(data):
-                return None 
+                return None
 
     def test_task_fail(self):
         """What happens when a task fails.
@@ -280,12 +280,12 @@ class TestAbstractMQ(TestRabbitpy):
         from kombu import Exchange
         e = Exchange('', type='direct')
         # declare queue
-        consumer_queue = Queue('test.task.fail', 
-                               e, 
+        consumer_queue = Queue('test.task.fail',
+                               e,
                                channel=self._connection,
                                routing_key='test.task.fail')
-        client_queue = Queue('', 
-                             e, 
+        client_queue = Queue('',
+                             e,
                              durable=False,
                              channel=self._connection)
         consumer_queue.declare()
@@ -300,7 +300,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         client = RpcClient(exchange=e)
         client.task('fail', {'x': 1}, server_routing_key='test.task.fail')
-        
+
         curr_queues = q.queues['fail']
         curr_callbacks = q.callbacks['fail']
         def still_around(body, message):
@@ -310,22 +310,22 @@ class TestAbstractMQ(TestRabbitpy):
         curr_callbacks.append(still_around)
 
         with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
-           self._connection.drain_events(timeout=1) 
+           self._connection.drain_events(timeout=1)
 
     def test_task_succeed(self):
         """What happens when a task succeeds.
-        
+
         Expect it to be acked from the queue.
         """
         from kombu import Exchange
         e = Exchange('', type='direct')
         # declare queue
-        consumer_queue = Queue('test.task.succeed', 
-                               e, 
+        consumer_queue = Queue('test.task.succeed',
+                               e,
                                channel=self._connection,
                                routing_key='test.task.succeed')
-        client_queue = Queue('', 
-                             e, 
+        client_queue = Queue('',
+                             e,
                              durable=False,
                              channel=self._connection)
         consumer_queue.declare()
@@ -340,7 +340,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         client = RpcClient(exchange=e)
         client.task('succeed', {'x': 1}, server_routing_key='test.task.succeed')
-        
+
         curr_queues = q.queues['succeed']
         curr_callbacks = q.callbacks['succeed']
         def still_around(body, message):
@@ -350,4 +350,4 @@ class TestAbstractMQ(TestRabbitpy):
         curr_callbacks.append(still_around)
 
         with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
-           self._connection.drain_events(timeout=1) 
+           self._connection.drain_events(timeout=1)
