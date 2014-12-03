@@ -10,8 +10,9 @@ def retrieve_version():
     :returns: str representing the app version
 
     """
-    with open('/etc/d8o/rabbitpy/VERSION') as f:
-        version = f.read()
+    try:
+        with open('/etc/d8o/rabbitpy/VERSION') as f:
+            version = f.read()
     except OSError:
         import subprocess
         version = subprocess.Popen(
