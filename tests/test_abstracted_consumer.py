@@ -29,7 +29,7 @@ class TestAbstractMQ(TestRabbitpy):
             q = Queue(queue_name,
                       self._exchange,
                       channel=self._connection,
-                      durable=False,
+                      durable=self._exchange.durable,
                       routing_key=queue_name)
             q.declare()
             declared_queues.append(q)

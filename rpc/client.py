@@ -48,7 +48,7 @@ class RpcClient(object):
         logger.debug("Client queue: {!r}".format(self._client_queue))
         with Connection(**conn_dict) as conn:
             client_queue = Queue(self._client_queue,
-                                 durable=False,
+                                 durable=self._exchange.durable,
                                  exchange=self._exchange,
                                  routing_key=self._client_queue)
             logger.debug("connection is {!r}".format(conn))

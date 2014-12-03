@@ -25,7 +25,7 @@ class TestRaygun(TestRabbitpy):
         self.queues = [
             Queue('rabbitpy.raygun',
                   exchange,
-                  durable=False,
+                  durable=exchange.durable,
                   channel=self._connection,
                   routing_key='rabbitpy.raygun')
         ]

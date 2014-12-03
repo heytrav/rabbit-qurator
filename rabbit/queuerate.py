@@ -109,7 +109,7 @@ class Queuerator(object):
         # Create the queue.
         queue = Queue(queue_name,
                       self._exchange,
-                      durable=False,
+                      durable=self._exchange.durable,
                       routing_key=routing_key)
 
         self.queues[name].append(queue)
