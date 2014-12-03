@@ -169,7 +169,9 @@ class RpcClient(object):
 
         self._send_command(payload, server_routing_key)
 
-    def _send_command(self, payload, server_routing_key, properties):
+    def _send_command(self, payload, server_routing_key, properties=None):
+        if properties is None:
+            properties = {}
         logger.info("Reply info: {!r}".format(properties))
         with Connection(**conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:

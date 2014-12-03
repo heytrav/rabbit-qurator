@@ -19,14 +19,14 @@ class TestRabbitpy(TestCase):
                                   type='direct',
                                   durable=False)
 
-
     def tearDown(self):
         """tear down unit tests """
 
-        [i.purge() for i in self.queues]
-        [i.delete() for i in self.queues]
+        for queue in self.queues:
+            if not queue.durable:
+                queue.purge()
+                queue.delete()
         self._connection.release()
-
 
     def connection_factory(self):
         """Return connection object
@@ -35,6 +35,3 @@ class TestRabbitpy(TestCase):
         """
         c = Connection(**conn_dict)
         return c
-
-
-        

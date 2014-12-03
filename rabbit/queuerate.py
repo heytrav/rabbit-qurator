@@ -8,6 +8,7 @@ from amqp import exceptions
 
 from rpc import conn_dict
 from rabbit.exchange import exchange as default_exchange
+from rabbit.exchange import task_exchange as default_task_exchange
 
 logger = get_logger(__name__)
 
@@ -24,7 +25,8 @@ class Queuerator(object):
                  legacy=True,
                  queue=None,
                  prefix='rabbitpy',
-                 exchange=default_exchange):
+                 exchange=default_exchange,
+                 task_exchange=default_task_exchange):
         """Constructor
 
         :legacy: Boolean flag. If True (default) it should try to emulate hase
@@ -35,6 +37,7 @@ class Queuerator(object):
         :exchange: Exchange to use.
         """
         self._exchange = exchange
+        self._task_exchange = task_exchange
         self._prefix = prefix
         self._legacy = legacy
         if legacy:
@@ -79,7 +82,7 @@ class Queuerator(object):
         else:
             return callback(data, message)
 
-    def _wrap_function(self, function, callback, queue_name):
+    def _wrap_function(self, function, callback, queue_name, task=False):
         """Set up queue used in decorated function.
 
         :func: wrapped function
@@ -107,9 +110,12 @@ class Queuerator(object):
 
         routing_key = queue_name
         # Create the queue.
+        exchange = self._exchange
+        if task:
+            exchange = self._task_exchange
         queue = Queue(queue_name,
-                      self._exchange,
-                      durable=self._exchange.durable,
+                      exchange,
+                      durable=exchange.durable,
                       routing_key=routing_key)
 
         self.queues[name].append(queue)
@@ -130,16 +136,23 @@ class Queuerator(object):
         The client should not expect anything to be returned.
 
         """
+        if not self._task_exchange.durable:
+            raise Exception('Task exchange should be durable.')
         if func is None:
             return partial(self.task, queue_name=queue_name)
 
         def process_message(body, message):
             logger.info("Processing function {!r} "
                         "with data {!r}".format(func.__name__, body))
-            func(body)
-            message.ack()
+            try:
+                func(body)
+            except Exception as e:
+                msg = "Problem processing task: {!r}".format(e)
+                logger.error(msg)
+            else:
+                message.ack()
 
-        return self._wrap_function(func, process_message, queue_name)
+        return self._wrap_function(func, process_message, queue_name, task=True)
 
     def rpc(self, func=None, *, queue_name=None):
         """Wrap around function. This method is modelled after standard RPC

@@ -230,3 +230,84 @@ class TestAbstractMQ(TestRabbitpy):
             self.assertRegex(message,
                              r'Malformed request',
                              "Legacy queue requires client with legacy=True.")
+
+    def test_default_exchange(self):
+        """Test behaviour using the default exchange."""
+
+        from kombu import Exchange
+        self._exchange = Exchange(channel=self._connection, durable=True, type='direct')
+        self.pre_declare_queues(['default.queue.thing',
+                                 'testing_default_exchange.client'])
+        q = Queuerator(exchange=self._exchange,
+                       queue='default.queue.thing')
+
+        @q.rpc
+        def testing_default_exchange(data):
+            return {"x": 1, "data": data}
+
+        client = RpcClient(exchange=self._exchange)
+
+        request = {'request': 'my request'}
+        client.rpc('testing_default_exchange', 
+                   request,
+                   server_routing_key='default.queue.thing')
+
+        queues = q.queues['testing_default_exchange']
+        test_callbacks = q.callbacks['testing_default_exchange']
+        conn = self._connection
+        with Consumer(conn, queues, callbacks=test_callbacks):
+            conn.drain_events(timeout=1)
+        for reply in client.retrieve_messages():
+            print("{!r}".format(reply))
+            self.assertIn('x', reply)
+            self.assertEqual(reply['data'], request)
+    
+    def test_task_nondurable_exchange(self):
+        """Task setup """
+        from kombu import Exchange
+        e = Exchange('', durable=False, type='direct')
+        q = Queuerator(task_exchange=e, queue='test.nondurable_exchange.queue')
+
+        with self.assertRaises(Exception):
+            @q.task
+            def amation(data):
+                return None 
+
+    def test_task_fail(self):
+        """What happens when long running task fails to ack.  """
+        from kombu import Exchange
+        e = Exchange('', type='direct')
+        # declare queue
+        consumer_queue = Queue('test.task.fail', 
+                               e, 
+                               channel=self._connection,
+                               routing_key='test.task.fail')
+        client_queue = Queue('amation.client', 
+                             e, 
+                             channel=self._connection,
+                             routing_key='amation.client')
+        consumer_queue.declare()
+        client_queue.declare()
+        self.queues.append(consumer_queue)
+        self.queues.append(client_queue)
+
+        q = Queuerator(task_exchange=e, queue='test.task.fail')
+        @q.task
+        def amation(data):
+            raise Exception('YOU FAIL!')
+
+        client = RpcClient(exchange=e)
+        client.task('amation', {'x': 1}, server_routing_key='test.task.fail')
+        
+        curr_queues = q.queues['amation']
+        curr_callbacks = q.callbacks['amation']
+        def still_around(body, message):
+            print("Found {!r} with message "
+                  "properties: {!r}".format(body, message.properties))
+
+        curr_callbacks.append(still_around)
+
+        with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
+           self._connection.drain_events(timeout=1) 
+
+

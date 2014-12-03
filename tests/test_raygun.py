@@ -10,7 +10,7 @@ from kombu.pools import producers
 from raygun4py import raygunprovider, raygunmsgs
 
 from rpc import conn_dict
-from rabbit.exchange import exchange
+from rabbit.exchange import task_exchange
 
 from tests.test_rabbit import TestRabbitpy
 
@@ -24,8 +24,8 @@ class TestRaygun(TestRabbitpy):
         TestRabbitpy.setUp(self)
         self.queues = [
             Queue('rabbitpy.raygun',
-                  exchange,
-                  durable=exchange.durable,
+                  task_exchange,
+                  durable=task_exchange.durable,
                   channel=self._connection,
                   routing_key='rabbitpy.raygun')
         ]
@@ -88,8 +88,8 @@ class TestRaygun(TestRabbitpy):
                 with producers[conn].acquire(block=True) as producer:
                     producer.publish(payload,
                                      serializer='json',
-                                     exchange=exchange,
-                                     declare=[exchange],
+                                     exchange=task_exchange,
+                                     declare=[task_exchange],
                                      routing_key='rabbitpy.raygun')
         with Connection(**conn_dict) as conn:
             with Consumer(conn, queues, callbacks=callbacks):
