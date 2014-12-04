@@ -14,6 +14,7 @@ from rabbit.exchange import task_exchange
 
 from tests.test_rabbit import TestRabbitpy
 
+
 class TestRaygun(TestRabbitpy):
 
     """Test sending stuff to raygun"""
@@ -42,7 +43,7 @@ class TestRaygun(TestRabbitpy):
             },
             "request": {
                 "headers": {
-                "content-type": 'application/html',
+                    "content-type": 'application/html',
                 },
                 "hostname": "localhost",
                 "httpmethod": "get",
@@ -51,7 +52,6 @@ class TestRaygun(TestRabbitpy):
                 "ipaddress": "73.23.44.19",
             }
         }
-
 
     def test_send_to_raygun(self):
         """Send a request to raygun. """

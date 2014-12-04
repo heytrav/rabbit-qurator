@@ -91,8 +91,10 @@ class RpcClient(object):
         """
         if self._legacy:
             payload = {
-                'command': command_name,
-                'data': data
+                'data': {
+                    'command': command_name,
+                    'options': data,
+                }
             }
         else:
             payload = data

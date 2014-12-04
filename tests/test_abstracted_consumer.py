@@ -96,7 +96,7 @@ class TestAbstractMQ(TestRabbitpy):
             conn.drain_events(timeout=1)
 
         checkit.assert_called_with(
-            {'command': 'blah', 'data': payload}
+            {'data': {'command': 'blah', 'options': payload}}
         )
         # response = client.retrieve_messages()
         consumer.respond_to_client.assert_called_with(

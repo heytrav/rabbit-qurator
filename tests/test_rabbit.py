@@ -1,8 +1,9 @@
 from unittest import TestCase
 
-from kombu import Connection,  Exchange
+from kombu import Connection, Exchange
 
 from rpc import conn_dict
+
 
 class TestRabbitpy(TestCase):
 
