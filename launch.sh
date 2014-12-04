@@ -14,6 +14,7 @@ docker run --name ${CONTAINERNAME} \
     --link rabbitmq:amq \
     --link rsyslogd:syslog \
     -p 0.0.0.0:$RABBITPY_PORT:$RABBITPY_PORT \
+    -e USER=$USER \
     -e RABBITPY_ENVIRONMENT=$IWMN_ENV \
     -e RAYGUN_API_KEY=$RAYGUN_API_KEY \
     -e AMQP_USER=$AMQP_USER \
