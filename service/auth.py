@@ -1,9 +1,8 @@
-import os
 import logging
 
 from rabbit.queuerate import Queuerator
 
-from kombu import Connection, Exchange, Queue, Producer, Consumer
+from kombu import Exchange
 
 from domainsage.models import User
 
