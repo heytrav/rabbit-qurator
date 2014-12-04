@@ -65,8 +65,8 @@ class Queuerator(object):
         :returns: the data returned by the callback.
         """
         try:
-            command = body['command']
-            data = body['data']
+            command = body['data']['command']
+            data = body['data']['options']
             callback = self.dispatch[command]
             logger.debug("Calling {!r} with {!r}".format(command, data))
         except KeyError as ke:
@@ -192,6 +192,14 @@ class Queuerator(object):
         with Connection(**conn_dict) as conn:
             with producers[conn].acquire(block=True) as producer:
                 # Assume reply_to and correlation_id in message.
+
+                # Note this also assumes that the client has a bound queue
+                # on the same exchange as this worker.
+                #
+                # This is not the case for hase, since it uses a generated
+                # queue name and the default exchange which has an implicit
+                # binding from routing_key => queue name
+                #
                 try:
                     send_reply(
                         self._exchange,
