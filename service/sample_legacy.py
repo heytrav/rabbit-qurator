@@ -7,6 +7,7 @@ logger = get_logger(__name__)
 
 consumer = Queuerator(queue='rabbitpy.core.domain')
 
+
 @consumer.rpc
 def current_time(*args, **kwargs):
     """Return the current time

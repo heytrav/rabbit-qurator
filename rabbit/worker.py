@@ -3,6 +3,7 @@ from kombu.log import get_logger
 
 logger = get_logger(__name__)
 
+
 class Worker(ConsumerMixin):
 
     """Manage server side of RPC connection.
@@ -19,7 +20,6 @@ class Worker(ConsumerMixin):
         self.connection = connection
         self.iwmn_consumer = iwmn_consumer
 
-
     def get_consumers(self, Consumer, channel):
         """Get a set of consumers.
 
@@ -33,7 +33,7 @@ class Worker(ConsumerMixin):
             queues = self.iwmn_consumer.queues[i]
             callbacks = self.iwmn_consumer.callbacks[i]
             logger.info("Queues: {!r}".format(queues))
-            c = Consumer( queues, callbacks=callbacks)
+            c = Consumer(queues, callbacks=callbacks)
             consumer_set.append(c)
             logger.info("Added consumer: {!r}".format(c))
 

@@ -12,6 +12,7 @@ logger = get_logger(__name__)
 
 
 class RpcClient(object):
+
     """Process a RPC queue and fetch the response."""
 
     reply_received = False
