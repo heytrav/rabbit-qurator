@@ -1,10 +1,11 @@
 import os
+import logging
 import http.client
-from kombu.log import get_logger
 
 from rabbit.queuerate import Queuerator
 
-logger = get_logger(__name__)
+
+logger = logging.getLogger(__name__)
 
 consumer = Queuerator(legacy=False)
 
