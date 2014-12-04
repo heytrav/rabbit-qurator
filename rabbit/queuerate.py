@@ -208,3 +208,18 @@ class Queuerator(object):
                     logger.error('Unable to reply to request {!r}'.format(ex))
                 else:
                     logger.info('Replied with response {!r}'.format(response))
+
+    def run(self):
+        from kombu import Connection
+        from kombu.utils.debug import setup_logging
+
+        from rpc import conn_dict
+        from rabbit.worker import Worker
+
+        setup_logging(loglevel='DEBUG', loggers=[''])
+        with Connection(**conn_dict) as conn:
+            try:
+                worker = Worker(conn, self)
+                worker.run()
+            except KeyboardInterrupt:
+                print('bye bye')
