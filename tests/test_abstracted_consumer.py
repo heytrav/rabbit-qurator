@@ -235,7 +235,10 @@ class TestAbstractMQ(TestRabbitpy):
         """Test behaviour using the default exchange."""
 
         from kombu import Exchange
-        self._exchange = Exchange(channel=self._connection, durable=True, type='direct')
+        self._exchange = Exchange(
+            channel=self._connection,
+            durable=True,
+            type='direct')
         self.pre_declare_queues(['default.queue.thing',
                                  'testing_default_exchange.client'])
         q = Queuerator(exchange=self._exchange,
@@ -294,6 +297,7 @@ class TestAbstractMQ(TestRabbitpy):
         self.queues.append(client_queue)
 
         q = Queuerator(task_exchange=e, queue='test.task.fail')
+
         @q.task
         def fail(data):
             raise Exception('YOU FAIL!')
@@ -303,6 +307,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         curr_queues = q.queues['fail']
         curr_callbacks = q.callbacks['fail']
+
         def still_around(body, message):
             self.assertFalse(message.acknowledged)
             message.ack()
@@ -310,7 +315,7 @@ class TestAbstractMQ(TestRabbitpy):
         curr_callbacks.append(still_around)
 
         with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
-           self._connection.drain_events(timeout=1)
+            self._connection.drain_events(timeout=1)
 
     def test_task_succeed(self):
         """What happens when a task succeeds.
@@ -334,15 +339,19 @@ class TestAbstractMQ(TestRabbitpy):
         self.queues.append(client_queue)
 
         q = Queuerator(task_exchange=e, queue='test.task.succeed')
+
         @q.task
         def succeed(data):
             return None
 
         client = RpcClient(exchange=e)
-        client.task('succeed', {'x': 1}, server_routing_key='test.task.succeed')
+        client.task(
+            'succeed', {
+                'x': 1}, server_routing_key='test.task.succeed')
 
         curr_queues = q.queues['succeed']
         curr_callbacks = q.callbacks['succeed']
+
         def still_around(body, message):
             print("Message: {!r}".format(message))
             self.assertTrue(message.acknowledged)
@@ -350,4 +359,4 @@ class TestAbstractMQ(TestRabbitpy):
         curr_callbacks.append(still_around)
 
         with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
-           self._connection.drain_events(timeout=1)
+            self._connection.drain_events(timeout=1)

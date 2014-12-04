@@ -46,16 +46,4 @@ def send_to_raygun(data):
 
 
 if __name__ == '__main__':
-    from kombu import Connection
-    from kombu.utils.debug import setup_logging
-
-    from rpc import conn_dict
-    from rabbit.worker import Worker
-
-    setup_logging(loglevel='DEBUG', loggers=[''])
-    with Connection(**conn_dict) as conn:
-        try:
-            worker = Worker(conn, consumer)
-            worker.run()
-        except KeyboardInterrupt:
-            print('bye bye')
+    consumer.run()

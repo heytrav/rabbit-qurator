@@ -143,10 +143,10 @@ class Queuerator(object):
 
         def process_message(body, message):
             logger.debug("Processing function {!r} "
-                        " in message: {!r} "
-                        "with data {!r}".format(func.__name__,
-                                                message,
-                                                body))
+                         " in message: {!r} "
+                         "with data {!r}".format(func.__name__,
+                                                 message,
+                                                 body))
             try:
                 func(body)
             except Exception as e:
@@ -156,7 +156,8 @@ class Queuerator(object):
                 logger.debug("Ack'ing message.")
                 message.ack()
 
-        return self._wrap_function(func, process_message, queue_name, task=True)
+        return self._wrap_function(
+            func, process_message, queue_name, task=True)
 
     def rpc(self, func=None, *, queue_name=None):
         """Wrap around function. This method is modelled after standard RPC
@@ -172,7 +173,7 @@ class Queuerator(object):
 
         def process_message(body, message):
             logger.debug("Processing function {!r} "
-                        "with data {!r}".format(func.__name__, body))
+                         "with data {!r}".format(func.__name__, body))
             response = func(body)
             logger.debug("Wrapped method returned:  {!r}".format(response))
             self.respond_to_client(message, response)
