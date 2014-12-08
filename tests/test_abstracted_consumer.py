@@ -26,13 +26,13 @@ class TestAbstractMQ(TestRabbitpy):
 
         declared_queues = []
         for queue_name in queues:
-            q = Queue(queue_name,
-                      self._exchange,
-                      channel=self._connection,
-                      durable=self._exchange.durable,
-                      routing_key=queue_name)
-            q.declare()
-            declared_queues.append(q)
+        q = Queue(queue_name,
+        self._exchange,
+        channel=self._connection,
+        durable=self._exchange.durable,
+        routing_key=queue_name)
+        q.declare()
+        declared_queues.append(q)
         self.queues = declared_queues
 
     def test_method_wrapping(self):
@@ -345,9 +345,9 @@ class TestAbstractMQ(TestRabbitpy):
             return None
 
         client = RpcClient(exchange=e)
-        client.task(
-            'succeed', {
-                'x': 1}, server_routing_key='test.task.succeed')
+        client.task('succeed',
+                    {'x': 1},
+                    server_routing_key='test.task.succeed')
 
         curr_queues = q.queues['succeed']
         curr_callbacks = q.callbacks['succeed']
