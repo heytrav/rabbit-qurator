@@ -24,11 +24,11 @@ class TestRaygun(TestRabbitpy):
 
         TestRabbitpy.setUp(self)
         self.queues = [
-            Queue('rabbitpy.raygun',
+            Queue('test.raygun',
                   task_exchange,
                   durable=task_exchange.durable,
                   channel=self._connection,
-                  routing_key='rabbitpy.raygun')
+                  routing_key='test.raygun')
         ]
         [i.declare(0) for i in self.queues]
 
@@ -56,17 +56,21 @@ class TestRaygun(TestRabbitpy):
     def test_send_to_raygun(self):
         """Send a request to raygun. """
 
-        from service.raygun import consumer, send_to_raygun, send
+        from service.raygun import consumer, send
 
-        self.assertEqual(len(consumer.queues['send_to_raygun']),
+        @consumer.task(queue_name='test.raygun')
+        def test_raygun(data):
+            send(data)
+
+        self.assertEqual(len(consumer.queues['test_raygun']),
                          1,
                          'Raygun consumer listening on one queue')
         print("Consumer queues: {!r}".format(consumer))
-        queues = consumer.queues['send_to_raygun']
+        queues = consumer.queues['test_raygun']
         self.assertEqual(queues[0].name,
-                         'rabbitpy.raygun',
+                         'test.raygun',
                          'Queue named as expected')
-        callbacks = consumer.callbacks['send_to_raygun']
+        callbacks = consumer.callbacks['test_raygun']
         try:
             raise RequestTimeout('Test HTTP like exception in raygun task.')
         except:
@@ -90,7 +94,7 @@ class TestRaygun(TestRabbitpy):
                                      serializer='json',
                                      exchange=task_exchange,
                                      declare=[task_exchange],
-                                     routing_key='rabbitpy.raygun')
+                                     routing_key='test.raygun')
         with Connection(**conn_dict) as conn:
             with Consumer(conn, queues, callbacks=callbacks):
                 conn.drain_events(timeout=1)
