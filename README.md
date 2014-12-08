@@ -76,18 +76,30 @@ This expects the client to send the following to the `awesome.my_rpc_method` que
 }
 ```
 
-#### Note
 * `prefix` parameter to the constructor defaults to `rabbitpy`.
 
+#General Notes
 
-#Supervisor
+##Environment
+
+In order to interact with RabbitMQ, you need to be sure that the following
+environment variables are set when starting the docker container with
+`./launch.sh`:
+
+1. `AMQP_USER`
+2. `AMQP_PASS`
+3. `AMQP_VHOST`
+
+Please refer to IWMN project documentation for `iwmn-base`, `hase`, or the
+`docker_vm` repository for information on what these should be. 
+
+##Supervisor
 
 See config files under `supervisor/`
 
      supervisord -c /etc/supervisor/supervisord.conf
 
-
-#Note
+##Miscellaneous information
 * The *hase-like* implementation is on by default.
 * When using the *hase-like* implementation, a queue name is required.
 * This is a work in progress and subject to unannounced sporadic changes.
