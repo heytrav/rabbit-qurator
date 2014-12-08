@@ -3,6 +3,8 @@
 branch = True
 source =
     rpc
+    service
+    rabbit
 omit = 
     tests/*
 
@@ -27,3 +29,5 @@ exclude_lines =
 ignore_errors = True
 include =
     rpc*
+    service*
+    rabbit*

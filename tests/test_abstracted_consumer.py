@@ -27,10 +27,10 @@ class TestAbstractMQ(TestRabbitpy):
         declared_queues = []
         for queue_name in queues:
             q = Queue(queue_name,
-            self._exchange,
-            channel=self._connection,
-            durable=self._exchange.durable,
-            routing_key=queue_name)
+                      self._exchange,
+                      channel=self._connection,
+                      durable=self._exchange.durable,
+                      routing_key=queue_name)
             q.declare()
             declared_queues.append(q)
 
