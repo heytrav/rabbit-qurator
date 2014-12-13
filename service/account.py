@@ -25,6 +25,7 @@ def account_for_domain(data):
     domains = data['domains']
     return accounts_for_domains(domains)
 
+
 def accounts_for_domains(domains):
     """Search for accounts for domains.
 

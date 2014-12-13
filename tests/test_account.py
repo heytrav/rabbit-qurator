@@ -17,6 +17,7 @@ except Exception as e:
 class TestAccountService(TestRabbitpy):
 
     """Tests for account service."""
+
     def setUp(self):
         """Set up unit test stuff."""
         TestRabbitpy.setUp(self)
@@ -28,6 +29,7 @@ class TestAccountService(TestRabbitpy):
                        queue='rabbitpy.test.account')
         self.pre_declare_queues(['rabbitpy.test.account',
                                  'search_domains.client'])
+
         @q.rpc(queue_name='rabbitpy.test.account')
         def search_domains(data):
             return accounts_for_domains(data['domains'])
