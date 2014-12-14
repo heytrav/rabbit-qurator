@@ -1,16 +1,16 @@
+import os
 from functools import wraps, partial
 
 from kombu import Queue, Connection
 from kombu.pools import producers
-from kombu.log import get_logger
 from kombu.common import send_reply
 from amqp import exceptions
 
 from rpc import conn_dict
+from rabbit import get_logger
 from rabbit.exchange import exchange as default_exchange
 from rabbit.exchange import task_exchange as default_task_exchange
-
-logger = get_logger(__name__)
+logger = get_logger('queuerator')
 
 
 class Queuerator(object):
@@ -46,6 +46,7 @@ class Queuerator(object):
                                 " for legacy implementation.")
 
         self._queue = queue
+        logger.debug("Initialising Queuerator class")
 
     def _error(self, error, message):
         """Return an error if caller sent an unknown command.
@@ -64,6 +65,7 @@ class Queuerator(object):
         which dispatch which callback will be called.
         :returns: the data returned by the callback.
         """
+        logger = get_logger(self._queue)
         try:
             command = body['data']['command']
             data = body['data']['options']
@@ -136,6 +138,9 @@ class Queuerator(object):
         The client should not expect anything to be returned.
 
         """
+        logger = get_logger()
+        if queue_name:
+            logger = get_logger(queue_name)
         if not self._task_exchange.durable:
             raise Exception('Task exchange should be durable.')
         if func is None:
@@ -168,6 +173,9 @@ class Queuerator(object):
         :queue_name: defaults to "rabbitpy.<func.__name__>"
 
         """
+        logger = get_logger()
+        if queue_name:
+            logger = get_logger(queue_name)
         if func is None:
             return partial(self.rpc, queue_name=queue_name)
 
@@ -220,12 +228,10 @@ class Queuerator(object):
 
     def run(self):
         from kombu import Connection
-        from kombu.utils.debug import setup_logging
 
         from rpc import conn_dict
         from rabbit.worker import Worker
 
-        setup_logging(loglevel='DEBUG', loggers=[''])
         with Connection(**conn_dict) as conn:
             try:
                 worker = Worker(conn, self)
