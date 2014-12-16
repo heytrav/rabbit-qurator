@@ -7,7 +7,7 @@ from rabbit.queuerate import Queuerator
 
 logger = logging.getLogger(__name__)
 
-consumer = Queuerator(legacy=False)
+q = Queuerator(legacy=False)
 
 
 def send(msg):
@@ -31,7 +31,7 @@ def send(msg):
                                              response.reason))
 
 
-@consumer.task(queue_name='rabbitpy.raygun')
+@q.task(queue_name='rabbitpy.raygun')
 def send_to_raygun(data):
     """Service endpoint for rabbitpy.raygun.
 
@@ -46,4 +46,4 @@ def send_to_raygun(data):
 
 
 if __name__ == '__main__':
-    consumer.run()
+    q.run()

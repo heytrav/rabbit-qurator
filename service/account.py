@@ -8,17 +8,17 @@ from rabbit.queuerate import Queuerator
 logger = logging.getLogger(__name__)
 
 # TODO configurify the db environment somewheres
-couchdb = couch_connect('development')
+couchdb = couch_connect()
 
-account_queuerator = Queuerator(queue='rabbitpy.core.account')
+q = Queuerator(queue='rabbitpy.core.account')
 
 
-@account_queuerator.rpc
+@q.rpc
 def account_for_domain(data):
     """Return account info for a particular domain
 
     :data: dict Sent by client
-    :returns: dict
+    :returns: dict containing the account for each item in data['domains'].
 
     """
     logger.debug("Received query: {!r}".format(data))
@@ -41,4 +41,4 @@ def accounts_for_domains(domains):
     return account_results
 
 if __name__ == '__main__':
-    account_queuerator.run()
+    q.run()
