@@ -336,7 +336,6 @@ class TestAbstractMQ(TestRabbitpy):
                              channel=self._connection)
         consumer_queue.declare()
         client_queue.declare()
-        self.queues.append(consumer_queue)
         self.queues.append(client_queue)
 
         q = Queuerator(task_exchange=e, queue='test.task.succeed')
@@ -351,13 +350,9 @@ class TestAbstractMQ(TestRabbitpy):
                     server_routing_key='test.task.succeed')
 
         curr_queues = q.queues['succeed']
-        curr_callbacks = q.callbacks['succeed']
 
+        @q.rpc
         def still_around(body, message):
             print("Message: {!r}".format(message))
-            self.assertTrue(message.acknowledged)
 
-        curr_callbacks.append(still_around)
-
-        with Consumer(self._connection, curr_queues, callbacks=curr_callbacks):
             self._connection.drain_events(timeout=1)

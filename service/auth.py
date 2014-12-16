@@ -10,12 +10,12 @@ from domainsage.services import couch_connect
 logger = logging.getLogger(__name__)
 
 default_exchange = Exchange('amq.direct', type='direct')
-consumer = Queuerator(queue='api.auth', exchange=default_exchange)
+q = Queuerator(queue='api.auth', exchange=default_exchange)
 
 couchdb = couch_connect('development')
 
 
-@consumer.rpc
+@q.rpc
 def verify_password(data):
     """
     Check a user's password and return whether the password is
@@ -35,4 +35,4 @@ def verify_password(data):
 
 
 if __name__ == '__main__':
-    consumer.run()
+    q.run()

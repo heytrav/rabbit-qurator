@@ -10,12 +10,12 @@ from domainsage.services import couch_connect
 logger = logging.getLogger(__name__)
 
 default_exchange = Exchange('amq.direct', type='direct')
-consumer = Queuerator(queue='api.user', exchange=default_exchange)
+q = Queuerator(queue='api.user', exchange=default_exchange)
 
 couchdb = couch_connect('development')
 
 
-@consumer.rpc
+@q.rpc
 def domains(data):
     """ Return list of domains a user has access to. """
     try:
@@ -31,4 +31,4 @@ def domains(data):
 
 
 if __name__ == '__main__':
-    consumer.run()
+    q.run()

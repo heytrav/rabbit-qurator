@@ -56,21 +56,21 @@ class TestRaygun(TestRabbitpy):
     def test_send_to_raygun(self):
         """Send a request to raygun. """
 
-        from service.raygun import consumer, send
+        from service.raygun import q, send
 
-        @consumer.task(queue_name='test.raygun')
+        @q.task(queue_name='test.raygun')
         def test_raygun(data):
             send(data)
 
-        self.assertEqual(len(consumer.queues['test_raygun']),
+        self.assertEqual(len(q.queues['test_raygun']),
                          1,
-                         'Raygun consumer listening on one queue')
-        print("Consumer queues: {!r}".format(consumer))
-        queues = consumer.queues['test_raygun']
+                         'Raygun q listening on one queue')
+        print("Consumer queues: {!r}".format(q))
+        queues = q.queues['test_raygun']
         self.assertEqual(queues[0].name,
                          'test.raygun',
                          'Queue named as expected')
-        callbacks = consumer.callbacks['test_raygun']
+        callbacks = q.callbacks['test_raygun']
         try:
             raise RequestTimeout('Test HTTP like exception in raygun task.')
         except:
