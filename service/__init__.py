@@ -3,6 +3,8 @@
 import logging
 from logging import handlers, Formatter
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 def get_logger(name=None):
     """Top level logger initialiser thingy.

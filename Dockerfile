@@ -20,4 +20,4 @@ ADD . /usr/local/d8o/rabbitpy
 RUN git describe > /etc/d8o/rabbitpy/VERSION
 ADD supervisor/ /etc/supervisor/conf.d/
 
-CMD /usr/bin/supervisord -c /etc/supervisor/supervisord.conf && /bin/bash
+ENTRYPOINT ["./docker_start.sh"]
