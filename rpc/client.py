@@ -17,6 +17,7 @@ class RpcClient(object):
 
     reply_received = False
     messages = {}
+    corr_id_server_queue = {}
 
     def __init__(self,
                  legacy=True,
@@ -71,11 +72,16 @@ class RpcClient(object):
         return None
 
     def ack_message(self, body, message):
-        logger.info("Processing message: {!r}".format(message))
+        logger.info("Processing message: {!r} with body {!r}".format(message,
+                                                                     body))
         if 'correlation_id' in message.properties:
             corr_id = message.properties['correlation_id']
             try:
                 self.messages.pop(corr_id)
+                server_queue = self.corr_id_server_queue.pop(corr_id)
+                logger.info(
+                    "STOPRABBIT:%s;CORRELATION_ID:%s" %
+                    (server_queue, corr_id))
                 self.reply = body
                 message.ack()
             except KeyError as e:
@@ -141,6 +147,9 @@ class RpcClient(object):
             'reply_to': self._client_queue,
             'correlation_id': message_correlation_id
         }
+        self.corr_id_server_queue[message_correlation_id] = server_routing_key
+        logger.info('STARTRABBIT:%s;CORRELATION_ID:%s' % (server_routing_key,
+                                                          message_correlation_id))
         self._send_command(payload, server_routing_key, properties)
         # Successful so store message correlation id for retrieval.
         self.messages[message_correlation_id] = True
