@@ -13,11 +13,7 @@ def get_logger(name=None):
     formatter = Formatter(
         '%(pathname)s:line %(lineno)d [%(levelname)s]: %(name)s - %(message)s'
     )
-    name_list = ['rabbit']
-    if name:
-        name_list.append(name)
-    logger_name = '.'.join(name_list)
-    logger = logging.getLogger(logger_name)
+    logger = logging.getLogger(name)
     handler = handlers.SysLogHandler(
         address='/dev/log',
         facility=handlers.SysLogHandler.LOG_DAEMON
