@@ -1,11 +1,10 @@
 from kombu import Queue, Connection
 from kombu.pools import producers
 from kombu.common import uuid, collect_replies
-from kombu.log import get_logger
 from amqp import exceptions
 
 
-from rpc import conn_dict
+from rpc import conn_dict, get_logger
 from rabbit.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
@@ -69,7 +68,6 @@ class RpcClient(object):
                              "messages: {!r}".format(amqp_error))
             except Exception as e:
                 raise e
-        return None
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r} with body {!r}".format(message,
