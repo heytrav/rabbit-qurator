@@ -10,5 +10,6 @@ WORKDIR /usr/local/d8o/rabbitpy
 ADD . /usr/local/d8o/rabbitpy
 RUN mkdir -p /etc/d8o/rabbitpy && git describe > /etc/d8o/rabbitpy/VERSION
 ADD supervisor/ /etc/supervisor/conf.d/
+RUN sed -i 's/\#Hostname "localhost"/Hostname "rabbitpy"/' /etc/collectd/collectd.conf
 
 ENTRYPOINT ["./docker_start.sh"]
