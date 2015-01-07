@@ -60,3 +60,4 @@ target/
 *.swo
 *.un~
 
+*.logstash-forwarder

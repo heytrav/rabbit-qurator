@@ -7,12 +7,13 @@ from rabbit.queuerate import Queuerator
 from domainsage.models import User
 from domainsage.services import couch_connect
 
-logger = logging.getLogger(__name__)
+from utils.logging import get_logger
+logger = get_logger('auth')
 
 default_exchange = Exchange('amq.direct', type='direct')
 q = Queuerator(queue='api.auth', exchange=default_exchange)
 
-couchdb = couch_connect('development')
+couchdb = couch_connect()
 
 
 @q.rpc
@@ -21,9 +22,11 @@ def verify_password(data):
     Check a user's password and return whether the password is
     correct.
     """
+    logger.debug("Received: {!r}".format(data))
     try:
         u = User.by_email(couchdb, data.get('user'))
-    except Exception:
+    except Exception as e:
+        logger.error("Error querying couch {!r}".format(e))
         return {'verified': False}
 
     try:

@@ -1,5 +1,5 @@
 import datetime
-from kombu.log import get_logger
+from utils.logging import get_logger
 
 from rabbit.queuerate import Queuerator
 

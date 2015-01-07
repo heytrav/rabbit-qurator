@@ -1,12 +1,10 @@
 import os
-import logging
 import http.client
 
 from rabbit.queuerate import Queuerator
+from utils.logging import get_logger
 
-
-logger = logging.getLogger(__name__)
-
+logger = get_logger('raygun')
 q = Queuerator(legacy=False)
 
 
