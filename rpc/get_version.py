@@ -1,4 +1,4 @@
-from rpc import get_logger
+from utils.logging import get_logger
 logger = get_logger(__name__)
 if __name__ == '__main__':
     from rpc.client import RpcClient

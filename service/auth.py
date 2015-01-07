@@ -7,7 +7,7 @@ from rabbit.queuerate import Queuerator
 from domainsage.models import User
 from domainsage.services import couch_connect
 
-from service import get_logger
+from utils.logging import get_logger
 logger = get_logger('auth')
 
 default_exchange = Exchange('amq.direct', type='direct')

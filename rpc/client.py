@@ -4,7 +4,8 @@ from kombu.common import uuid, collect_replies
 from amqp import exceptions
 
 
-from rpc import conn_dict, get_logger
+from rpc import conn_dict
+from utils.logging import get_logger
 from rabbit.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)
