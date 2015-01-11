@@ -10,7 +10,7 @@ from rpc import conn_dict
 from utils.logging import get_logger
 from rabbit.exchange import exchange as default_exchange
 from rabbit.exchange import task_exchange as default_task_exchange
-logger = get_logger('queuerator')
+logger = get_logger(__name__)
 
 
 class Queuerator(object):
