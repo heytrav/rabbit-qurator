@@ -33,7 +33,8 @@ docker run --name ${CONTAINERNAME} \
     -h  $CONTAINERNAME \
     -v /usr/local/d8o/rabbitpy:/usr/local/d8o/rabbitpy:rw  \
     -v /usr/local/d8o/domainsage:/usr/local/d8o/domainsage:r \
-    -v /data:/usr/local/d8o/data:r \
+    --volumes-from logstash-public-data \
+    --volumes-from logstash-forwarder \
     --link beanbag:beanbag \
     --link rabbitmq:amq \
     --link docker-elk:docker-elk \
