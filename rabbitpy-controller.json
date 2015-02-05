@@ -45,10 +45,12 @@
                     {
                         "name": "rabbitpy",
                         "image": "docker.domarino.com/rabbitpy:latest",
-                        "command": [
-                            "/docker_start.sh"
-                            ],
                         "volumeMounts": [
+                        {
+                            "name": "domainsage",
+                            "mountPath":"/usr/local/domainsage",
+                            "readOnly": true
+                        },
                         {
                             "name": "logstash-forwarder-config",
                             "mountPath": "/etc/logstash-forwarder",
@@ -91,6 +93,12 @@
                             "name": "logstash-keys",
                             "source": {
                             "hostDir": {"path": "/home/core/share/data/logstash"}
+                            }
+                        },
+                        {
+                            "name": "domainsage",
+                            "source": {
+                            "hostDir": {"path": "/home/core/share/domainsage"}
                             }
                         }
                     ]
