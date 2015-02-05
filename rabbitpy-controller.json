@@ -1,0 +1,105 @@
+
+{
+    "id" : "rabbitpy",
+    "kind": "ReplicationController",
+    "apiVersion": "v1beta1",
+    "desiredState": {
+        "replicas": 1,
+        "replicaSelector": {
+            "component": "rabbitpy",
+            "role": "rabbitpy"
+        },
+        "podTemplate": {
+            "desiredState": {
+                "manifest": {
+                    "version": "v1beta1",
+                    "id": "rabbitpy",
+                    "containers": [
+                    {
+                        "name": "logstash-forwarder",
+                        "image": "quay.io/heytrav/logstash-forwarder:v0.0.2",
+                        "volumeMounts": [
+                        {
+                            "name": "logstash-forwarder-config",
+                            "mountPath": "/etc/logstash-forwarder",
+                            "readOnly": false
+
+                        },
+                        {
+                            "name": "logstash-forwarder",
+                            "mountPath": "/usr/local/logstash-forwarder",
+                            "readOnly": false
+                        },
+                        {
+                            "name": "logstash-forwarder-runner",
+                            "mountPath": "/opt/logstash-forwarder",
+                            "readOnly": false
+                        },
+                        {
+                            "name": "logstash-keys",
+                            "mountPath": "/data/logstash",
+                            "readOnly": true
+                        }
+                        ]
+                    },
+                    {
+                        "name": "rabbitpy",
+                        "image": "docker.domarino.com/rabbitpy:latest",
+                        "command": [
+                            "/docker_start.sh"
+                            ],
+                        "volumeMounts": [
+                        {
+                            "name": "logstash-forwarder-config",
+                            "mountPath": "/etc/logstash-forwarder",
+                            "readOnly": true
+
+                        },
+                        {
+                            "name": "logstash-forwarder",
+                            "mountPath": "/usr/local/logstash-forwarder",
+                            "readOnly": true
+                        },
+                        {
+                            "name": "logstash-forwarder-runner",
+                            "mountPath": "/opt/logstash-forwarder",
+                            "readOnly": true
+                        }
+                        ]
+                    }
+                    ],
+                        "volumes": [
+                        {
+                            "name": "logstash-forwarder-config",
+                            "source": {
+                                "emptyDir": { }
+                            }
+                        },
+                        {
+                            "name": "logstash-forwarder",
+                            "source": {
+                                "emptyDir": { }
+                            }
+                        },
+                        {
+                            "name": "logstash-forwarder-runner",
+                            "source": {
+                                "emptyDir": { }
+                            }
+                        },
+                        {
+                            "name": "logstash-keys",
+                            "source": {
+                            "hostDir": {"path": "/home/core/share/data/logstash"}
+                            }
+                        }
+                    ]
+                }
+            },
+            "labels": {
+                "component": "rabbitpy",
+                "role": "rabbit"
+            }
+        }
+    }
+}
