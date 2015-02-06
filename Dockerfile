@@ -8,7 +8,9 @@ RUN echo "export PYTHONPATH=$PYTHONPATH:/usr/local/rabbitpy:/usr/local/domainsag
 RUN pip3 install -I -r /tmp/requirements.txt 
 WORKDIR /usr/local/rabbitpy
 ADD . /usr/local/rabbitpy
-RUN mkdir -p /etc/rabbitpy && git describe > /etc/rabbitpy/VERSION
+RUN \
+    mkdir -p /etc/rabbitpy && \
+        git describe > /etc/rabbitpy/VERSION
 ADD supervisor/ /etc/supervisor/conf.d/
 RUN sed -i 's/\#Hostname "localhost"/Hostname "rabbitpy"/' /etc/collectd/collectd.conf
 

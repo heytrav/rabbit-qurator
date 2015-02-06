@@ -106,7 +106,7 @@
             },
             "labels": {
                 "component": "rabbitpy",
-                "role": "rabbit"
+                "role": "rabbitpy"
             }
         }
     }
