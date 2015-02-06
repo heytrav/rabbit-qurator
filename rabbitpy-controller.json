@@ -44,7 +44,7 @@
                     },
                     {
                         "name": "rabbitpy",
-                        "image": "docker.domarino.com/rabbitpy:latest",
+                        "image": "docker.domarino.com/rabbitpy:v0.1.1-1-g29e0d38",
                         "volumeMounts": [
                         {
                             "name": "domainsage",

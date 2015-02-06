@@ -7,7 +7,7 @@
 # key in a parallel directory called /data like so:
 
 #   openssl req -x509 -batch -nodes -days 3650 -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt
-# The /data volume will be mounted at /usr/local/d8o/data.
+# The /data volume will be mounted at /usr/local/data.
 # I'm open to suggestions if there is a better way to do this.
 
 usage() { echo "Usage: $0 [-i]" 1>&2; exit 1; }
@@ -31,8 +31,8 @@ docker stop ${CONTAINERNAME} && docker rm ${CONTAINERNAME}
 docker run --name ${CONTAINERNAME} \
     $INTERACTIVE_ARGS  \
     -h  $CONTAINERNAME \
-    -v /usr/local/d8o/rabbitpy:/usr/local/d8o/rabbitpy:rw  \
-    -v /usr/local/d8o/domainsage:/usr/local/d8o/domainsage:r \
+    -v /usr/local/rabbitpy:/usr/local/rabbitpy:rw  \
+    -v /usr/local/domainsage:/usr/local/domainsage:r \
     --volumes-from logstash-public-data \
     --volumes-from logstash-forwarder \
     --link beanbag:beanbag \
