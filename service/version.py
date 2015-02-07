@@ -11,7 +11,7 @@ def retrieve_version():
 
     """
     try:
-        with open('/etc/d8o/rabbitpy/VERSION') as f:
+        with open('/etc/rabbitpy/VERSION') as f:
             version = f.read()
     except OSError:
         import subprocess
