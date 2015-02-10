@@ -1,4 +1,4 @@
-FROM docker.domarino.com/iwmn-python3.4:latest
+FROM quay.io/heytrav/python3.4:v0.0.14
 MAINTAINER Travis Holton <travis@ideegeo.com>
 
 
