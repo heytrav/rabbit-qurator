@@ -1,4 +1,4 @@
-FROM quay.io/heytrav/python3.4:v0.0.14
+FROM quay.io/heytrav/python3.4:v0.0.18
 MAINTAINER Travis Holton <travis@ideegeo.com>
 
 
