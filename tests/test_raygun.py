@@ -9,8 +9,8 @@ from kombu.pools import producers
 
 from raygun4py import raygunprovider, raygunmsgs
 
-from rpc import conn_dict
-from rabbit.exchange import task_exchange
+from rabbitpy.rpc import conn_dict
+from rabbitpy.exchange import task_exchange
 
 from tests.test_rabbit import TestRabbitpy
 
@@ -56,7 +56,7 @@ class TestRaygun(TestRabbitpy):
     def test_send_to_raygun(self):
         """Send a request to raygun. """
 
-        from service.raygun import q, send
+        from rabbitpy.service.raygun import q, send
 
         @q.task(queue_name='test.raygun')
         def test_raygun(data):

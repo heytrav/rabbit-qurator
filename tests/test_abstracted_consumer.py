@@ -2,8 +2,8 @@ from unittest.mock import MagicMock, ANY
 from kombu import Consumer, Queue
 from kombu.utils import nested
 
-from rabbit.queuerate import Queuerator
-from rpc.client import RpcClient
+from rabbitpy.queuerate import Queuerator
+from rabbitpy.rpc.client import RpcClient
 
 from tests.test_rabbit import TestRabbitpy
 

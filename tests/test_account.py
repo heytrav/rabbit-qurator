@@ -1,10 +1,10 @@
 import unittest
 
 from domainsage.services import couch_connect
-from rabbit.queuerate import Queuerator
-from service.account import accounts_for_domains
+from rabbitpy.queuerate import Queuerator
+from rabbitpy.service.account import accounts_for_domains
 
-from rpc.client import RpcClient
+from rabbitpy.rpc.client import RpcClient
 from tests.test_rabbit import TestRabbitpy
 
 try:

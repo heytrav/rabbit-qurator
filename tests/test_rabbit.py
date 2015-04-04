@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from kombu import Connection, Exchange, Queue, Consumer
 
-from rpc import conn_dict
+from rabbitpy.rpc import conn_dict
 
 
 class TestRabbitpy(TestCase):
