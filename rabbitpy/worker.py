@@ -1,5 +1,5 @@
 from kombu.mixins import ConsumerMixin
-from rabbitpy.utils.logging import get_logger
+from rabbitpy import get_logger
 
 logger = get_logger(__name__)
 
