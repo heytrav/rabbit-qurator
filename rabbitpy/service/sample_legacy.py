@@ -1,7 +1,7 @@
 import datetime
 from utils.logging import get_logger
 
-from rabbit.queuerate import Queuerator
+from rabbitpy.queuerate import Queuerator
 
 logger = get_logger(__name__)
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
 
     from rpc import conn_dict
-    from rabbit.worker import Worker
+    from rabbitpy.worker import Worker
 
     with Connection(**conn_dict) as conn:
         setup_logging(loglevel='DEBUG', loggers=[''])

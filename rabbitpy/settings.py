@@ -7,9 +7,8 @@ RABBITMQ_PASSWORD=os.environ['RABBITMQ_PASSWORD']
 RABBITMQ_VHOST=os.environ['RABBITMQ_VHOST']
 RABBITMQ_SSL=False
 
+# Copy pasted (with impunity) from domainsage.settings
 try:
-    # TODO maybe support specific file with config instead of just path
-    # http://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
     if 'RABBITPY_SETTINGS_DIR' in os.environ:
         local_settings_dir = os.path.realpath(
             os.path.expanduser(
@@ -18,3 +17,12 @@ try:
     from local_settings import *
 except ImportError:
     pass
+
+conn_dict = {
+    'hostname': RABBITMQ_SERVICE_HOST,
+    'port': RABBITMQ_SERVICE_PORT,
+    'userid': RABBITMQ_USER,
+    'password': RABBITMQ_PASSWORD,
+    'ssl': RABBITMQ_SSL,
+    'virtual_host': RABBITMQ_VHOST,
+}

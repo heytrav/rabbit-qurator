@@ -1,5 +1,5 @@
 
-from rabbit.queuerate import Queuerator
+from rabbitpy.queuerate import Queuerator
 
 
 q = Queuerator(legacy=False)

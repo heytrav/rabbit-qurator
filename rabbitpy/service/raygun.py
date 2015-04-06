@@ -1,7 +1,7 @@
 import os
 import http.client
 
-from rabbit.queuerate import Queuerator
+from rabbitpy.queuerate import Queuerator
 from utils.logging import get_logger
 
 logger = get_logger('raygun')

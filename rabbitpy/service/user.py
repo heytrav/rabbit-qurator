@@ -2,7 +2,7 @@ import logging
 
 from kombu import Exchange
 
-from rabbit.queuerate import Queuerator
+from rabbitpy.queuerate import Queuerator
 
 from domainsage.models import User
 from domainsage.services import couch_connect

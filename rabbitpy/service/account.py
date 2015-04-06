@@ -3,7 +3,7 @@ import logging
 from domainsage.models import Account
 from domainsage.services import couch_connect
 
-from rabbit.queuerate import Queuerator
+from rabbitpy.queuerate import Queuerator
 
 logger = logging.getLogger(__name__)
 
