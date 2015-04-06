@@ -4,7 +4,7 @@ from kombu.common import uuid, collect_replies
 from amqp import exceptions
 
 
-from rabbitpy.settings import conn_dict
+from rabbitpy.settings import CONN_DICT
 from rabbitpy import get_logger
 from rabbitpy.exchange import exchange as default_exchange
 
@@ -48,7 +48,7 @@ class RpcClient(object):
         """
 
         logger.debug("Client queue: {!r}".format(self._client_queue))
-        with Connection(**conn_dict) as conn:
+        with Connection(**CONN_DICT) as conn:
             client_queue = Queue(self._client_queue,
                                  durable=self._exchange.durable,
                                  exchange=self._exchange,
@@ -184,7 +184,7 @@ class RpcClient(object):
         if properties is None:
             properties = {}
         logger.info("Reply info: {!r}".format(properties))
-        with Connection(**conn_dict) as conn:
+        with Connection(**CONN_DICT) as conn:
             with producers[conn].acquire(block=True) as producer:
                 try:
                     producer.publish(payload,

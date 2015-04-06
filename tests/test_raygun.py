@@ -9,7 +9,7 @@ from kombu.pools import producers
 
 from raygun4py import raygunprovider, raygunmsgs
 
-from rabbitpy.rpc import conn_dict
+from rabbitpy.rpc import CONN_DICT
 from rabbitpy.exchange import task_exchange
 
 from tests.test_rabbit import TestRabbitpy
@@ -88,14 +88,14 @@ class TestRaygun(TestRabbitpy):
                 .build()
 
             payload = jsonpickle.encode(msg, unpicklable=False)
-            with Connection(**conn_dict) as conn:
+            with Connection(**CONN_DICT) as conn:
                 with producers[conn].acquire(block=True) as producer:
                     producer.publish(payload,
                                      serializer='json',
                                      exchange=task_exchange,
                                      declare=[task_exchange],
                                      routing_key='test.raygun')
-        with Connection(**conn_dict) as conn:
+        with Connection(**CONN_DICT) as conn:
             with Consumer(conn, queues, callbacks=callbacks):
                 conn.drain_events(timeout=1)
 

@@ -6,7 +6,7 @@ from kombu.pools import producers
 from kombu.common import send_reply
 from amqp import exceptions
 
-from rabbitpy.settings import conn_dict
+from rabbitpy.settings import CONN_DICT
 from rabbitpy import get_logger
 from rabbitpy.exchange import exchange as default_exchange
 from rabbitpy.exchange import task_exchange as default_task_exchange
@@ -198,7 +198,7 @@ class Queuerator(object):
             message.properties['reply_to'],
             message.properties['correlation_id']
         ))
-        with Connection(**conn_dict) as conn:
+        with Connection(**CONN_DICT) as conn:
             with producers[conn].acquire(block=True) as producer:
                 # Assume reply_to and correlation_id in message.
 
@@ -229,10 +229,10 @@ class Queuerator(object):
     def run(self):
         from kombu import Connection
 
-        from rpc import conn_dict
+        from rpc.settings import CONN_DICT
         from rabbitpy.worker import Worker
 
-        with Connection(**conn_dict) as conn:
+        with Connection(**CONN_DICT) as conn:
             try:
                 worker = Worker(conn, self)
                 worker.run()
