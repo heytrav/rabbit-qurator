@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from kombu import Connection, Exchange, Queue, Consumer
 
-from rabbitpy.rpc import conn_dict
+from rabbitpy.settings import CONN_DICT
 
 
 class TestRabbitpy(TestCase):
@@ -34,7 +34,7 @@ class TestRabbitpy(TestCase):
         :returns: Connection object
 
         """
-        c = Connection(**conn_dict)
+        c = Connection(**CONN_DICT)
         return c
 
     def pre_declare_queues(self, queues):
