@@ -5,7 +5,7 @@ from amqp import exceptions
 
 
 from rabbitpy.settings import conn_dict
-from rabbitpy.utils.logging import get_logger
+from rabbitpy import get_logger
 from rabbitpy.exchange import exchange as default_exchange
 
 logger = get_logger(__name__)

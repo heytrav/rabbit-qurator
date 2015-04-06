@@ -59,4 +59,3 @@ CONN_DICT = {
     'ssl': RABBITMQ_SSL,
     'virtual_host': RABBITMQ_VHOST,
 }
-

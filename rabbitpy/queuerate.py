@@ -7,7 +7,7 @@ from kombu.common import send_reply
 from amqp import exceptions
 
 from rabbitpy.settings import conn_dict
-from rabbitpy.utils.logging import get_logger
+from rabbitpy import get_logger
 from rabbitpy.exchange import exchange as default_exchange
 from rabbitpy.exchange import task_exchange as default_task_exchange
 logger = get_logger(__name__)
