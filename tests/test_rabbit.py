@@ -10,10 +10,7 @@ class TestRabbitpy(TestCase):
     """Superclass for rabbitpy testing stuff"""
 
     def setUp(self):
-        """Constructor
-        :returns: TODO
-
-        """
+        """Constructor """
         self._connection = self.connection_factory()
         self._exchange = Exchange('testrabbitpy',
                                   channel=self._connection,
