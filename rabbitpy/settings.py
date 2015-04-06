@@ -1,13 +1,22 @@
 import os
-
-RABBITMQ_SERVICE_HOST=os.environ['RABBITMQ_SERVICE_HOST']
-RABBITMQ_SERVICE_PORT=os.environ['RABBITMQ_SERVICE_PORT']
-RABBITMQ_USER=os.environ['RABBITMQ_USER']
-RABBITMQ_PASSWORD=os.environ['RABBITMQ_PASSWORD']
-RABBITMQ_VHOST=os.environ['RABBITMQ_VHOST']
-RABBITMQ_SSL=False
+RABBITMQ_SERVICE_HOST=None
+RABBITMQ_SERVICE_PORT=None
+RABBITMQ_USER=None
+RABBITMQ_PASSWORD=None
+RABBITMQ_VHOST=None
+RABBITMQ_SSL=None
+try:
+    RABBITMQ_SERVICE_HOST=os.environ['RABBITMQ_SERVICE_HOST']
+    RABBITMQ_SERVICE_PORT=os.environ['RABBITMQ_SERVICE_PORT']
+    RABBITMQ_USER=os.environ['RABBITMQ_USER']
+    RABBITMQ_PASSWORD=os.environ['RABBITMQ_PASSWORD']
+    RABBITMQ_VHOST=os.environ['RABBITMQ_VHOST']
+    RABBITMQ_SSL=False
+except KeyError as ke:
+    pass
 
 LOGGING_CONFIG = {
+    "version": 1,
     "formatters": {
         "simple":{
             "format": "%(pathname)s:line %(lineno)d [%(levelname)s]: %(name)s - %(message)s"
@@ -15,11 +24,9 @@ LOGGING_CONFIG = {
     },
     "handlers": {
         "consoleHandler": {
-            "class": "StreamHandler"
+            "class": "logging.StreamHandler",
             "formatter": "simple",
             "level": "DEBUG",
-            "class": "StreamHandler",
-            "args": "(sys.stdout,)"
         }
     },
     "loggers": {

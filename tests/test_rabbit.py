@@ -12,10 +12,14 @@ class TestRabbitpy(TestCase):
     def setUp(self):
         """Constructor """
         self._connection = self.connection_factory()
-        self._exchange = Exchange('testrabbitpy',
-                                  channel=self._connection,
-                                  type='direct',
-                                  durable=False)
+        try:
+            self._exchange = Exchange('testrabbitpy',
+                                    channel=self._connection,
+                                    type='direct',
+                                    durable=False)
+        except OSError as derp:
+            if type(derp.args[0]) is ConnectionRefusedError:
+                self.skipTest("Not connected to RabbitMQ. Skipping.")
 
     def tearDown(self):
         """tear down unit tests """
