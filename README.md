@@ -1,6 +1,6 @@
 #rabbitpy
 
-** WORK IN PROGRESS **
+**WORK IN PROGRESS**
 
 A library for creating RPC tools
 
@@ -15,8 +15,14 @@ into RPC style endpoints or fire-and-forget tasks.
 
 
 ```
-pip install rabbitpy  
+pip install \
+    git+https://<oauth token>:x-oauth-basic@github.com/ideegeo/rabbitpy.git@<tag or commit sha>
 ```
+
+*Note*:
+* `<oauth token>` can be the same one used in some of our other repositories.
+* Currently this is WIP so the commit sha or tag used to install may change.
+  Use the branch/tag selection above to find the current latest before using.
 
 #Usage
 
@@ -112,8 +118,7 @@ This expects the client to send the following to the `awesome.my_rpc_method` que
 ##Environment
 
 In order to interact with RabbitMQ, you need to be sure that the following
-environment variables are set when starting the docker container with
-`./launch.sh`:
+environment variables are set when using rabbitpy:
 
 1. `RABBITMQ_TRANSPORT_SERVICE_HOST`
 1. `RABBITMQ_TRANSPORT_SERVICE_PORT`
