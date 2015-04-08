@@ -20,6 +20,7 @@ class TestRabbitpy(TestCase):
         except OSError as derp:
             if type(derp.args[0]) is ConnectionRefusedError:
                 self.skipTest("Not connected to RabbitMQ. Skipping.")
+            raise
 
     def tearDown(self):
         """tear down unit tests """
