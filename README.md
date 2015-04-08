@@ -1,23 +1,52 @@
 #rabbitpy
 
-Another place for rabbits to play
+** WORK IN PROGRESS **
+
+A library for creating RPC tools
 
 
 #Description
 
-Rabbits in Python. At this stage just experimental stuff.
+This library is intended to support microservices that need to interface with
+RabbitMQ.  It provides a couple wrappers that can be used to turn functions
+into RPC style endpoints or fire-and-forget tasks.
 
-#Setup
-
-    docker build -t docker.domarino.com/rabbitpy .
+#Installation
 
 
+```
+pip install rabbitpy  
+```
 
-#Running
+#Usage
 
-    docker run -i -t -v /usr/local/d8o/rabbitpy:/usr/local/d8o/rabbitpy:rw docker.domarino.com/rabbitpy
-    root@aa9bdd7dafab:/usr/local/d8o/rabbitpy# workon rabbitpy
-    (rabbitpy)root@aa9bdd7dafab:/usr/local/d8o/rabbitpy#
+##Consumer
+
+
+
+```python
+from rabbitpy.queurate import Queuerator
+consumer = Queuerator(legacy=False, exchange=some_exchange)
+
+@consumer.rpc
+def do_something(*args, **kwargs):
+    # some logic
+    return {"message": "Hello"}
+
+```
+
+##Client
+
+You can implement clients however you like. Here is an example:
+```python
+from rabbitpy.rpc.client import RpcClient
+
+client = RpcClient(exchange=some_exchange)
+client.rpc('do_something', {"msg": "Test"})
+for reply in client.retrieve_messages():
+    # reply somewhere in here
+
+```
 
 
 #Synopsis
@@ -86,18 +115,13 @@ In order to interact with RabbitMQ, you need to be sure that the following
 environment variables are set when starting the docker container with
 `./launch.sh`:
 
-1. `AMQP_USER`
-2. `AMQP_PASS`
-3. `AMQP_VHOST`
+1. `RABBITMQ_TRANSPORT_SERVICE_HOST`
+1. `RABBITMQ_TRANSPORT_SERVICE_PORT`
+1. `RABBITMQ_USER`
+1. `RABBITMQ_PASS`
+1. `RABBITMQ_VHOST`
 
-Please refer to IWMN project documentation for `iwmn-base`, `hase`, or the
-`docker_vm` repository for information on what these should be. 
 
-##Supervisor
-
-See config files under `supervisor/`
-
-     supervisord -c /etc/supervisor/supervisord.conf
 
 ##Miscellaneous information
 * The *hase-like* implementation is on by default.
