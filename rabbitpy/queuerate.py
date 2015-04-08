@@ -229,7 +229,7 @@ class Queuerator(object):
     def run(self):
         from kombu import Connection
 
-        from rpc.settings import CONN_DICT
+        from .rpc.settings import CONN_DICT
         from rabbitpy.worker import Worker
 
         with Connection(**CONN_DICT) as conn:

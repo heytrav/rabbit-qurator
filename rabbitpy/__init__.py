@@ -4,6 +4,7 @@ import logging.config
 
 from rabbitpy.settings import LOGGING_CONFIG
 
+
 def get_logger(name=None):
     """Top level logger initialiser thingy.
 
