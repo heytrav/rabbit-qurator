@@ -10,4 +10,4 @@ setup(name='rabbitpy',
       author='Travis Holton',
       author_email='travis@ideegeo.com',
       version=version,
-      packages=['rabbitpy', 'rabbitpy.rpc'])
+      packages=['rabbitpy', 'rabbitpy.rpc', 'rabbitpy.tests'])
