@@ -5,7 +5,7 @@ from kombu.utils import nested
 from rabbitpy.queuerate import Queuerator
 from rabbitpy.rpc.client import RpcClient
 
-from tests.test_rabbit import TestRabbitpy
+from .test_rabbit import TestRabbitpy
 
 
 class TestAbstractMQ(TestRabbitpy):
