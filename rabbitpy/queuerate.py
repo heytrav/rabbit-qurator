@@ -6,8 +6,8 @@ from kombu.pools import producers
 from kombu.common import send_reply
 from amqp import exceptions
 
-from .settings import CONN_DICT
 from . import get_logger
+from .settings import CONN_DICT
 from .exchange import exchange as default_exchange
 from .exchange import task_exchange as default_task_exchange
 logger = get_logger(__name__)
@@ -229,8 +229,8 @@ class Queuerator(object):
     def run(self):
         from kombu import Connection
 
-        from .rpc.settings import CONN_DICT
-        from rabbitpy.worker import Worker
+        from .settings import CONN_DICT
+        from .worker import Worker
 
         with Connection(**CONN_DICT) as conn:
             try:
