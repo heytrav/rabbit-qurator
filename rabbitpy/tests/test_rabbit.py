@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from kombu import Connection, Exchange, Queue, Consumer
 
-from rabbitpy.settings import CONN_DICT
+from ..settings import CONN_DICT
 
 
 class TestRabbitpy(TestCase):
@@ -36,6 +36,7 @@ class TestRabbitpy(TestCase):
         :returns: Connection object
 
         """
+        print("Connection: {!r}".format(CONN_DICT))
         c = Connection(**CONN_DICT)
         return c
 
