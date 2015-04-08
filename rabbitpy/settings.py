@@ -1,24 +1,26 @@
 import os
-RABBITMQ_TRANSPORT_SERVICE_HOST=None
-RABBITMQ_TRANSPORT_SERVICE_PORT=None
-RABBITMQ_USER=None
-RABBITMQ_PASSWORD=None
-RABBITMQ_VHOST=None
-RABBITMQ_SSL=None
+RABBITMQ_TRANSPORT_SERVICE_HOST = None
+RABBITMQ_TRANSPORT_SERVICE_PORT = None
+RABBITMQ_USER = None
+RABBITMQ_PASSWORD = None
+RABBITMQ_VHOST = None
+RABBITMQ_SSL = None
 try:
-    RABBITMQ_TRANSPORT_SERVICE_HOST=os.environ['RABBITMQ_TRANSPORT_SERVICE_HOST']
-    RABBITMQ_TRANSPORT_SERVICE_PORT=os.environ['RABBITMQ_TRANSPORT_SERVICE_PORT']
-    RABBITMQ_USER=os.environ['RABBITMQ_USER']
-    RABBITMQ_PASSWORD=os.environ['RABBITMQ_PASSWORD']
-    RABBITMQ_VHOST=os.environ['RABBITMQ_VHOST']
-    RABBITMQ_SSL=False
+    RABBITMQ_TRANSPORT_SERVICE_HOST = os.environ[
+        'RABBITMQ_TRANSPORT_SERVICE_HOST']
+    RABBITMQ_TRANSPORT_SERVICE_PORT = os.environ[
+        'RABBITMQ_TRANSPORT_SERVICE_PORT']
+    RABBITMQ_USER = os.environ['RABBITMQ_USER']
+    RABBITMQ_PASSWORD = os.environ['RABBITMQ_PASSWORD']
+    RABBITMQ_VHOST = os.environ['RABBITMQ_VHOST']
+    RABBITMQ_SSL = False
 except KeyError as ke:
     pass
 
 LOGGING_CONFIG = {
     "version": 1,
     "formatters": {
-        "simple":{
+        "simple": {
             "format": "%(pathname)s:line %(lineno)d [%(levelname)s]: %(name)s - %(message)s"
         }
     },
@@ -39,7 +41,7 @@ LOGGING_CONFIG = {
             "handlers": ["consoleHandler"],
             "propagate": 1
         },
-        "rabbitpy.rpc" : {
+        "rabbitpy.rpc": {
             "level": "DEBUG",
             "handlers": ["consoleHandler"],
             "propagate": 1

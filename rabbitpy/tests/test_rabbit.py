@@ -14,11 +14,11 @@ class TestRabbitpy(TestCase):
         self._connection = self.connection_factory()
         try:
             self._exchange = Exchange('testrabbitpy',
-                                    channel=self._connection,
-                                    type='direct',
-                                    durable=False)
+                                      channel=self._connection,
+                                      type='direct',
+                                      durable=False)
         except OSError as derp:
-            if type(derp.args[0]) is ConnectionRefusedError:
+            if isinstance(derp.args[0], ConnectionRefusedError):
                 self.skipTest("Not connected to RabbitMQ. Skipping.")
             raise
 
