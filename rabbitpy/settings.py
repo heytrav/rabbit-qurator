@@ -1,19 +1,11 @@
 import os
-RABBITMQ_TRANSPORT_SERVICE_HOST = None
-RABBITMQ_TRANSPORT_SERVICE_PORT = None
-RABBITMQ_USER = None
-RABBITMQ_PASSWORD = None
-RABBITMQ_VHOST = None
-RABBITMQ_SSL = None
-try:
-    RABBITMQ_TRANSPORT_SERVICE_HOST = os.environ['RABBITMQ_TRANSPORT_SERVICE_HOST']
-    RABBITMQ_TRANSPORT_SERVICE_PORT = os.environ['RABBITMQ_TRANSPORT_SERVICE_PORT']
-    RABBITMQ_USER = os.environ['RABBITMQ_USER']
-    RABBITMQ_PASSWORD = os.environ['RABBITMQ_PASSWORD']
-    RABBITMQ_VHOST = os.environ['RABBITMQ_VHOST']
-    RABBITMQ_SSL = False
-except KeyError as ke:
-    pass
+
+RABBITMQ_TRANSPORT_SERVICE_HOST = os.environ.get('RABBITMQ_TRANSPORT_SERVICE_HOST', 'localhost')
+RABBITMQ_TRANSPORT_SERVICE_PORT = os.environ.get('RABBITMQ_TRANSPORT_SERVICE_PORT', 5672)
+RABBITMQ_USER = os.environ.get('RABBITMQ_USER')
+RABBITMQ_PASSWORD = os.environ.get('RABBITMQ_PASSWORD')
+RABBITMQ_VHOST = os.environ.get('RABBITMQ_VHOST')
+RABBITMQ_SSL = os.environ.get('RABBITMQ_SSL', False)
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -57,6 +49,11 @@ try:
     from local_settings import *
 except ImportError:
     pass
+
+for mq_key in [RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_VHOST]:
+    if mq_key is None:
+        raise Exception('Must define RABBITMQ_USER, RABBITMQ_PASSWORD and '
+                        'RABBITMQ_VHOST.')
 
 CONN_DICT = {
     'hostname': RABBITMQ_TRANSPORT_SERVICE_HOST,
