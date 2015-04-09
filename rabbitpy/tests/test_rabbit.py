@@ -59,13 +59,13 @@ class TestRabbitpy(TestCase):
         self.queues = declared_queues
 
     def pull_messages(self,
-                      queuerator,
+                      qurator,
                       queues=None,
                       callbacks=None,
                       command=None):
         """Helper to pull messages from a particular queue.
 
-        :queuerator: Queuerator object
+        :qurator: Qurator object
         :command: queue set to pull from
         :callbacks: callbacks from
         """
@@ -75,8 +75,8 @@ class TestRabbitpy(TestCase):
                             "Please provide either both queues and callbacks "
                             "or a command to check")
         if queues is None:
-            queues = queuerator.queues[command]
+            queues = qurator.queues[command]
         if callbacks is None:
-            callbacks = queuerator.callbacks[command]
+            callbacks = qurator.callbacks[command]
         with Consumer(self._connection, queues, callbacks=callbacks):
             self._connection.drain_events(timeout=1)

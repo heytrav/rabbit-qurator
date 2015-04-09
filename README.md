@@ -29,8 +29,8 @@ pip install \
 
 
 ```python
-from rabbitpy.queurate import Queuerator
-consumer = Queuerator(legacy=False, exchange=some_exchange)
+from rabbitpy.queue import Qurator
+consumer = Qurator(legacy=False, exchange=some_exchange)
 
 @consumer.rpc
 def do_something(*args, **kwargs):
@@ -58,9 +58,9 @@ for reply in client.retrieve_messages():
 
 Create a hase like queue:
 ```python
-from rabbitpy.queuerate import Queuerator
+from rabbitpy.queue import Qurator
 
-legacy_consumer = Queuerator(queue='api.some.queue')
+legacy_consumer = Qurator(queue='api.some.queue')
 
 @legacy_consumer.rpc
 def my_rpc_method(data);
@@ -88,7 +88,7 @@ This expects the client to send something like the following to the queue `api.s
 Alternative method for defining queues:
 
 ```python
-consumer = Queuerator(legacy=False,
+consumer = Qurator(legacy=False,
                       prefix='awesome')
 
 @consumer.rpc

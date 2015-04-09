@@ -13,7 +13,7 @@ from .exchange import task_exchange as default_task_exchange
 logger = get_logger(__name__)
 
 
-class Queuerator(object):
+class Qurator(object):
 
     """Manage Queue and callbacks for a set of Consumers"""
 
@@ -46,7 +46,7 @@ class Queuerator(object):
                                 " for legacy implementation.")
 
         self._queue = queue
-        logger.debug("Initialising Queuerator class")
+        logger.debug("Initialising Qurator class")
 
     def _error(self, error, message):
         """Return an error if caller sent an unknown command.
