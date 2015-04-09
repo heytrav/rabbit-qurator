@@ -2,11 +2,9 @@
 [run]
 branch = True
 source =
-    rpc
-    service
-    rabbit
+    rabbitpy
 omit = 
-    tests/*
+    rabbitpy/tests/*
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -28,6 +26,4 @@ exclude_lines =
 
 ignore_errors = True
 include =
-    rpc*
-    service*
-    rabbit*
+    rabbitpy*

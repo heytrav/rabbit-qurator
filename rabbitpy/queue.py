@@ -6,14 +6,14 @@ from kombu.pools import producers
 from kombu.common import send_reply
 from amqp import exceptions
 
-from rpc import conn_dict
-from utils.logging import get_logger
-from rabbit.exchange import exchange as default_exchange
-from rabbit.exchange import task_exchange as default_task_exchange
+from . import get_logger
+from .settings import CONN_DICT
+from .exchange import exchange as default_exchange
+from .exchange import task_exchange as default_task_exchange
 logger = get_logger(__name__)
 
 
-class Queuerator(object):
+class Qurator(object):
 
     """Manage Queue and callbacks for a set of Consumers"""
 
@@ -46,7 +46,7 @@ class Queuerator(object):
                                 " for legacy implementation.")
 
         self._queue = queue
-        logger.debug("Initialising Queuerator class")
+        logger.debug("Initialising Qurator class")
 
     def _error(self, error, message):
         """Return an error if caller sent an unknown command.
@@ -198,7 +198,7 @@ class Queuerator(object):
             message.properties['reply_to'],
             message.properties['correlation_id']
         ))
-        with Connection(**conn_dict) as conn:
+        with Connection(**CONN_DICT) as conn:
             with producers[conn].acquire(block=True) as producer:
                 # Assume reply_to and correlation_id in message.
 
@@ -229,10 +229,10 @@ class Queuerator(object):
     def run(self):
         from kombu import Connection
 
-        from rpc import conn_dict
-        from rabbit.worker import Worker
+        from .settings import CONN_DICT
+        from .worker import Worker
 
-        with Connection(**conn_dict) as conn:
+        with Connection(**CONN_DICT) as conn:
             try:
                 worker = Worker(conn, self)
                 worker.run()

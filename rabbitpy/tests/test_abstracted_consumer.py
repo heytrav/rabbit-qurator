@@ -2,10 +2,10 @@ from unittest.mock import MagicMock, ANY
 from kombu import Consumer, Queue
 from kombu.utils import nested
 
-from rabbit.queuerate import Queuerator
-from rpc.client import RpcClient
+from ..queue import Qurator
+from ..rpc.client import RpcClient
 
-from tests.test_rabbit import TestRabbitpy
+from .test_rabbit import TestRabbitpy
 
 
 class TestAbstractMQ(TestRabbitpy):
@@ -42,7 +42,7 @@ class TestAbstractMQ(TestRabbitpy):
         self.pre_declare_queues(['rabbitpy.moffa',
                                  'rabbitpy.boffa',
                                  'boffa.moffa'])
-        consumer = Queuerator(legacy=False,
+        consumer = Qurator(legacy=False,
                               exchange=self._exchange)
 
         @consumer.rpc
@@ -73,7 +73,7 @@ class TestAbstractMQ(TestRabbitpy):
         """Check behaviour of wrapped function."""
 
         self.pre_declare_queues(['rabbitpy.blah', 'blah.client'])
-        consumer = Queuerator(legacy=False,
+        consumer = Qurator(legacy=False,
                               exchange=self._exchange)
         checkit = MagicMock(return_value={"msg": "Got reply"})
         # Now mock it!
@@ -108,7 +108,7 @@ class TestAbstractMQ(TestRabbitpy):
     def test_rpc_client(self):
         """Check behaviour of client """
         self.pre_declare_queues(['rabbitpy.booya', 'booya.client'])
-        consumer = Queuerator(legacy=False,
+        consumer = Qurator(legacy=False,
                               exchange=self._exchange)
 
         @consumer.rpc
@@ -136,10 +136,10 @@ class TestAbstractMQ(TestRabbitpy):
                                  'yeahimafunction.client'])
         # This shouldn't work.
         with self.assertRaises(Exception):
-            consumer = Queuerator()
+            consumer = Qurator()
 
         # This should.
-        legacy_consumer = Queuerator(queue='testapi.test.queue',
+        legacy_consumer = Qurator(queue='testapi.test.queue',
                                      exchange=self._exchange)
         check_function = MagicMock(return_value={"result": "OK"})
         check_another_function = MagicMock(return_value={"result": "D'OH"})
@@ -207,7 +207,7 @@ class TestAbstractMQ(TestRabbitpy):
         data_to_send = {"x": "1"}
 
         server_queue = 'random.test.queue'
-        q = Queuerator(queue=server_queue,
+        q = Qurator(queue=server_queue,
                        exchange=self._exchange)
 
         @q.rpc
@@ -242,7 +242,7 @@ class TestAbstractMQ(TestRabbitpy):
             type='direct')
         self.pre_declare_queues(['default.queue.thing',
                                  'testing_default_exchange.client'])
-        q = Queuerator(exchange=self._exchange,
+        q = Qurator(exchange=self._exchange,
                        queue='default.queue.thing')
 
         @q.rpc
@@ -270,7 +270,7 @@ class TestAbstractMQ(TestRabbitpy):
         """Task setup """
         from kombu import Exchange
         e = Exchange('', durable=False, type='direct')
-        q = Queuerator(task_exchange=e, queue='test.nondurable_exchange.queue')
+        q = Qurator(task_exchange=e, queue='test.nondurable_exchange.queue')
 
         with self.assertRaises(Exception):
             @q.task
@@ -297,7 +297,7 @@ class TestAbstractMQ(TestRabbitpy):
         self.queues.append(consumer_queue)
         self.queues.append(client_queue)
 
-        q = Queuerator(task_exchange=e, queue='test.task.fail')
+        q = Qurator(task_exchange=e, queue='test.task.fail')
 
         @q.task
         def fail(data):
@@ -338,7 +338,7 @@ class TestAbstractMQ(TestRabbitpy):
         client_queue.declare()
         self.queues.append(client_queue)
 
-        q = Queuerator(task_exchange=e, queue='test.task.succeed')
+        q = Qurator(task_exchange=e, queue='test.task.succeed')
 
         @q.task
         def succeed(data):

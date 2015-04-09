@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, ANY
 
-from rpc.client import RpcClient
+from rabbitpy.rpc.client import RpcClient
 
 
 class TestClient(TestCase):

@@ -61,3 +61,4 @@ target/
 *.un~
 
 *.logstash-forwarder
+MANIFEST

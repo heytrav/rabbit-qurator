@@ -1,23 +1,56 @@
 #rabbitpy
 
-Another place for rabbits to play
+A library for creating RPC tools
 
 
 #Description
 
-Rabbits in Python. At this stage just experimental stuff.
+This library is intended to support microservices that need to interface with
+RabbitMQ.  It provides a couple wrappers that can be used to turn functions
+into RPC style endpoints or fire-and-forget tasks.
 
-#Setup
-
-    docker build -t docker.domarino.com/rabbitpy .
+#Installation
 
 
+```
+pip install \
+    git+https://<oauth token>:x-oauth-basic@github.com/ideegeo/rabbitpy.git@<tag or commit sha>
+```
 
-#Running
+*Note*:
+* `<oauth token>` can be the same one used in some of our other repositories.
+* Currently this is WIP so the commit sha or tag used to install may change.
+  Use the branch/tag selection above to find the current latest before using.
 
-    docker run -i -t -v /usr/local/d8o/rabbitpy:/usr/local/d8o/rabbitpy:rw docker.domarino.com/rabbitpy
-    root@aa9bdd7dafab:/usr/local/d8o/rabbitpy# workon rabbitpy
-    (rabbitpy)root@aa9bdd7dafab:/usr/local/d8o/rabbitpy#
+#Usage
+
+##Consumer
+
+
+
+```python
+from rabbitpy.queue import Qurator
+consumer = Qurator(legacy=False, exchange=some_exchange)
+
+@consumer.rpc
+def do_something(*args, **kwargs):
+    # some logic
+    return {"message": "Hello"}
+
+```
+
+##Client
+
+You can implement clients however you like. Here is an example:
+```python
+from rabbitpy.rpc.client import RpcClient
+
+client = RpcClient(exchange=some_exchange)
+client.rpc('do_something', {"msg": "Test"})
+for reply in client.retrieve_messages():
+    # reply somewhere in here
+
+```
 
 
 #Synopsis
@@ -25,9 +58,9 @@ Rabbits in Python. At this stage just experimental stuff.
 
 Create a hase like queue:
 ```python
-from rabbit.queuerate import Queuerator
+from rabbitpy.queue import Qurator
 
-legacy_consumer = Queuerator(queue='api.some.queue')
+legacy_consumer = Qurator(queue='api.some.queue')
 
 @legacy_consumer.rpc
 def my_rpc_method(data);
@@ -55,7 +88,7 @@ This expects the client to send something like the following to the queue `api.s
 Alternative method for defining queues:
 
 ```python
-consumer = Queuerator(legacy=False,
+consumer = Qurator(legacy=False,
                       prefix='awesome')
 
 @consumer.rpc
@@ -83,21 +116,15 @@ This expects the client to send the following to the `awesome.my_rpc_method` que
 ##Environment
 
 In order to interact with RabbitMQ, you need to be sure that the following
-environment variables are set when starting the docker container with
-`./launch.sh`:
+environment variables are set when using rabbitpy:
 
-1. `AMQP_USER`
-2. `AMQP_PASS`
-3. `AMQP_VHOST`
+1. `RABBITMQ_TRANSPORT_SERVICE_HOST`
+1. `RABBITMQ_TRANSPORT_SERVICE_PORT`
+1. `RABBITMQ_USER`
+1. `RABBITMQ_PASS`
+1. `RABBITMQ_VHOST`
 
-Please refer to IWMN project documentation for `iwmn-base`, `hase`, or the
-`docker_vm` repository for information on what these should be. 
 
-##Supervisor
-
-See config files under `supervisor/`
-
-     supervisord -c /etc/supervisor/supervisord.conf
 
 ##Miscellaneous information
 * The *hase-like* implementation is on by default.

@@ -1,5 +1,8 @@
+# main rabbitpy module
 import logging
 import logging.config
+
+from rabbitpy.settings import LOGGING_CONFIG
 
 
 def get_logger(name=None):
@@ -9,6 +12,6 @@ def get_logger(name=None):
     :returns: logging logger object
 
     """
-    logging.config.fileConfig('logging.conf')
+    logging.config.dictConfig(LOGGING_CONFIG)
     logger = logging.getLogger(name)
     return logger

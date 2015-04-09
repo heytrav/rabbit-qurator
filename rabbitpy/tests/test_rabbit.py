@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from kombu import Connection, Exchange, Queue, Consumer
 
-from rpc import conn_dict
+from ..settings import CONN_DICT
 
 
 class TestRabbitpy(TestCase):
@@ -10,15 +10,17 @@ class TestRabbitpy(TestCase):
     """Superclass for rabbitpy testing stuff"""
 
     def setUp(self):
-        """Constructor
-        :returns: TODO
-
-        """
+        """Constructor """
         self._connection = self.connection_factory()
-        self._exchange = Exchange('testrabbitpy',
-                                  channel=self._connection,
-                                  type='direct',
-                                  durable=False)
+        try:
+            self._exchange = Exchange('testrabbitpy',
+                                      channel=self._connection,
+                                      type='direct',
+                                      durable=False)
+        except OSError as derp:
+            if isinstance(derp.args[0], ConnectionRefusedError):
+                self.skipTest("Not connected to RabbitMQ. Skipping.")
+            raise
 
     def tearDown(self):
         """tear down unit tests """
@@ -34,7 +36,8 @@ class TestRabbitpy(TestCase):
         :returns: Connection object
 
         """
-        c = Connection(**conn_dict)
+        print("Connection: {!r}".format(CONN_DICT))
+        c = Connection(**CONN_DICT)
         return c
 
     def pre_declare_queues(self, queues):
@@ -56,13 +59,13 @@ class TestRabbitpy(TestCase):
         self.queues = declared_queues
 
     def pull_messages(self,
-                      queuerator,
+                      qurator,
                       queues=None,
                       callbacks=None,
                       command=None):
         """Helper to pull messages from a particular queue.
 
-        :queuerator: Queuerator object
+        :qurator: Qurator object
         :command: queue set to pull from
         :callbacks: callbacks from
         """
@@ -72,8 +75,8 @@ class TestRabbitpy(TestCase):
                             "Please provide either both queues and callbacks "
                             "or a command to check")
         if queues is None:
-            queues = queuerator.queues[command]
+            queues = qurator.queues[command]
         if callbacks is None:
-            callbacks = queuerator.callbacks[command]
+            callbacks = qurator.callbacks[command]
         with Consumer(self._connection, queues, callbacks=callbacks):
             self._connection.drain_events(timeout=1)
