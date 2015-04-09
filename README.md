@@ -14,7 +14,8 @@ into RPC style endpoints or fire-and-forget tasks.
 
 ```
 pip install \
-    git+https://<oauth token>:x-oauth-basic@github.com/ideegeo/rabbitpy.git@v0.2.0```
+    git+https://<oauth token>:x-oauth-basic@github.com/ideegeo/rabbitpy.git@v0.2.0
+```
 
 *Note*:
 * `<oauth token>` can be the same one used in some of our other repositories.
