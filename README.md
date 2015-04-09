@@ -1,7 +1,5 @@
 #rabbitpy
 
-**WORK IN PROGRESS**
-
 A library for creating RPC tools
 
 
