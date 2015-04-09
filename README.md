@@ -14,13 +14,11 @@ into RPC style endpoints or fire-and-forget tasks.
 
 ```
 pip install \
-    git+https://<oauth token>:x-oauth-basic@github.com/ideegeo/rabbitpy.git@<tag or commit sha>
-```
+    git+https://<oauth token>:x-oauth-basic@github.com/ideegeo/rabbitpy.git@v0.2.0```
 
 *Note*:
 * `<oauth token>` can be the same one used in some of our other repositories.
-* Currently this is WIP so the commit sha or tag used to install may change.
-  Use the branch/tag selection above to find the current latest before using.
+* Check repository for latest tag.
 
 #Usage
 
