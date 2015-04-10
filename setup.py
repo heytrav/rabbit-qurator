@@ -1,7 +1,8 @@
 from distutils.core import setup
 from pip.req import parse_requirements
+import uuid
 import subprocess
-install_reqs = parse_requirements('requirements.txt')
+install_reqs = parse_requirements('requirements.txt', session=str(uuid.uuid4()))
 reqs = [str(ir.req) for ir in install_reqs]
 
 version = subprocess.Popen(
