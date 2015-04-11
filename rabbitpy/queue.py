@@ -100,7 +100,9 @@ class Qurator(object):
             self.callbacks[name] = []
         if self._legacy:
             self.dispatch[name] = callback
-            self.callbacks[name].append(self._hase_dispatch)
+            # Expect that there will only be one callback with this particular
+            # name.
+            self.callbacks[name] = [self._hase_dispatch]
             # Set queue_name to whatever class was instantiated with.
             queue_name = self._queue
         else:
