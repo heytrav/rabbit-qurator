@@ -63,4 +63,5 @@ CONN_DICT = {
     'password': RABBITMQ_PASSWORD,
     'ssl': RABBITMQ_SSL,
     'virtual_host': RABBITMQ_VHOST,
+    'heartbeat': 2
 }
