@@ -184,6 +184,7 @@ class RpcClient(object):
         if properties is None:
             properties = {}
         logger.info("Reply info: {!r}".format(properties))
+        logger.info("Using connection: {!r}".format(CONN_DICT))
         with Connection(**CONN_DICT) as conn:
             with producers[conn].acquire(block=True) as producer:
                 try:

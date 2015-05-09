@@ -14,4 +14,5 @@ def get_logger(name=None):
     """
     logging.config.dictConfig(LOGGING_CONFIG)
     logger = logging.getLogger(name)
+    logger.debug("Just created logger with config {!r}".format(LOGGING_CONFIG))
     return logger
