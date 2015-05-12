@@ -36,6 +36,8 @@ class RpcClient(object):
         self._exchange = exchange
         self.reply = None
         self._client_queue = client_queue
+        self._queue = None
+        self._conn = Connection(**CONN_DICT)
 
     def retrieve_messages(self):
         """Process the message queue and ack the one that matches the
@@ -48,27 +50,23 @@ class RpcClient(object):
         """
 
         logger.debug("Client queue: {!r}".format(self._client_queue))
-        with Connection(**CONN_DICT) as conn:
-            client_queue = Queue(self._client_queue,
-                                 durable=self._exchange.durable,
-                                 exchange=self._exchange,
-                                 routing_key=self._client_queue)
-            logger.debug("connection is {!r}".format(conn))
-            try:
-                for i in collect_replies(conn,
-                                         conn.channel(),
-                                         client_queue,
-                                         callbacks=[self.ack_message]):
-                    logger.info("Received message {!r}".format(i))
-                    if self.reply:
-                        response = self.reply
-                        self.reply = None
-                        yield response
-            except exceptions.AMQPError as amqp_error:
-                logger.error("Unable to retreive "
-                             "messages: {!r}".format(amqp_error))
-            except Exception as e:
-                raise e
+        client_queue = self._queue
+        logger.debug("connection is {!r}".format(self._conn))
+        try:
+            for i in collect_replies(self._conn,
+                                        self._conn.channel(),
+                                        client_queue,
+                                        callbacks=[self.ack_message]):
+                logger.info("Received message {!r}".format(i))
+                if self.reply:
+                    response = self.reply
+                    self.reply = None
+                    yield response
+        except exceptions.AMQPError as amqp_error:
+            logger.error("Unable to retreive "
+                            "messages: {!r}".format(amqp_error))
+        except Exception as e:
+            raise e
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r} with body {!r}".format(message,
@@ -106,8 +104,7 @@ class RpcClient(object):
         return payload
 
     def _prepare_client_queue(self, command_name):
-        """Setup a client queue based on the command
-        :returns: TODO
+        """Setup a client queue based on the command.
 
         """
         if self._client_queue is None:
@@ -185,21 +182,28 @@ class RpcClient(object):
             properties = {}
         logger.info("Reply info: {!r}".format(properties))
         logger.info("Using connection: {!r}".format(CONN_DICT))
-        with Connection(**CONN_DICT) as conn:
-            with producers[conn].acquire(block=True) as producer:
-                try:
-                    producer.publish(payload,
-                                     serializer='json',
-                                     exchange=self._exchange,
-                                     declare=[self._exchange],
-                                     routing_key=server_routing_key,
-                                     **properties)
-                    logger.info("Published to exchange "
-                                "{!r}".format(self._exchange))
-                    logger.info("Published request %r" % payload)
-                except Exception as e:
-                    logger.error("Unable to publish to queue: {!r}".format(e))
-                    raise
+        logger.info("Declaring queue %s." % self._client_queue)
+        queue = Queue(self._client_queue,
+                        channel=self._conn,
+                        durable=self._exchange.durable,
+                        exchange=self._exchange,
+                        routing_key=self._client_queue)
+        queue.declare()
+        self._queue = queue
+        with producers[self._conn].acquire(block=True) as producer:
+            try:
+                producer.publish(payload,
+                                    serializer='json',
+                                    exchange=self._exchange,
+                                    declare=[self._exchange],
+                                    routing_key=server_routing_key,
+                                    **properties)
+                logger.info("Published to exchange "
+                            "{!r}".format(self._exchange))
+                logger.info("Published request %r" % payload)
+            except Exception as e:
+                logger.error("Unable to publish to queue: {!r}".format(e))
+                raise
 
 
 if __name__ == '__main__':
