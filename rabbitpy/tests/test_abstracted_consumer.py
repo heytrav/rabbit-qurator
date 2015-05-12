@@ -43,7 +43,7 @@ class TestAbstractMQ(TestRabbitpy):
                                  'rabbitpy.boffa',
                                  'boffa.moffa'])
         consumer = Qurator(legacy=False,
-                              exchange=self._exchange)
+                           exchange=self._exchange)
 
         @consumer.rpc
         def moffa(msg):
@@ -74,7 +74,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         self.pre_declare_queues(['rabbitpy.blah', 'blah.client'])
         consumer = Qurator(legacy=False,
-                              exchange=self._exchange)
+                           exchange=self._exchange)
         checkit = MagicMock(return_value={"msg": "Got reply"})
         # Now mock it!
         consumer.respond_to_client = MagicMock()
@@ -109,7 +109,7 @@ class TestAbstractMQ(TestRabbitpy):
         """Check behaviour of client """
         self.pre_declare_queues(['rabbitpy.booya', 'booya.client'])
         consumer = Qurator(legacy=False,
-                              exchange=self._exchange)
+                           exchange=self._exchange)
 
         @consumer.rpc
         def booya(*args, **kwargs):
@@ -140,7 +140,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         # This should.
         legacy_consumer = Qurator(queue='testapi.test.queue',
-                                     exchange=self._exchange)
+                                  exchange=self._exchange)
         check_function = MagicMock(return_value={"result": "OK"})
         check_another_function = MagicMock(return_value={"result": "D'OH"})
 
@@ -208,7 +208,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         server_queue = 'random.test.queue'
         q = Qurator(queue=server_queue,
-                       exchange=self._exchange)
+                    exchange=self._exchange)
 
         @q.rpc
         def flappy(data):
@@ -243,7 +243,7 @@ class TestAbstractMQ(TestRabbitpy):
         self.pre_declare_queues(['default.queue.thing',
                                  'testing_default_exchange.client'])
         q = Qurator(exchange=self._exchange,
-                       queue='default.queue.thing')
+                    queue='default.queue.thing')
 
         @q.rpc
         def testing_default_exchange(data):

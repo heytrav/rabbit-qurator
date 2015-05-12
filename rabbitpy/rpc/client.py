@@ -54,9 +54,9 @@ class RpcClient(object):
         logger.debug("connection is {!r}".format(self._conn))
         try:
             for i in collect_replies(self._conn,
-                                        self._conn.channel(),
-                                        client_queue,
-                                        callbacks=[self.ack_message]):
+                                     self._conn.channel(),
+                                     client_queue,
+                                     callbacks=[self.ack_message]):
                 logger.info("Received message {!r}".format(i))
                 if self.reply:
                     response = self.reply
@@ -64,7 +64,7 @@ class RpcClient(object):
                     yield response
         except exceptions.AMQPError as amqp_error:
             logger.error("Unable to retreive "
-                            "messages: {!r}".format(amqp_error))
+                         "messages: {!r}".format(amqp_error))
         except Exception as e:
             raise e
 
@@ -184,20 +184,20 @@ class RpcClient(object):
         logger.info("Using connection: {!r}".format(CONN_DICT))
         logger.info("Declaring queue %s." % self._client_queue)
         queue = Queue(self._client_queue,
-                        channel=self._conn,
-                        durable=self._exchange.durable,
-                        exchange=self._exchange,
-                        routing_key=self._client_queue)
+                      channel=self._conn,
+                      durable=self._exchange.durable,
+                      exchange=self._exchange,
+                      routing_key=self._client_queue)
         queue.declare()
         self._queue = queue
         with producers[self._conn].acquire(block=True) as producer:
             try:
                 producer.publish(payload,
-                                    serializer='json',
-                                    exchange=self._exchange,
-                                    declare=[self._exchange],
-                                    routing_key=server_routing_key,
-                                    **properties)
+                                 serializer='json',
+                                 exchange=self._exchange,
+                                 declare=[self._exchange],
+                                 routing_key=server_routing_key,
+                                 **properties)
                 logger.info("Published to exchange "
                             "{!r}".format(self._exchange))
                 logger.info("Published request %r" % payload)
