@@ -1,11 +1,13 @@
 
 
+from kombu import Exchange
 from rabbitpy.rpc.client import RpcClient
 
 if __name__ == '__main__':
-    client = RpcClient()
-    client.rpc('personal_handle', 
-               {'handle_id ': '30e8e78c61fc0941aeff87654f0001b2'},
+    ex = Exchange(type='direct', durable=False)
+    client = RpcClient(exchange=ex)
+    client.rpc('get_handle', 
+               {'handle_id': '001bffe546d6705f4e004a80e30769bd'},
                server_routing_key='api.handle')
     for reply in client.retrieve_messages():
         print("Got reply: {!r}".format(reply))

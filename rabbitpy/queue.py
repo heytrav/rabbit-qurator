@@ -216,7 +216,14 @@ class Qurator(object):
                         self._exchange,
                         message,
                         response,
-                        producer
+                        producer,
+                        retry=True, 
+                        retry_policy={
+                            'max_retries': 3,
+                            'interval_start': 0,
+                            'interval_step': 0.2,
+                            'interval_max': 0.2,
+                        }
                     )
                 except exceptions.AMQPError as amqp_error:
                     logger.error("Problem communicating "
