@@ -217,7 +217,7 @@ class Qurator(object):
                         message,
                         response,
                         producer,
-                        retry=True, 
+                        retry=True,
                         retry_policy={
                             'max_retries': 3,
                             'interval_start': 0,
