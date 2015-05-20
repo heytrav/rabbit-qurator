@@ -29,7 +29,7 @@ class Qurator(object):
                  task_exchange=default_task_exchange):
         """Constructor
 
-        :legacy: Boolean flag. If True (default) it should try to emulate hase
+        :legacy: Boolean flag. If False (default) it should try to emulate hase
         functionality by dispatching calls to a single queue to different
         functions. If False, assume that each method is its own queue.
         :prefix: Prefix for consumer queues. Defaults to 'rabbitpy'.
@@ -68,9 +68,8 @@ class Qurator(object):
         logger = get_logger(self._queue)
         try:
             command = body['data']['command']
-            data = body['data']['options']
             callback = self.dispatch[command]
-            logger.debug("Calling {!r} with {!r}".format(command, data))
+            logger.debug("Calling {!r} with {!r}".format(command, body))
         except KeyError as ke:
             error_message = "Malformed request: {!r}".format(ke)
             logger.error(error_message)
@@ -82,7 +81,7 @@ class Qurator(object):
             error = {"error": error_message, "sent": body}
             self._error(error, message)
         else:
-            return callback(data, message)
+            return callback(body, message)
 
     def _wrap_function(self, function, callback, queue_name, task=False):
         """Set up queue used in decorated function.
