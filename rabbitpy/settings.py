@@ -1,6 +1,7 @@
 import os
 import sys
 
+DEPLOY_ENVIRONMENT = os.environ.get('DEPLOY_ENVIRONMENT', 'development')
 RABBITMQ_TRANSPORT_SERVICE_HOST = os.environ.get(
     'RABBITMQ_TRANSPORT_SERVICE_HOST',
     'localhost')
@@ -16,7 +17,7 @@ LOGGING_CONFIG = {
     "version": 1,
     "formatters": {
         "simple": {
-            "format": "%(pathname)s:line %(lineno)d [%(levelname)s]: %(name)s - %(message)s"
+            "format": "%(pathname)s:line [" + DEPLOY_ENVIRONMENT +  "] %(lineno)d [%(levelname)s]: %(name)s - %(message)s"
         }
     },
     "handlers": {
