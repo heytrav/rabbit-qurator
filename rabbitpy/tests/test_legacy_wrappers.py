@@ -14,7 +14,7 @@ class TestLegacyWrapper(TestCase):
 
         @preprocess
         def stripped_out_data(raw_data):
-            self.assertNotIn('data', raw_data) 
+            self.assertNotIn('data', raw_data)
             self.assertEqual(raw_data, {"one": "stuff"})
 
 
@@ -46,7 +46,7 @@ class TestLegacyWrapper(TestCase):
         """
         @preprocess(subset='subset')
         def specific_part(raw_data):
-            self.assertNotIn('data', raw_data) 
+            self.assertNotIn('data', raw_data)
             self.assertNotIn('excluded', raw_data)
             self.assertEqual(raw_data, {"one": "stuff"})
 
@@ -108,3 +108,34 @@ class TestLegacyWrapper(TestCase):
         self.assertIn('account_id', options)
         self.assertIn('domains', options)
 
+    def test_pre_postprocess(self):
+        """Test preprocess and postprocess decorators together.  """
+        @postprocess
+        @preprocess
+        def generic_function_pre_post(raw_data):
+            self.assertNotIn('data', raw_data)
+            self.assertIn('user_id', raw_data)
+            return_data = {
+                "account_id": "testuser",
+                "domains": [{"testme.com": {"registered": 1439940393}}]
+            }
+            raw_data.update(return_data)
+            return return_data
+
+        arg = {
+            'data': {
+                'options': {
+                    "user_id": 'testuser',
+                    "account_id": None
+                }
+            }
+        }
+        func_data = generic_function_pre_post(arg)
+        print("Generic func returned {!r}".format(func_data))
+        self.assertIn('data', func_data)
+        self.assertIn('options', func_data['data'])
+        options = func_data['data']['options']
+        self.assertIn('account_id', options)
+        self.assertEqual(options['account_id'], "testuser")
+        self.assertIn('user_id', options)
+        self.assertIn('domains', options)
