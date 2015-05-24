@@ -139,3 +139,23 @@ class TestLegacyWrapper(TestCase):
         self.assertEqual(options['account_id'], "testuser")
         self.assertIn('user_id', options)
         self.assertIn('domains', options)
+
+    def test_wrapper_error(self):
+        """Test error handling.
+        """
+        @postprocess
+        @preprocess
+        def generic_throw_error(arg):
+            raise Exception("Just to see what happens")
+
+        arg = {
+            "data": {
+                "options": {
+                    "stuff": "doesn't matter"
+                }
+            }
+        }
+        result = generic_throw_error(arg)
+        self.assertIn('error', result)
+        options = result['data']['options']
+        self.assertEqual(options, arg['data']['options'])
