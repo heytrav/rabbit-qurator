@@ -68,7 +68,7 @@ class TestLegacyWrapper(TestCase):
             will_fail(arg)
 
     def test_postprocess_data(self):
-        """Test wrapper puts stuff back into jobqueue structure. """
+        """Test postprocess wrapper puts stuff back into jobqueue structure. """
         @postprocess
         def generic_func(raw_data):
             return {"account_id": "testuser"}
@@ -81,14 +81,13 @@ class TestLegacyWrapper(TestCase):
             }
         }
         func_data = generic_func(arg)
+        print("Generic func returned {!r}".format(func_data))
         self.assertIn('data', func_data)
         self.assertIn('options', func_data['data'])
-        self.assertEqual(func_data['data']['options'], 
-                         {"account_id": "testuser"},
-                         "Received expected result")
+        self.assertEqual(func_data['data']['options'], {"account_id": "testuser"})
 
     def test_isolate_subset_return_jobqueue(self):
-        """Test that wrapper puts data in specific place. """
+        """Test that postprocess wrapper puts data in specific place. """
 
         @postprocess(subset='domains')
         def generic_func_subset(raw_data):
@@ -102,6 +101,7 @@ class TestLegacyWrapper(TestCase):
             }
         }
         func_data = generic_func_subset(arg)
+        print("Generic func returned {!r}".format(func_data))
         self.assertIn('data', func_data)
         self.assertIn('options', func_data['data'])
         options = func_data['data']['options']

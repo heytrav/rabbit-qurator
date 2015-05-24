@@ -28,7 +28,7 @@ def preprocess(func=None, *, subset=None):
             return func(processed_data)
         except KeyError as e:
             logger.error("Caller did not provide proper"
-                            " data structure: {!r}".format(e))
+                         " data structure: {!r}".format(e))
             raise
     return wrapper
 
@@ -52,9 +52,12 @@ def postprocess(func=None, *, subset=None):
 
         """
         logger.debug("Legacy data entered is: {!r}".format(legacy_data))
-        if 'data' in legacy_data and 'options' in legacy_data['data']:
+        try:
             return_data = legacy_data['data']['options']
-        return_data = {"data": { "options": {} }}
+        except KeyError as ke:
+            logger.critical("Incorrect data structure"
+                            "in postprocess {!r}".format(legacy_data))
+            raise ke
         try:
             result = func(legacy_data)
             logger.debug("Function returned {!r}".format(result))
