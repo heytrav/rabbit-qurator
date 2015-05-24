@@ -18,7 +18,7 @@ def get_logger(name=None, config=None):
         LOGGING_CONFIG['loggers'][name] = config
     logging.config.dictConfig(LOGGING_CONFIG)
     logger = logging.getLogger(name)
-    logger.debug("Just created logger with config {!r}".format(LOGGING_CONFIG))
-    logger.debug("Environment: %s" % os.environ.get('RABBITPY_SETTINGS_DIR'))
     adapter = LoggerAdapter(logger, {"deploy_environment": DEPLOY_ENVIRONMENT})
+    adapter.debug("Just created logger with config {!r}".format(LOGGING_CONFIG))
+    adapter.debug("Environment: %s" % os.environ.get('RABBITPY_SETTINGS_DIR'))
     return adapter
