@@ -17,7 +17,7 @@ LOGGING_CONFIG = {
     "version": 1,
     "formatters": {
         "simple": {
-            "format": "%(pathname)s:line [" + DEPLOY_ENVIRONMENT +  "] %(lineno)d [%(levelname)s]: %(name)s - %(message)s"
+            "format": "[%(deploy_environment)s] %(pathname)s:line %(lineno)d [%(levelname)s]: %(name)s - %(message)s"
         }
     },
     "handlers": {
