@@ -17,4 +17,7 @@ setup(name='rabbitpy',
       author_email='travis@ideegeo.com',
       install_requires=reqs,
       version=version,
-      packages=['rabbitpy', 'rabbitpy.rpc', 'rabbitpy.tests'])
+      packages=['rabbitpy',
+                'rabbitpy.rpc',
+                'rabbitpy.tests',
+                'rabbitpy.utilities'])
