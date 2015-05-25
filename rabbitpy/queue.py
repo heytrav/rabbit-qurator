@@ -29,7 +29,7 @@ class Qurator(object):
                  task_exchange=default_task_exchange):
         """Constructor
 
-        :legacy: Boolean flag. If False (default) it should try to emulate hase
+        :legacy: Boolean flag. If True (default) it should try to emulate hase
         functionality by dispatching calls to a single queue to different
         functions. If False, assume that each method is its own queue.
         :prefix: Prefix for consumer queues. Defaults to 'rabbitpy'.
