@@ -32,7 +32,8 @@ LOGGING_CONFIG = {
     "loggers": {
         "root": {
             "level": "DEBUG",
-            "handlers": ["consoleHandler"]
+            "handlers": ["consoleHandler"],
+            "propagate": 0
         },
         "rabbitpy": {
             "level": "DEBUG",
@@ -40,6 +41,11 @@ LOGGING_CONFIG = {
             "propagate": 0
         },
         "rabbitpy.rpc": {
+            "level": "DEBUG",
+            "handlers": ["consoleHandler"],
+            "propagate": 0
+        },
+        "rabbitpy.utilities": {
             "level": "DEBUG",
             "handlers": ["consoleHandler"],
             "propagate": 0

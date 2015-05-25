@@ -68,9 +68,8 @@ class Qurator(object):
         logger = get_logger(self._queue)
         try:
             command = body['data']['command']
-            data = body['data']['options']
             callback = self.dispatch[command]
-            logger.debug("Calling {!r} with {!r}".format(command, data))
+            logger.debug("Calling {!r} with {!r}".format(command, body))
         except KeyError as ke:
             error_message = "Malformed request: {!r}".format(ke)
             logger.error(error_message)
@@ -82,7 +81,7 @@ class Qurator(object):
             error = {"error": error_message, "sent": body}
             self._error(error, message)
         else:
-            return callback(data, message)
+            return callback(body, message)
 
     def _wrap_function(self, function, callback, queue_name, task=False):
         """Set up queue used in decorated function.
@@ -165,7 +164,6 @@ class Qurator(object):
 
         return self._wrap_function(
             func, process_message, queue_name, task=True)
-
 
     def rpc(self, func=None, *, queue_name=None):
         """Wrap around function. This method is modelled after standard RPC
