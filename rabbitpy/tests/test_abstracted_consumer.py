@@ -206,6 +206,10 @@ class TestAbstractMQ(TestRabbitpy):
         """Check that we get an error message for a malformed request to the
         legacy queue.
 
+        The request is 'malformed' in this instance because we're sending a
+        'non-legacy' request to a queue that has been defined with the default
+        legacy flag activated.
+
         """
         self.pre_declare_queues(['random.test.queue',
                                  'flappy.client'])
@@ -215,9 +219,9 @@ class TestAbstractMQ(TestRabbitpy):
         q = Qurator(queue=server_queue,
                     exchange=self._exchange)
 
+        @q.rpc
         @postprocess
         @preprocess
-        @q.rpc
         def flappy(data):
             return {"data": "whatever"}
 

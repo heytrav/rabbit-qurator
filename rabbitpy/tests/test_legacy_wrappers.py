@@ -4,10 +4,10 @@ from unittest.mock import MagicMock
 
 from ..utilities.jobqueue import preprocess, postprocess
 
+
 class TestLegacyWrapper(TestCase):
 
     """Test ability of wrappers to convert legacy jobqueue structure."""
-
 
     def test_preprocess_iwmn_request(self):
         """Test wrapping queue calls with wrappers. """
@@ -16,7 +16,6 @@ class TestLegacyWrapper(TestCase):
         def stripped_out_data(raw_data):
             self.assertNotIn('data', raw_data)
             self.assertEqual(raw_data, {"one": "stuff"})
-
 
         arg = {
             'data': {
@@ -27,7 +26,6 @@ class TestLegacyWrapper(TestCase):
         }
         func_data = stripped_out_data(arg)
 
-
     def test_raise_key_error(self):
         """Calling something with preprocess and non-legacy data should throw
         an error.
@@ -36,10 +34,9 @@ class TestLegacyWrapper(TestCase):
         def fail_legacy_call(raw_data):
             pass
 
-        arg = { "one": "stuff" }
+        arg = {"one": "stuff"}
         with self.assertRaises(KeyError):
             fail_legacy_call(arg)
-
 
     def test_isolate_subset_jobqueue(self):
         """Test that wrapper plucks data out of part of jobqueue structure.
@@ -84,14 +81,16 @@ class TestLegacyWrapper(TestCase):
         print("Generic func returned {!r}".format(func_data))
         self.assertIn('data', func_data)
         self.assertIn('options', func_data['data'])
-        self.assertEqual(func_data['data']['options'], {"account_id": "testuser"})
+        self.assertEqual(
+            func_data['data']['options'], {
+                "account_id": "testuser"})
 
     def test_isolate_subset_return_jobqueue(self):
         """Test that postprocess wrapper puts data in specific place. """
 
         @postprocess(subset='domains')
         def generic_func_subset(raw_data):
-            return [{"test-me.com":{"registered": 14394893}}]
+            return [{"test-me.com": {"registered": 14394893}}]
 
         arg = {
             'data': {

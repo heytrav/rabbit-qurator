@@ -5,6 +5,7 @@ from .. import get_logger
 from ..settings import LOGGING_CONFIG
 logger = get_logger('rabbitpy.utilities', LOGGING_CONFIG)
 
+
 def preprocess(func=None, *, subset=None):
     """
     Pre process data passed to function to handle jobqueue monstrosity we
@@ -59,6 +60,7 @@ def postprocess(func=None, *, subset=None):
         return_data = {}
         try:
             _ = legacy_data['data']['options']
+            return_data.update(legacy_data)
         except KeyError as ke:
             logger.error("Incorrect data structure"
                          "in postprocess {!r}".format(legacy_data))
@@ -66,8 +68,8 @@ def postprocess(func=None, *, subset=None):
             raise ke
         try:
             result = func(legacy_data)
-            return_data.update(legacy_data)
-            logger.debug("In postprocess function returned {!r}".format(result))
+            logger.debug(
+                "In postprocess function returned {!r}".format(result))
             if subset is not None:
                 return_data['data']['options'][subset] = result
             else:

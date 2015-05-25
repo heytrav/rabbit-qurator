@@ -165,7 +165,6 @@ class Qurator(object):
         return self._wrap_function(
             func, process_message, queue_name, task=True)
 
-
     def rpc(self, func=None, *, queue_name=None):
         """Wrap around function. This method is modelled after standard RPC
         behaviour where the message sends a reply_to queue and a
