@@ -33,7 +33,7 @@ def preprocess(func=None, *, subset=None):
             logger.debug("In preprocess function "
                          "returned {!r} ".format(result))
         except KeyError as e:
-            logger.error("Caller did not provide proper data structure")
+            logger.error("Caller did not send 'jobqueue' like datastructure.")
             logger.exception(e)
             raise
         return result
