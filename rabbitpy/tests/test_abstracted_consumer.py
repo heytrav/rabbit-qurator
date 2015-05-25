@@ -4,7 +4,11 @@ from kombu.utils import nested
 
 from ..queue import Qurator
 from ..rpc.client import RpcClient
-from ..utilities.jobqueue import preprocess, postprocess
+from ..utilities.jobqueue import (
+    preprocess,
+    postprocess,
+    wrap
+)
 
 from .test_rabbit import TestRabbitpy
 
@@ -152,8 +156,7 @@ class TestAbstractMQ(TestRabbitpy):
             return check_function(data)
 
         @legacy_consumer.rpc
-        @postprocess
-        @preprocess
+        @wrap
         def yeahimafunction(data):
             return check_another_function(data)
 

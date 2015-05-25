@@ -2,7 +2,11 @@ import unittest
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from ..utilities.jobqueue import preprocess, postprocess
+from ..utilities.jobqueue import (
+    preprocess,
+    postprocess,
+    wrap
+)
 
 
 class TestLegacyWrapper(TestCase):
@@ -139,11 +143,86 @@ class TestLegacyWrapper(TestCase):
         self.assertIn('user_id', options)
         self.assertIn('domains', options)
 
+    def test_wrap(self):
+        """Test wrap decorator to call both pre/postprocess together."""
+        @wrap
+        def generic_function_pre_post(raw_data):
+            self.assertNotIn('data', raw_data)
+            self.assertIn('user_id', raw_data)
+            return_data = {
+                "account_id": "testuser",
+                "domains": [{"testme.com": {"registered": 1439940393}}]
+            }
+            raw_data.update(return_data)
+            return return_data
+
+        arg = {
+            'data': {
+                'options': {
+                    "user_id": 'testuser',
+                    "account_id": None
+                }
+            }
+        }
+        func_data = generic_function_pre_post(arg)
+        print("Generic func returned {!r}".format(func_data))
+        self.assertIn('data', func_data)
+        self.assertIn('options', func_data['data'])
+        options = func_data['data']['options']
+        self.assertIn('account_id', options)
+        self.assertEqual(options['account_id'], "testuser")
+        self.assertIn('user_id', options)
+        self.assertIn('domains', options)
+
+    def test_wrap_data_subset(self):
+        """Test wrap decorator to call both pre/postprocess together."""
+        @wrap(subset='domains')
+        def generic_function_pre_post(raw_data):
+            return_data = [{"testme.com": {"registered": 1439940393}}]
+            return return_data
+
+        arg = {
+            'data': {
+                'options': {
+                    "user_id": 'testuser',
+                    "domains": []
+                }
+            }
+        }
+        func_data = generic_function_pre_post(arg)
+        print("Generic func returned {!r}".format(func_data))
+        self.assertIn('data', func_data)
+        self.assertIn('options', func_data['data'])
+        options = func_data['data']['options']
+        self.assertIn('user_id', options)
+        self.assertIn('domains', options)
+        self.assertEqual(options['domains'],
+                         [{"testme.com": {"registered": 1439940393}}])
+
     def test_wrapper_error(self):
         """Test error handling.
         """
         @postprocess
         @preprocess
+        def generic_throw_error(arg):
+            raise Exception("Just to see what happens")
+
+        arg = {
+            "data": {
+                "options": {
+                    "stuff": "doesn't matter"
+                }
+            }
+        }
+        result = generic_throw_error(arg)
+        self.assertIn('error', result)
+        options = result['data']['options']
+        self.assertEqual(options, arg['data']['options'])
+
+    def test_wrap_function_error(self):
+        """Test error handling in wrap function.
+        """
+        @wrap
         def generic_throw_error(arg):
             raise Exception("Just to see what happens")
 

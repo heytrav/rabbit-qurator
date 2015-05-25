@@ -27,6 +27,8 @@ def preprocess(func=None, *, subset=None):
             processed_data = legacy_data['data']['options']
             if subset is not None:
                 processed_data = processed_data[subset]
+                logger.debug("Operating on subset: {!r}: {!r}"
+                             .format(subset, processed_data))
             result = func(processed_data)
             logger.debug("In preprocess function "
                          "returned {!r} ".format(result))
@@ -71,6 +73,7 @@ def postprocess(func=None, *, subset=None):
             logger.debug(
                 "In postprocess function returned {!r}".format(result))
             if subset is not None:
+                logger.debug("Operating on subset: %s" % subset)
                 return_data['data']['options'][subset] = result
             else:
                 return_data['data']['options'].update(result)
@@ -80,4 +83,18 @@ def postprocess(func=None, *, subset=None):
             return_data['error'] = message
         logger.debug("Returning from postprocess: {!r}".format(return_data))
         return return_data
+    return wrapper
+
+
+def wrap(func=None, *, subset=None):
+    """Apply both pre and postprocess functions to wrapped function.  """
+
+    if func is None:
+        return partial(wrap, subset=subset)
+
+    @wraps(func)
+    @postprocess(subset=subset)
+    @preprocess(subset=subset)
+    def wrapper(legacy_data):
+        return func(legacy_data)
     return wrapper
