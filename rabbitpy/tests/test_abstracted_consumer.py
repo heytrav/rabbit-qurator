@@ -191,6 +191,9 @@ class TestAbstractMQ(TestRabbitpy):
                 conn.drain_events(timeout=1)
                 conn.drain_events(timeout=1)
 
+        # TODO: revisit after reading up on mock a bit. For some reason the
+        # decorators are causing the return data to be included in the data
+        # that the function is called with.
         #check_function.assert_called_with({"x": 1})
         #check_another_function.assert_called_with({"y": 3})
 
