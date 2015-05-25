@@ -277,7 +277,6 @@ class TestAbstractMQ(TestRabbitpy):
         with Consumer(conn, queues, callbacks=test_callbacks):
             conn.drain_events(timeout=1)
         for reply in client.retrieve_messages():
-            print("{!r}".format(reply))
             self.assertIn('x', reply['data']['options'])
             self.assertEqual(reply['data']['options']['data'], request)
 
@@ -288,7 +287,6 @@ class TestAbstractMQ(TestRabbitpy):
         q = Qurator(task_exchange=e, queue='test.nondurable_exchange.queue')
 
         with self.assertRaises(Exception):
-            @postprocess
             @q.task
             @preprocess
             def amation(data):
@@ -316,7 +314,6 @@ class TestAbstractMQ(TestRabbitpy):
 
         q = Qurator(task_exchange=e, queue='test.task.fail')
 
-        @postprocess
         @q.task
         @preprocess
         def fail(data):
@@ -359,7 +356,6 @@ class TestAbstractMQ(TestRabbitpy):
 
         q = Qurator(task_exchange=e, queue='test.task.succeed')
 
-        @postprocess
         @q.task
         @preprocess
         def succeed(data):
@@ -372,7 +368,6 @@ class TestAbstractMQ(TestRabbitpy):
 
         curr_queues = q.queues['succeed']
 
-        @postprocess
         @q.rpc
         @preprocess
         def still_around(body, message):
