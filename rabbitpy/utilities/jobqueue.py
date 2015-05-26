@@ -59,17 +59,25 @@ def postprocess(func=None, *, subset=None):
 
         """
         logger.debug("Calling postprocess with {!r}".format(legacy_data))
+
         return_data = {}
         try:
             _ = legacy_data['data']['options']
-            return_data.update(legacy_data)
         except KeyError as ke:
             logger.error("Incorrect data structure"
                          "in postprocess {!r}".format(legacy_data))
             logger.exception(ke)
             raise ke
+        else:
+            return_data.update(legacy_data)
+
         try:
             result = func(legacy_data)
+        except Exception as e:
+            message = 'Error while executing {!r}: {!r}'.format(func, e)
+            logger.warn(message)
+            return_data['error'] = str(e)
+        else:
             logger.debug(
                 "In postprocess function returned {!r}".format(result))
             if subset is not None:
@@ -77,10 +85,6 @@ def postprocess(func=None, *, subset=None):
                 return_data['data']['options'][subset] = result
             else:
                 return_data['data']['options'].update(result)
-        except Exception as e:
-            message = 'Error while executing {!r}: {!r}'.format(func, e)
-            logger.warn(message)
-            return_data['error'] = message
         logger.debug("Returning from postprocess: {!r}".format(return_data))
         return return_data
     return wrapper
