@@ -79,7 +79,7 @@ def postprocess(func=None, *, subset=None):
                 return_data['data']['options'].update(result)
         except Exception as e:
             message = 'Error while executing {!r}: {!r}'.format(func, e)
-            logger.exception(message)
+            logger.warn(message)
             return_data['error'] = message
         logger.debug("Returning from postprocess: {!r}".format(return_data))
         return return_data
