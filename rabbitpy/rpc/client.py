@@ -51,12 +51,14 @@ class RpcClient(object):
 
         logger.debug("Client queue: {!r}".format(self._client_queue))
         client_queue = self._queue
-        logger.debug("connection is {!r}".format(self._conn))
+        logger.debug("connection is {!r}" 
+                     "is connected: {!r}".format(self._conn,
+                                                 self._conn.connected))
         try:
             for i in collect_replies(self._conn,
                                      self._conn.channel(),
                                      client_queue,
-                                     #timeout=1,
+                                     timeout=1,
                                      limit=1,
                                      callbacks=[self.ack_message]):
                 logger.info("Received message {!r}".format(i))
