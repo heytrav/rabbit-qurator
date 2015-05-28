@@ -69,8 +69,9 @@ class RpcClient(object):
                          "messages: {!r}".format(amqp_error))
         except Exception as e:
             raise e
-        #client_queue.purge()
-        #client_queue.delete()
+        client_queue.purge()
+        client_queue.delete()
+        self._conn.release()
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r} with body {!r}".format(message,
