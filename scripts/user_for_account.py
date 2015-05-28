@@ -6,7 +6,8 @@ if __name__ == '__main__':
     client.rpc('user_for_account', 
                {'account': '4084a589401ebe665c313edecf0066a0'},
                server_routing_key='api.account')
-    for reply in client.retrieve_messages():
+    retriever = client.retrieve_messages()
+    for reply in retriever:
         print("Got reply: {!r}".format(reply))
 
 

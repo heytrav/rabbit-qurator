@@ -39,6 +39,7 @@ class RpcClient(object):
         self._queue = None
         self._conn = Connection(**CONN_DICT)
 
+
     def retrieve_messages(self):
         """Process the message queue and ack the one that matches the
         correlation_id sent to the server.
@@ -49,31 +50,39 @@ class RpcClient(object):
 
         """
 
+        connection = self._conn
         logger.debug("Client queue: {!r}".format(self._client_queue))
         client_queue = self._queue
         logger.debug("connection is {!r}" 
                      "is connected: {!r}".format(self._conn,
                                                  self._conn.connected))
-        try:
-            for i in collect_replies(self._conn,
-                                     self._conn.channel(),
-                                     client_queue,
-                                     timeout=1,
-                                     limit=1,
-                                     callbacks=[self.ack_message]):
-                logger.info("Received message {!r}".format(i))
-                if self.reply:
-                    response = self.reply
-                    self.reply = None
-                    yield response
-        except exceptions.AMQPError as amqp_error:
-            logger.error("Unable to retreive "
-                         "messages: {!r}".format(amqp_error))
-        except Exception as e:
-            raise e
-        client_queue.purge()
-        client_queue.delete()
-        self._conn.release()
+        callbacks = [self.ack_message]
+        def client_replies(channel=None):
+            logger.debug("Calling client replies")
+            try:
+                for i in collect_replies(connection,
+                                        channel,
+                                        client_queue,
+                                        timeout=1,
+                                        limit=1,
+                                        callbacks=callbacks):
+                    logger.info("Received message {!r}".format(i))
+                    if self.reply:
+                        response = self.reply
+                        self.reply = None
+                        yield response
+            except exceptions.AMQPError as amqp_error:
+                logger.error("Unable to retreive "
+                            "messages: {!r}".format(amqp_error))
+            except Exception as e:
+                raise e
+        channel = connection.channel()
+        retriever, chan = connection.autoretry(client_replies, channel)()
+
+        #client_queue.purge()
+        #client_queue.delete()
+        #connection.release()
+        return retriever
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r} with body {!r}".format(message,
