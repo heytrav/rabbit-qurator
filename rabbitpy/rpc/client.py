@@ -56,6 +56,8 @@ class RpcClient(object):
             for i in collect_replies(self._conn,
                                      self._conn.channel(),
                                      client_queue,
+                                     #timeout=1,
+                                     limit=1,
                                      callbacks=[self.ack_message]):
                 logger.info("Received message {!r}".format(i))
                 if self.reply:
@@ -67,6 +69,8 @@ class RpcClient(object):
                          "messages: {!r}".format(amqp_error))
         except Exception as e:
             raise e
+        #client_queue.purge()
+        #client_queue.delete()
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r} with body {!r}".format(message,
