@@ -55,19 +55,20 @@ class RpcClient(object):
         logger.debug("connection is {!r}" 
                      "is connected: {!r}".format(self._conn,
                                                  self._conn.connected))
-        while self.reply is None:
-            collect_replies(self._conn,
+        for i in collect_replies(self._conn,
                             self._conn.channel(),
                             client_queue,
                             timeout=1,
                             limit=1,
-                            callbacks=[self.ack_message])
-        response = self.reply
-        self.reply = None
-        client_queue.purge()
-        client_queue.delete()
-        connection.release()
-        return response
+                            callbacks=[self.ack_message]):
+            logger.info("Received {!r}".format(i))
+            if self.reply is not None:
+                response = self.reply
+                self.reply = None
+                client_queue.purge()
+                client_queue.delete()
+                self._conn.release()
+                return response
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r} with body {!r}".format(message,
@@ -83,7 +84,8 @@ class RpcClient(object):
                 self.reply = body
                 message.ack()
             except KeyError as e:
-                logger.info("Malformed message: ".format(e))
+                logger.exception(e)
+                logger.error("Malformed message: {!r}".format(body))
 
     def _setup_payload(self, command_name, data):
         """Setup the datastructure for either hase-like or standard.
@@ -149,6 +151,7 @@ class RpcClient(object):
                                                           message_correlation_id))
         result = None
         try:
+            self.messages[message_correlation_id] = True
             self._send_command(payload, server_routing_key, properties)
             result = self.retrieve_messages()
         except Exception as e:
@@ -156,7 +159,6 @@ class RpcClient(object):
             logger.exception(e)
             raise e
         # Successful so store message correlation id for retrieval.
-        self.messages[message_correlation_id] = True
         return result
 
     def task(self,

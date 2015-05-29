@@ -3,12 +3,10 @@ from rabbitpy.rpc.client import RpcClient
 
 if __name__ == '__main__':
     client = RpcClient()
-    client.rpc('user_for_account', 
+    reply = client.rpc('user_for_account', 
                {'account': '4084a589401ebe665c313edecf0066a0'},
                server_routing_key='api.account')
-    retriever = client.retrieve_messages()
-    for reply in retriever:
-        print("Got reply: {!r}".format(reply))
+    print("Got reply: {!r}".format(reply))
 
 
 
