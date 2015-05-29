@@ -50,39 +50,24 @@ class RpcClient(object):
 
         """
 
-        connection = self._conn
         logger.debug("Client queue: {!r}".format(self._client_queue))
         client_queue = self._queue
         logger.debug("connection is {!r}" 
                      "is connected: {!r}".format(self._conn,
                                                  self._conn.connected))
-        callbacks = [self.ack_message]
-        def client_replies(channel=None):
-            logger.debug("Calling client replies")
-            try:
-                for i in collect_replies(connection,
-                                        channel,
-                                        client_queue,
-                                        timeout=1,
-                                        limit=1,
-                                        callbacks=callbacks):
-                    logger.info("Received message {!r}".format(i))
-                    if self.reply:
-                        response = self.reply
-                        self.reply = None
-                        yield response
-            except exceptions.AMQPError as amqp_error:
-                logger.error("Unable to retreive "
-                            "messages: {!r}".format(amqp_error))
-            except Exception as e:
-                raise e
-        channel = connection.channel()
-        retriever, chan = connection.autoretry(client_replies, channel)()
-
-        #client_queue.purge()
-        #client_queue.delete()
-        #connection.release()
-        return retriever
+        while self.reply is None:
+            collect_replies(self._conn,
+                            self._conn.channel(),
+                            client_queue,
+                            timeout=1,
+                            limit=1,
+                            callbacks=[self.ack_message])
+        response = self.reply
+        self.reply = None
+        client_queue.purge()
+        client_queue.delete()
+        connection.release()
+        return response
 
     def ack_message(self, body, message):
         logger.info("Processing message: {!r} with body {!r}".format(message,
@@ -162,9 +147,17 @@ class RpcClient(object):
         self.corr_id_server_queue[message_correlation_id] = server_routing_key
         logger.info('STARTRABBIT:%s;CORRELATION_ID:%s' % (server_routing_key,
                                                           message_correlation_id))
-        self._send_command(payload, server_routing_key, properties)
+        result = None
+        try:
+            self._send_command(payload, server_routing_key, properties)
+            result = self.retrieve_messages()
+        except Exception as e:
+            logger.debug("Whoa...something happened.")
+            logger.exception(e)
+            raise e
         # Successful so store message correlation id for retrieval.
         self.messages[message_correlation_id] = True
+        return result
 
     def task(self,
              command_name,
@@ -207,19 +200,15 @@ class RpcClient(object):
         queue.declare()
         self._queue = queue
         with producers[self._conn].acquire(block=True) as producer:
-            try:
-                producer.publish(payload,
-                                 serializer='json',
-                                 exchange=self._exchange,
-                                 declare=[self._exchange],
-                                 routing_key=server_routing_key,
-                                 **properties)
-                logger.info("Published to exchange "
-                            "{!r}".format(self._exchange))
-                logger.info("Published request %r" % payload)
-            except Exception as e:
-                logger.error("Unable to publish to queue: {!r}".format(e))
-                raise
+            producer.publish(payload,
+                             serializer='json',
+                             exchange=self._exchange,
+                             declare=[self._exchange],
+                             routing_key=server_routing_key,
+                             **properties)
+            logger.info("Published to exchange "
+                        "{!r}".format(self._exchange))
+            logger.info("Published request %r" % payload)
 
 
 if __name__ == '__main__':
