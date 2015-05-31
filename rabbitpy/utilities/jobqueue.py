@@ -32,8 +32,9 @@ def preprocess(func=None, *, subset=None):
             result = func(processed_data)
             logger.debug("In preprocess function "
                          "returned {!r} ".format(result))
-        except KeyError as e:
-            logger.error("Caller did not send 'jobqueue' like datastructure.",
+        except KeyError:
+            logger.error("Caller did not send" "'jobqueue'"
+                         "like datastructure: {!r}.".format(legacy_data),
                          exc_info=True)
             raise
         return result
@@ -63,7 +64,7 @@ def postprocess(func=None, *, subset=None):
         return_data = {}
         try:
             _ = legacy_data['data']['options']
-        except KeyError as ke:
+        except KeyError:
             logger.warn("Incorrect data structure"
                          "in postprocess {!r}".format(legacy_data),
                          exc_info=True)
