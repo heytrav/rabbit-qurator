@@ -79,7 +79,7 @@ class RpcClient(object):
                 self.messages.pop(corr_id)
                 server_queue = self.corr_id_server_queue.pop(corr_id)
                 logger.info(
-                    "STOPRABBIT:%s;CORRELATION_ID:%s" %
+                    "STOPREQUEST:%s;CORRELATION_ID:%s" %
                     (server_queue, corr_id))
                 self.reply = body
                 message.ack()
@@ -147,7 +147,7 @@ class RpcClient(object):
             'correlation_id': message_correlation_id
         }
         self.corr_id_server_queue[message_correlation_id] = server_routing_key
-        logger.info('STARTRABBIT:%s;CORRELATION_ID:%s' % (server_routing_key,
+        logger.info('STARTREQUEST:%s;CORRELATION_ID:%s' % (server_routing_key,
                                                           message_correlation_id))
         result = None
         try:

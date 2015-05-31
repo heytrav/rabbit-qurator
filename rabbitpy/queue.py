@@ -10,7 +10,6 @@ from . import get_logger
 from .settings import CONN_DICT
 from .exchange import exchange as default_exchange
 from .exchange import task_exchange as default_task_exchange
-logger = get_logger(__name__)
 
 
 class Qurator(object):
@@ -36,6 +35,7 @@ class Qurator(object):
         :queue: Default name for queue
         :exchange: Exchange to use.
         """
+        logger = get_logger(__name__)
         self._exchange = exchange
         self._task_exchange = task_exchange
         self._prefix = prefix
@@ -70,14 +70,14 @@ class Qurator(object):
             command = body['data']['command']
             callback = self.dispatch[command]
             logger.debug("Calling {!r} with {!r}".format(command, body))
-        except KeyError as ke:
-            error_message = "Malformed request: {!r}".format(ke)
-            logger.error(error_message)
+        except KeyError:
+            error_message = "Malformed request"
+            logger.error(error_message, exc_info=True)
             error = {"error": error_message, "sent": body}
             self._error(error, message)
         except Exception as e:
-            error_message = "Unable call method: {!r}".format(e)
-            logger.error(error_message)
+            error_message = "Unable call method"
+            logger.error(error_message, exc_info=True)
             error = {"error": error_message, "sent": body}
             self._error(error, message)
         else:
@@ -139,7 +139,7 @@ class Qurator(object):
         The client should not expect anything to be returned.
 
         """
-        logger = get_logger()
+        logger = get_logger(__name__)
         if queue_name:
             logger = get_logger(queue_name)
         if not self._task_exchange.durable:
@@ -155,9 +155,8 @@ class Qurator(object):
                                                  body))
             try:
                 func(body)
-            except Exception as e:
-                msg = "Problem processing task: {!r}".format(e)
-                logger.error(msg)
+            except Exception:
+                logger.error("Problem processing task", exc_info=True)
             else:
                 logger.debug("Ack'ing message.")
                 message.ack()
@@ -174,27 +173,41 @@ class Qurator(object):
         :queue_name: defaults to "rabbitpy.<func.__name__>"
 
         """
-        logger = get_logger()
         if queue_name:
             logger = get_logger(queue_name)
+        else:
+            logger = get_logger(__name__)
         if func is None:
             return partial(self.rpc, queue_name=queue_name)
 
         def process_message(body, message):
             logger.debug("Processing function {!r} "
                          "with data {!r}".format(func.__name__, body))
+            try:
+                correlation_id = message.properties['correlation_id']
+                logger.info('STARTSERVICE:%s;CORRELATION_ID:%s' % (queue_name,
+                                                                   correlation_id))
+            except Exception:
+                logger.error("No correlation id for request!"
+                             " {!r}".format(body),
+                             exc_info=True)
             response = func(body)
             logger.debug("Wrapped method returned:  {!r}".format(response))
-            self.respond_to_client(message, response)
+            self.respond_to_client(message, response, queue_name)
             message.ack()
 
         return self._wrap_function(func, process_message, queue_name)
 
-    def respond_to_client(self, message, response={}):
+    def respond_to_client(self, message, response=None, queue_name=None):
         """Send RPC response back to client.
 
         :response: datastructure that needs to go back to client.
         """
+        if response is None:
+            response = {}
+        if queue_name is None:
+            queue_name = __name__
+        logger = get_logger(queue_name)
         logger.debug("Replying to queue {!r} with properties: {!r}".format(
             message.properties['reply_to'],
             message.properties['correlation_id']
@@ -224,15 +237,22 @@ class Qurator(object):
                             'interval_max': 0.2,
                         }
                     )
-                except exceptions.AMQPError as amqp_error:
-                    logger.error("Problem communicating "
-                                 "with rabbit {!r}".format(amqp_error))
-                except KeyError as e:
-                    logger.error('Missing key in request {!r}'.format(e))
-                except Exception as ex:
-                    logger.error('Unable to reply to request {!r}'.format(ex))
+                except exceptions.AMQPError:
+                    logger.error("Problem communicating with rabbit",
+                                 exc_info=True)
+                except KeyError:
+                    logger.error('Missing key in request', exc_info=True)
+                except Exception:
+                    logger.error('Unable to reply to request', exc_info=True)
                 else:
                     logger.info('Replied with response {!r}'.format(response))
+        try:
+            correlation_id = message.properties['correlation_id']
+            logger.info('STOPSERVICE:%s;CORRELATION_ID:%s' % (
+                __name__, correlation_id ))
+        except Exception:
+            logger.error('No correlation id present in response!',
+                         exc_info=True)
 
     def run(self):
         from kombu import Connection

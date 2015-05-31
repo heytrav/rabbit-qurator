@@ -33,8 +33,8 @@ def preprocess(func=None, *, subset=None):
             logger.debug("In preprocess function "
                          "returned {!r} ".format(result))
         except KeyError as e:
-            logger.error("Caller did not send 'jobqueue' like datastructure.")
-            logger.exception(e)
+            logger.error("Caller did not send 'jobqueue' like datastructure.",
+                         exc_info=True)
             raise
         return result
     return wrapper
@@ -64,18 +64,18 @@ def postprocess(func=None, *, subset=None):
         try:
             _ = legacy_data['data']['options']
         except KeyError as ke:
-            logger.error("Incorrect data structure"
-                         "in postprocess {!r}".format(legacy_data))
-            logger.exception(ke)
-            raise ke
+            logger.warn("Incorrect data structure"
+                         "in postprocess {!r}".format(legacy_data),
+                         exc_info=True)
+            raise
         else:
             return_data.update(legacy_data)
 
         try:
             result = func(legacy_data)
         except Exception as e:
-            message = 'Error while executing {!r}: {!r}'.format(func, e)
-            logger.warn(message)
+            message = 'Error while executing %s!' % func.__name__
+            logger.warn(message, exc_info=True)
             return_data['error'] = str(e)
         else:
             logger.debug(
