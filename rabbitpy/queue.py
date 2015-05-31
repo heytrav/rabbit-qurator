@@ -245,14 +245,11 @@ class Qurator(object):
                 except Exception:
                     logger.error('Unable to reply to request', exc_info=True)
                 else:
+                    correlation_id = message.properties['correlation_id']
+                    logger.info('STOPSERVICE:%s;CORRELATION_ID:%s' % (
+                        __name__, correlation_id ))
                     logger.info('Replied with response {!r}'.format(response))
-        try:
-            correlation_id = message.properties['correlation_id']
-            logger.info('STOPSERVICE:%s;CORRELATION_ID:%s' % (
-                __name__, correlation_id ))
-        except Exception:
-            logger.error('No correlation id present in response!',
-                         exc_info=True)
+
 
     def run(self):
         from kombu import Connection
