@@ -9,11 +9,10 @@ class TestClient(TestCase):
     """Test the rpc client."""
 
     def test_payload_legacy_rpc(self):
-        """Test command for legacy RPC implementation
-
-        """
+        """Test command for legacy RPC implementation."""
         c = RpcClient()
         c._send_command = MagicMock()
+        c.retrieve_messages = MagicMock()
 
         call_payload = {"test": 1}
         c.rpc('do_that', call_payload)
@@ -32,12 +31,10 @@ class TestClient(TestCase):
         )
 
     def test_payload_standard_rpc(self):
-        """Test command for standard RPC
-        :returns: TODO
-
-        """
+        """Test command for standard RPC."""
         c = RpcClient(legacy=False)
         c._send_command = MagicMock()
+        c.retrieve_messages = MagicMock()
         call_payload = {"test": 2}
         c.rpc('do_that', call_payload)
         c._send_command.assert_called_with(call_payload,
@@ -48,6 +45,7 @@ class TestClient(TestCase):
         """Test setup rpc properties.  """
         c = RpcClient()
         c._send_command = MagicMock()
+        c.retrieve_messages = MagicMock()
         c.rpc('whatever', {"data": "x"})
         c._send_command.assert_called_with(
             ANY,
@@ -60,6 +58,7 @@ class TestClient(TestCase):
         # This part shouldn't matter if legacy or not.
         c = RpcClient(legacy=False, client_queue='test.my.queue')
         c._send_command = MagicMock()
+        c.retrieve_messages = MagicMock()
         c.rpc('whatever', {"data": "x"})
         c._send_command.assert_called_with(
             ANY,

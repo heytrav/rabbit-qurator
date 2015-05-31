@@ -247,9 +247,8 @@ class Qurator(object):
                 else:
                     correlation_id = message.properties['correlation_id']
                     logger.info('STOPSERVICE:%s;CORRELATION_ID:%s' % (
-                        __name__, correlation_id ))
+                        __name__, correlation_id))
                     logger.info('Replied with response {!r}'.format(response))
-
 
     def run(self):
         from kombu import Connection

@@ -39,7 +39,6 @@ class RpcClient(object):
         self._queue = None
         self._conn = Connection(**CONN_DICT)
 
-
     def retrieve_messages(self):
         """Process the message queue and ack the one that matches the
         correlation_id sent to the server.
@@ -52,22 +51,26 @@ class RpcClient(object):
 
         logger.debug("Client queue: {!r}".format(self._client_queue))
         client_queue = self._queue
-        logger.debug("connection is {!r}" 
+        logger.debug("connection is {!r}"
                      "is connected: {!r}".format(self._conn,
                                                  self._conn.connected))
         for i in collect_replies(self._conn,
-                            self._conn.channel(),
-                            client_queue,
-                            timeout=1,
-                            limit=1,
-                            callbacks=[self.ack_message]):
+                                 self._conn.channel(),
+                                 client_queue,
+                                 timeout=1,
+                                 limit=1,
+                                 callbacks=[self.ack_message]):
             logger.info("Received {!r}".format(i))
             if self.reply is not None:
                 response = self.reply
                 self.reply = None
-                client_queue.purge()
-                client_queue.delete()
-                self._conn.release()
+                try:
+                    client_queue.purge()
+                    client_queue.delete()
+                    self._conn.release()
+                except Exception:
+                    logger.warn("Unable to purge and delete queues",
+                                exc_info=True)
                 return response
 
     def ack_message(self, body, message):
@@ -148,7 +151,7 @@ class RpcClient(object):
         }
         self.corr_id_server_queue[message_correlation_id] = server_routing_key
         logger.info('STARTREQUEST:%s;CORRELATION_ID:%s' % (server_routing_key,
-                                                          message_correlation_id))
+                                                           message_correlation_id))
         result = None
         try:
             self.messages[message_correlation_id] = True
@@ -163,7 +166,7 @@ class RpcClient(object):
 
     def task(self,
              command_name,
-             data={},
+             data=None,
              server_routing_key=None):
         """Send a RPC request
 
@@ -174,6 +177,8 @@ class RpcClient(object):
         to <command>.server
         """
 
+        if data is None:
+            data = {}
         self.reply_received = False
         payload = self._setup_payload(command_name, data)
         logger.info("Preparing request {!r}".format(payload))
@@ -191,6 +196,7 @@ class RpcClient(object):
     def _send_command(self, payload, server_routing_key, properties=None):
         if properties is None:
             properties = {}
+        self.reply = None
         logger.info("Reply info: {!r}".format(properties))
         logger.info("Using connection: {!r}".format(CONN_DICT))
         logger.info("Declaring queue %s." % self._client_queue)
@@ -211,7 +217,6 @@ class RpcClient(object):
             logger.info("Published to exchange "
                         "{!r}".format(self._exchange))
             logger.info("Published request %r" % payload)
-
 
 if __name__ == '__main__':
     from kombu.utils.debug import setup_logging

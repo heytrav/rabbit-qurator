@@ -66,8 +66,8 @@ def postprocess(func=None, *, subset=None):
             _ = legacy_data['data']['options']
         except KeyError:
             logger.warn("Incorrect data structure"
-                         "in postprocess {!r}".format(legacy_data),
-                         exc_info=True)
+                        "in postprocess {!r}".format(legacy_data),
+                        exc_info=True)
             raise
         else:
             return_data.update(legacy_data)

@@ -92,7 +92,7 @@ class TestAbstractMQ(TestRabbitpy):
 
         # Send message to server
         client = RpcClient(exchange=self._exchange, prefix='rabbitpy')
-        client.rpc('blah', payload)
+        reply = client.rpc('blah', payload)
 
         # Synthetically drain events from queues
         blah_queues = consumer.queues['blah']
@@ -107,12 +107,13 @@ class TestAbstractMQ(TestRabbitpy):
         # response = client.retrieve_messages()
         consumer.respond_to_client.assert_called_with(
             ANY,
-            {"msg": "Got reply"}
+            {"msg": "Got reply"},
+            None
         )
 
     def test_rpc_client(self):
         """Check behaviour of client """
-        self.pre_declare_queues(['rabbitpy.booya', 'booya.client'])
+        self.pre_declare_queues(['rabbitpy.booya'])
         consumer = Qurator(legacy=False,
                            exchange=self._exchange)
 
@@ -129,16 +130,14 @@ class TestAbstractMQ(TestRabbitpy):
         conn = self._connection
         with Consumer(conn, booya_queue, callbacks=booya_callbacks):
             conn.drain_events(timeout=1)
-        for reply in client.retrieve_messages():
-            self.assertIn('msg', reply)
-            self.assertEqual(reply['msg'], 'Wooot')
+        reply = client.retrieve_messages()
+        self.assertIn('msg', reply)
+        self.assertEqual(reply['msg'], 'Wooot')
 
     def test_legacy_rabbit(self):
         """Test creation of legacy style rabbit. """
 
-        self.pre_declare_queues(['testapi.test.queue',
-                                 'testlegacy.client',
-                                 'yeahimafunction.client'])
+        self.pre_declare_queues(['testapi.test.queue'])
         # This shouldn't work.
         with self.assertRaises(Exception):
             consumer = Qurator()
@@ -200,13 +199,13 @@ class TestAbstractMQ(TestRabbitpy):
         #check_function.assert_called_with({"x": 1})
         #check_another_function.assert_called_with({"y": 3})
 
-        for reply in client.retrieve_messages():
-            self.assertIn('result', reply['data']['options'])
-            self.assertEqual(reply['data']['options']['result'], 'OK')
+        reply = client.retrieve_messages()
+        self.assertIn('result', reply['data']['options'])
+        self.assertEqual(reply['data']['options']['result'], 'OK')
 
-        for reply in client2.retrieve_messages():
-            self.assertIn('result', reply['data']['options'])
-            self.assertEqual(reply['data']['options']['result'], "D'OH")
+        reply = client2.retrieve_messages()
+        self.assertIn('result', reply['data']['options'])
+        self.assertEqual(reply['data']['options']['result'], "D'OH")
 
     def test_malformed_legacy_request(self):
         """Check that we get an error message for a malformed request to the
@@ -217,8 +216,7 @@ class TestAbstractMQ(TestRabbitpy):
         legacy flag activated.
 
         """
-        self.pre_declare_queues(['random.test.queue',
-                                 'flappy.client'])
+        self.pre_declare_queues(['random.test.queue'])
         data_to_send = {"x": "1"}
 
         server_queue = 'random.test.queue'
@@ -242,12 +240,12 @@ class TestAbstractMQ(TestRabbitpy):
         conn = self._connection
         with Consumer(conn, queues, callbacks=q_callbacks):
             conn.drain_events(timeout=1)
-        for reply in c.retrieve_messages():
-            self.assertIn('error', reply)
-            message = reply['error']
-            self.assertRegex(message,
-                             r'Malformed request',
-                             "Legacy queue requires client with legacy=True.")
+        reply = c.retrieve_messages()
+        self.assertIn('error', reply)
+        message = reply['error']
+        self.assertRegex(message,
+                         r'Malformed request',
+                         "Legacy queue requires client with legacy=True.")
 
     def test_default_exchange(self):
         """Test behaviour using the default exchange."""
@@ -257,8 +255,7 @@ class TestAbstractMQ(TestRabbitpy):
             channel=self._connection,
             durable=True,
             type='direct')
-        self.pre_declare_queues(['default.queue.thing',
-                                 'testing_default_exchange.client'])
+        self.pre_declare_queues(['default.queue.thing'])
         q = Qurator(exchange=self._exchange,
                     queue='default.queue.thing')
 
@@ -282,9 +279,9 @@ class TestAbstractMQ(TestRabbitpy):
         conn = self._connection
         with Consumer(conn, queues, callbacks=test_callbacks):
             conn.drain_events(timeout=1)
-        for reply in client.retrieve_messages():
-            self.assertIn('x', reply['data']['options'])
-            self.assertEqual(reply['data']['options']['data'], request)
+        reply = client.retrieve_messages()
+        self.assertIn('x', reply['data']['options'])
+        self.assertEqual(reply['data']['options']['data'], request)
 
     def test_task_nondurable_exchange(self):
         """Task setup """
