@@ -1,0 +1,11 @@
+
+machine:
+    python:
+        version: 3.4.2
+    services:
+        - rabbitmq
+
+test:
+    override:
+        - ./run_tests.sh
+
