@@ -3,7 +3,7 @@ machine:
     python:
         version: 3.4.2
     services:
-        - rabbitmq
+        - rabbitmq-server
 
 test:
     override:
