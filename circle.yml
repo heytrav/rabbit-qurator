@@ -4,8 +4,3 @@ machine:
         version: 3.4.2
     services:
         - rabbitmq-server
-
-test:
-    override:
-        - ./run_tests.sh
-
