@@ -1,4 +1,6 @@
 machine:
+    environment:
+        DEPLOY_ENVIRONMENT: development
     python:
         version: 3.4.2
     services:
