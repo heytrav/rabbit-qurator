@@ -1,4 +1,4 @@
-[![Circle CI](https://circleci.com/gh/ideegeo/rabbitpy.svg?style=svg&circle-token=0a443639d898b45e9b07d6214a5faf711e76f178)](https://circleci.com/gh/ideegeo/rabbitpy)
+[![Circle CI](https://circleci.com/gh/ideegeo/rabbitpy/tree/master.svg?style=svg&circle-token=0a443639d898b45e9b07d6214a5faf711e76f178)](https://circleci.com/gh/ideegeo/rabbitpy/tree/master)
 
 #rabbitpy
 
