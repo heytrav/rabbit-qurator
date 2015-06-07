@@ -76,7 +76,8 @@ class TestClient(TestCase):
         c.task('whatever', {"data": "x"})
         c._send_command.assert_called_with(
             ANY,
-            'whatever'
+            'whatever',
+            declare_queue=False
         )
         # This part shouldn't matter if legacy or not.
         c = RpcClient(legacy=False, client_queue='test.my.queue')
