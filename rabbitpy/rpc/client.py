@@ -191,9 +191,10 @@ class RpcClient(object):
                     "to {!r}".format(self._client_queue,
                                      server_routing_key))
 
-        self._send_command(payload, server_routing_key)
+        self._send_command(payload, server_routing_key, declare_queue=False)
 
-    def _send_command(self, payload, server_routing_key, properties=None):
+    def _send_command(self, payload, server_routing_key, properties=None,
+                      declare_queue=True):
         if properties is None:
             properties = {}
         self.reply = None
@@ -205,7 +206,8 @@ class RpcClient(object):
                       durable=self._exchange.durable,
                       exchange=self._exchange,
                       routing_key=self._client_queue)
-        queue.declare()
+        if declare_queue:
+            queue.declare()
         self._queue = queue
         with producers[self._conn].acquire(block=True) as producer:
             producer.publish(payload,
