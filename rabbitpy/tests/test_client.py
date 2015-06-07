@@ -70,9 +70,7 @@ class TestClient(TestCase):
         )
 
     def test_task_properties(self):
-        """Setup task properties
-
-        """
+        """Setup task properties."""
         c = RpcClient()
         c._send_command = MagicMock()
         c.task('whatever', {"data": "x"})
