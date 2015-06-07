@@ -86,5 +86,6 @@ class TestClient(TestCase):
         c.task('whatever', {"data": "x"})
         c._send_command.assert_called_with(
             ANY,
-            'whatever'
+            'whatever',
+            declare_queue=False
         )
