@@ -1,4 +1,5 @@
 import os
+import uuid
 from functools import wraps, partial
 
 from kombu import Queue, Connection
@@ -184,7 +185,8 @@ class Qurator(object):
             logger.debug("Processing function {!r} "
                          "with data {!r}".format(func.__name__, body))
             try:
-                correlation_id = message.properties['correlation_id']
+                properties = message.properties
+                correlation_id = properties.setdefault('correlation_id', uuid.uuid4())
                 logger.info('STARTSERVICE:%s;CORRELATION_ID:%s' % (queue_name,
                                                                    correlation_id))
             except Exception:
