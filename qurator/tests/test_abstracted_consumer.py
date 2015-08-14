@@ -4,11 +4,6 @@ from kombu.utils import nested
 
 from ..queue import Qurator
 from ..rpc.client import RpcClient
-from ..utilities.jobqueue import (
-    preprocess,
-    postprocess,
-    wrap
-)
 
 from .test_rabbit import TestRabbitpy
 
@@ -148,8 +143,6 @@ class TestAbstractMQ(TestRabbitpy):
                     queue='default.queue.thing')
 
         @q.rpc
-        @postprocess
-        @preprocess
         def testing_default_exchange(data):
             return_data = {}
             return_data.update(data)
@@ -179,7 +172,6 @@ class TestAbstractMQ(TestRabbitpy):
 
         with self.assertRaises(Exception):
             @q.task
-            @preprocess
             def amation(data):
                 return None
 
@@ -206,7 +198,6 @@ class TestAbstractMQ(TestRabbitpy):
         q = Qurator(task_exchange=e, queue='test.task.fail')
 
         @q.task
-        @preprocess
         def fail(data):
             raise Exception('YOU FAIL!')
 
@@ -248,7 +239,6 @@ class TestAbstractMQ(TestRabbitpy):
         q = Qurator(task_exchange=e, queue='test.task.succeed')
 
         @q.task
-        @preprocess
         def succeed(data):
             return None
 
@@ -260,7 +250,6 @@ class TestAbstractMQ(TestRabbitpy):
         curr_queues = q.queues['succeed']
 
         @q.rpc
-        @preprocess
         def still_around(body, message):
             print("Message: {!r}".format(message))
 
