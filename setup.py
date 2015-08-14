@@ -19,5 +19,4 @@ setup(name='rabbit-qurator',
       version=version,
       packages=['qurator',
                 'qurator.rpc',
-                'qurator.tests',
-                'qurator.utilities'])
+                'qurator.tests'])
