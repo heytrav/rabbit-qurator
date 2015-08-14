@@ -1,4 +1,3 @@
-import uuid
 from kombu import Queue, Connection
 from kombu.pools import producers
 from kombu.common import uuid, collect_replies
@@ -93,7 +92,8 @@ class RpcClient(object):
 
         """
         if self._client_queue is None:
-            self._client_queue = '.'.join([command_name, 'client', uuid.uuid4()])
+            corr_uuid = uuid()
+            self._client_queue = '.'.join([command_name, 'client', corr_uuid])
 
     def rpc(self,
             command_name,

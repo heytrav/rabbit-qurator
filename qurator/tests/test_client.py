@@ -21,7 +21,7 @@ class TestClient(TestCase):
 
     def test_rpc_properties(self):
         """Test setup rpc properties.  """
-        c = RpcClient()
+        c = RpcClient(client_queue='whatever.client')
         c._send_command = MagicMock()
         c.retrieve_messages = MagicMock()
         c.rpc('whatever', {"data": "x"})
