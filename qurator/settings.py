@@ -55,10 +55,10 @@ LOGGING_CONFIG = {
 
 # Copy pasted (with impunity) from domainsage.settings
 try:
-    if 'RABBITPY_SETTINGS_DIR' in os.environ:
+    if 'QURATOR_SETTINGS_DIR' in os.environ:
         local_settings_dir = os.path.realpath(
             os.path.expanduser(
-                os.environ['RABBITPY_SETTINGS_DIR']))
+                os.environ['QURATOR_SETTINGS_DIR']))
         sys.path.insert(0, local_settings_dir)
     from local_settings import *
 except ImportError:

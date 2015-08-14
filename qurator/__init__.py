@@ -21,5 +21,5 @@ def get_logger(name=None, config=None):
     adapter = LoggerAdapter(logger, {"deploy_environment": DEPLOY_ENVIRONMENT})
     adapter.debug(
         "Just created logger with config {!r}".format(LOGGING_CONFIG))
-    adapter.debug("Environment: %s" % os.environ.get('RABBITPY_SETTINGS_DIR'))
+    adapter.debug("Environment: %s" % os.environ.get('QURATOR_SETTINGS_DIR'))
     return adapter
