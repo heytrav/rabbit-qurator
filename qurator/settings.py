@@ -35,17 +35,17 @@ LOGGING_CONFIG = {
             "handlers": ["consoleHandler"],
             "propagate": 0
         },
-        "rabbitpy": {
+        "qurator": {
             "level": "DEBUG",
             "handlers": ["consoleHandler"],
             "propagate": 0
         },
-        "rabbitpy.rpc": {
+        "qurator.rpc": {
             "level": "DEBUG",
             "handlers": ["consoleHandler"],
             "propagate": 0
         },
-        "rabbitpy.utilities": {
+        "qurator.utilities": {
             "level": "DEBUG",
             "handlers": ["consoleHandler"],
             "propagate": 0

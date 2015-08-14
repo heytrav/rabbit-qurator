@@ -223,7 +223,7 @@ class RpcClient(object):
 if __name__ == '__main__':
     from kombu.utils.debug import setup_logging
     setup_logging(loglevel='INFO', loggers=[''])
-    c = RpcClient(legacy=False, prefix='rabbitpy')
+    c = RpcClient(legacy=False, prefix='qurator')
     c.rpc('version')
 
     gen = c.retrieve_messages()

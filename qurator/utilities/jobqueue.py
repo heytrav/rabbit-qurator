@@ -3,7 +3,7 @@ from functools import wraps, partial
 
 from .. import get_logger
 from ..settings import LOGGING_CONFIG
-logger = get_logger('rabbitpy.utilities', LOGGING_CONFIG)
+logger = get_logger('qurator.utilities', LOGGING_CONFIG)
 
 
 def preprocess(func=None, *, subset=None):

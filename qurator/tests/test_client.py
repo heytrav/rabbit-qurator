@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, ANY
 
-from rabbitpy.rpc.client import RpcClient
+from qurator.rpc.client import RpcClient
 
 
 class TestClient(TestCase):

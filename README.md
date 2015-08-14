@@ -1,6 +1,5 @@
-[![Circle CI](https://circleci.com/gh/ideegeo/rabbitpy/tree/master.svg?style=svg&circle-token=0a443639d898b45e9b07d6214a5faf711e76f178)](https://circleci.com/gh/ideegeo/rabbitpy/tree/master)
-
-#rabbitpy
+[![Circle CI](https://circleci.com/gh/heytrav/rpc-qurator.svg?style=svg)](https://circleci.com/gh/heytrav/rpc-qurator)
+#rpc-qurator
 
 A library for creating RPC tools
 
@@ -14,14 +13,6 @@ into RPC style endpoints or fire-and-forget tasks.
 #Installation
 
 
-```
-pip install \
-    git+https://<oauth token>:x-oauth-basic@github.com/ideegeo/rabbitpy.git@v0.2.0
-```
-
-*Note*:
-* `<oauth token>` can be the same one used in some of our other repositories.
-* Check repository for latest tag.
 
 #Usage
 
@@ -30,7 +21,7 @@ pip install \
 
 
 ```python
-from rabbitpy.queue import Qurator
+from qurator.queue import Qurator
 consumer = Qurator(legacy=False, exchange=some_exchange)
 
 @consumer.rpc
@@ -44,7 +35,7 @@ def do_something(*args, **kwargs):
 
 You can implement clients however you like. Here is an example:
 ```python
-from rabbitpy.rpc.client import RpcClient
+from qurator.rpc.client import RpcClient
 
 client = RpcClient(exchange=some_exchange)
 client.rpc('do_something', {"msg": "Test"})
@@ -59,7 +50,7 @@ for reply in client.retrieve_messages():
 
 Create a hase like queue:
 ```python
-from rabbitpy.queue import Qurator
+from qurator.queue import Qurator
 
 legacy_consumer = Qurator(queue='api.some.queue')
 
@@ -110,14 +101,14 @@ This expects the client to send the following to the `awesome.my_rpc_method` que
 }
 ```
 
-* `prefix` parameter to the constructor defaults to `rabbitpy`.
+* `prefix` parameter to the constructor defaults to `qurator`.
 
 #General Notes
 
 ##Environment
 
 In order to interact with RabbitMQ, you need to be sure that the following
-environment variables are set when using rabbitpy:
+environment variables are set when using qurator:
 
 1. `RABBITMQ_TRANSPORT_SERVICE_HOST`
 1. `RABBITMQ_TRANSPORT_SERVICE_PORT`

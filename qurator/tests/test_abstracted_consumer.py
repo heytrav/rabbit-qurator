@@ -44,8 +44,8 @@ class TestAbstractMQ(TestRabbitpy):
     def test_method_wrapping(self):
         """Test creating custom rpc endpoint."""
 
-        self.pre_declare_queues(['rabbitpy.moffa',
-                                 'rabbitpy.boffa',
+        self.pre_declare_queues(['qurator.moffa',
+                                 'qurator.boffa',
                                  'boffa.moffa'])
         consumer = Qurator(legacy=False,
                            exchange=self._exchange)
@@ -60,7 +60,7 @@ class TestAbstractMQ(TestRabbitpy):
                          1,
                          'One consumer')
         self.assertEqual(moffa_queues[0].name,
-                         'rabbitpy.moffa',
+                         'qurator.moffa',
                          'Queue has expected name')
 
         @consumer.rpc(queue_name='boffa.moffa')
@@ -77,7 +77,7 @@ class TestAbstractMQ(TestRabbitpy):
     def test_standard_rpc(self):
         """Check behaviour of wrapped function."""
 
-        self.pre_declare_queues(['rabbitpy.blah', 'blah.client'])
+        self.pre_declare_queues(['qurator.blah', 'blah.client'])
         consumer = Qurator(legacy=False,
                            exchange=self._exchange)
         checkit = MagicMock(return_value={"msg": "Got reply"})
@@ -91,7 +91,7 @@ class TestAbstractMQ(TestRabbitpy):
         payload = {"msg": "Hello"}
 
         # Send message to server
-        client = RpcClient(exchange=self._exchange, prefix='rabbitpy')
+        client = RpcClient(exchange=self._exchange, prefix='qurator')
         reply = client.rpc('blah', payload)
 
         # Synthetically drain events from queues
@@ -113,7 +113,7 @@ class TestAbstractMQ(TestRabbitpy):
 
     def test_rpc_client(self):
         """Check behaviour of client """
-        self.pre_declare_queues(['rabbitpy.booya'])
+        self.pre_declare_queues(['qurator.booya'])
         consumer = Qurator(legacy=False,
                            exchange=self._exchange)
 
@@ -122,7 +122,7 @@ class TestAbstractMQ(TestRabbitpy):
             return {"msg": "Wooot"}
 
         payload = {"msg": "Boooya"}
-        client = RpcClient(exchange=self._exchange, prefix='rabbitpy')
+        client = RpcClient(exchange=self._exchange, prefix='qurator')
         client.rpc('booya', payload)
         booya_queue = consumer.queues['booya']
         booya_callbacks = consumer.callbacks['booya']

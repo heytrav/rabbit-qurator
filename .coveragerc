@@ -2,9 +2,9 @@
 [run]
 branch = True
 source =
-    rabbitpy
+    qurator
 omit = 
-    rabbitpy/tests/*
+    qurator/tests/*
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -26,4 +26,4 @@ exclude_lines =
 
 ignore_errors = True
 include =
-    rabbitpy*
+    qurator*

@@ -1,4 +1,4 @@
-# main rabbitpy module
+# main qurator module
 import os
 import logging
 import logging.config

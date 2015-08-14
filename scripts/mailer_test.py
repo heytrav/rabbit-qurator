@@ -1,7 +1,7 @@
 
 import time
-from rabbitpy.exchange import task_exchange
-from rabbitpy.rpc.client import RpcClient
+from qurator.exchange import task_exchange
+from qurator.rpc.client import RpcClient
 
 if __name__ == '__main__':
     client = RpcClient(exchange=task_exchange)

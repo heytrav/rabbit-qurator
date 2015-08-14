@@ -7,13 +7,13 @@ from ..settings import CONN_DICT
 
 class TestRabbitpy(TestCase):
 
-    """Superclass for rabbitpy testing stuff"""
+    """Superclass for qurator testing stuff"""
 
     def setUp(self):
         """Constructor """
         self._connection = self.connection_factory()
         try:
-            self._exchange = Exchange('testrabbitpy',
+            self._exchange = Exchange('testqurator',
                                       channel=self._connection,
                                       type='direct',
                                       durable=False)

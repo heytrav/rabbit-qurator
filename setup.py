@@ -12,12 +12,12 @@ version = subprocess.Popen(
 version = version.decode('utf-8')
 version.strip()
 
-setup(name='rabbitpy',
+setup(name='qurator',
       author='Travis Holton',
       author_email='travis@ideegeo.com',
       install_requires=reqs,
       version=version,
-      packages=['rabbitpy',
-                'rabbitpy.rpc',
-                'rabbitpy.tests',
-                'rabbitpy.utilities'])
+      packages=['qurator',
+                'qurator.rpc',
+                'qurator.tests',
+                'qurator.utilities'])

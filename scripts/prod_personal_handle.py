@@ -1,7 +1,7 @@
 
 
 from kombu import Exchange
-from rabbitpy.rpc.client import RpcClient
+from qurator.rpc.client import RpcClient
 
 if __name__ == '__main__':
     client = RpcClient()

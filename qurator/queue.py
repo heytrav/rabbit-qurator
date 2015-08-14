@@ -24,7 +24,7 @@ class Qurator(object):
     def __init__(self,
                  legacy=True,
                  queue=None,
-                 prefix='rabbitpy',
+                 prefix='qurator',
                  exchange=default_exchange,
                  task_exchange=default_task_exchange):
         """Constructor
@@ -32,7 +32,7 @@ class Qurator(object):
         :legacy: Boolean flag. If True (default) it should try to emulate hase
         functionality by dispatching calls to a single queue to different
         functions. If False, assume that each method is its own queue.
-        :prefix: Prefix for consumer queues. Defaults to 'rabbitpy'.
+        :prefix: Prefix for consumer queues. Defaults to 'qurator'.
         :queue: Default name for queue
         :exchange: Exchange to use.
         """
@@ -171,7 +171,7 @@ class Qurator(object):
         correlation_id back to the client.
 
         :func: wrap with new standard rpc behaviour
-        :queue_name: defaults to "rabbitpy.<func.__name__>"
+        :queue_name: defaults to "qurator.<func.__name__>"
 
         """
         if queue_name:
