@@ -131,7 +131,7 @@ class RpcClient(object):
 
         self.reply_received = False
         payload = {}
-        if data is not None
+        if data is not None:
             payload = data
         logger.info("Preparing request {!r}".format(payload))
 
