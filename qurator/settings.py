@@ -1,7 +1,7 @@
 import os
 import sys
 
-DEPLOY_ENVIRONMENT = os.environ.get('DEPLOY_ENVIRONMENT', None)
+DEPLOY_ENVIRONMENT = os.environ.get('DEPLOY_ENVIRONMENT', 'development')
 if DEPLOY_ENVIRONMENT is None:
     raise Exception("Please define the local DEPLOY_ENVIRONMENT.")
 RABBITMQ_TRANSPORT_SERVICE_HOST = os.environ.get(

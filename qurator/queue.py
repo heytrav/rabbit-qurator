@@ -186,7 +186,9 @@ class Qurator(object):
                          "with data {!r}".format(func.__name__, body))
             try:
                 properties = message.properties
-                correlation_id = properties.setdefault('correlation_id', uuid.uuid4())
+                correlation_id = properties.setdefault(
+                    'correlation_id',
+                    uuid.uuid4())
                 logger.info('STARTSERVICE:%s;CORRELATION_ID:%s' % (queue_name,
                                                                    correlation_id))
             except Exception:
