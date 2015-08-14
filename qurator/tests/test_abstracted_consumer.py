@@ -136,9 +136,8 @@ class TestAbstractMQ(TestRabbitpy):
             channel=self._connection,
             durable=True,
             type='direct')
-        self.pre_declare_queues(['default.queue.thing'])
-        q = Qurator(exchange=self._exchange,
-                    queue='default.queue.thing')
+        self.pre_declare_queues(['qurator.testing_default_exchange'])
+        q = Qurator(exchange=self._exchange)
 
         @q.rpc
         def testing_default_exchange(data):
@@ -151,9 +150,9 @@ class TestAbstractMQ(TestRabbitpy):
         request = {'request': 'my request'}
         client.rpc('testing_default_exchange',
                    request,
-                   server_routing_key='default.queue.thing')
+                   server_routing_key='qurator.testing_default_exchange')
 
-        queues = q.queues['testing_default_exchange']
+        queues = q.queues['qurator.testing_default_exchange']
         test_callbacks = q.callbacks['testing_default_exchange']
         conn = self._connection
         with Consumer(conn, queues, callbacks=test_callbacks):
