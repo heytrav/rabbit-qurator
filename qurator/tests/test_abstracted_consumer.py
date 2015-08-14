@@ -159,8 +159,8 @@ class TestAbstractMQ(TestRabbitpy):
         with Consumer(conn, queues, callbacks=test_callbacks):
             conn.drain_events(timeout=1)
         reply = client.retrieve_messages()
-        self.assertIn('x', reply['data']['options'])
-        self.assertEqual(reply['data']['options']['data'], request)
+        self.assertIn('x', reply)
+        self.assertEqual(reply, request)
 
     def test_task_nondurable_exchange(self):
         """Task setup """
