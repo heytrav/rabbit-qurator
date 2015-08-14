@@ -12,9 +12,9 @@ version = subprocess.Popen(
 version = version.decode('utf-8')
 version.strip()
 
-setup(name='qurator',
+setup(name='rabbit-qurator',
       author='Travis Holton',
-      author_email='travis@ideegeo.com',
+      author_email='wtholton@gmail.com',
       install_requires=reqs,
       version=version,
       packages=['qurator',
