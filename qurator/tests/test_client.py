@@ -8,28 +8,6 @@ class TestClient(TestCase):
 
     """Test the rpc client."""
 
-    def test_payload_legacy_rpc(self):
-        """Test command for legacy RPC implementation."""
-        c = RpcClient()
-        c._send_command = MagicMock()
-        c.retrieve_messages = MagicMock()
-
-        call_payload = {"test": 1}
-        c.rpc('do_that', call_payload)
-
-        # Note: this command should be called with the payload, server routing
-        # key, and possibly a dict containing the reply_to and correlation id.
-        c._send_command.assert_called_with(
-            {
-                "data": {
-                    "command": "do_that",
-                    "options": call_payload,
-                }
-            },
-            'do_that',  # generated routing key
-            ANY
-        )
-
     def test_payload_standard_rpc(self):
         """Test command for standard RPC."""
         c = RpcClient(legacy=False)

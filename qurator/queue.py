@@ -22,7 +22,7 @@ class Qurator(object):
     dispatch = {}
 
     def __init__(self,
-                 legacy=True,
+                 legacy=False,
                  queue=None,
                  prefix='qurator',
                  exchange=default_exchange,

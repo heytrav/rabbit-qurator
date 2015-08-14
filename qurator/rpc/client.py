@@ -20,7 +20,7 @@ class RpcClient(object):
     corr_id_server_queue = {}
 
     def __init__(self,
-                 legacy=True,
+                 legacy=False,
                  exchange=default_exchange,
                  prefix=None,
                  client_queue=None):
@@ -90,24 +90,24 @@ class RpcClient(object):
                 logger.exception(e)
                 logger.error("Malformed message: {!r}".format(body))
 
-    def _setup_payload(self, command_name, data):
-        """Setup the datastructure for either hase-like or standard.
+    #def _setup_payload(self, command_name, data):
+        #"""Setup the datastructure for either hase-like or standard.
 
-        :command_name: the name of the command
-        :data: data to be sent with the command
-        :returns: payload for the request
+        #:command_name: the name of the command
+        #:data: data to be sent with the command
+        #:returns: payload for the request
 
-        """
-        if self._legacy:
-            payload = {
-                'data': {
-                    'command': command_name,
-                    'options': data,
-                }
-            }
-        else:
-            payload = data
-        return payload
+        #"""
+        #if self._legacy:
+            #payload = {
+                #'data': {
+                    #'command': command_name,
+                    #'options': data,
+                #}
+            #}
+        #else:
+            #payload = data
+        #return payload
 
     def _prepare_client_queue(self, command_name):
         """Setup a client queue based on the command.
@@ -118,7 +118,7 @@ class RpcClient(object):
 
     def rpc(self,
             command_name,
-            data={},
+            data=None,
             server_routing_key=None):
         """Send a RPC request
 
@@ -130,7 +130,9 @@ class RpcClient(object):
         """
 
         self.reply_received = False
-        payload = self._setup_payload(command_name, data)
+        payload = {}
+        if data is not None
+            payload = data
         logger.info("Preparing request {!r}".format(payload))
 
         if server_routing_key is None:

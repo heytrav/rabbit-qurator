@@ -48,35 +48,6 @@ for reply in client.retrieve_messages():
 #Synopsis
 
 
-Create a hase like queue:
-```python
-from qurator.queue import Qurator
-
-legacy_consumer = Qurator(queue='api.some.queue')
-
-@legacy_consumer.rpc
-def my_rpc_method(data);
-    try:
-        # do some stuff
-        response = do_stuff(data)
-        return response
-    except Exception as e:
-        return {"error": "There was an error! {!r}".format(e)}
-
-```
-
-This expects the client to send something like the following to the queue `api.some.queue`:
-```javascript
-{
-    "command": "my_rpc_method",
-    "data": {
-        "domain": "something.com"
-        ...
-    }
-}
-```
-
-
 Alternative method for defining queues:
 
 ```python
