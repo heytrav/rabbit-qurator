@@ -80,15 +80,8 @@ This expects the client to send the following to the `awesome.my_rpc_method` que
 In order to interact with RabbitMQ, you need to be sure that the following
 environment variables are set when using qurator:
 
-1. `RABBITMQ_TRANSPORT_SERVICE_HOST`
-1. `RABBITMQ_TRANSPORT_SERVICE_PORT`
+1. `RABBITMQ_TRANSPORT_SERVICE_HOST` (default: `localhost`)
+1. `RABBITMQ_TRANSPORT_SERVICE_PORT` (default: `5672`)
 1. `RABBITMQ_USER`
 1. `RABBITMQ_PASS`
 1. `RABBITMQ_VHOST`
-
-
-
-##Miscellaneous information
-* The *hase-like* implementation is on by default.
-* When using the *hase-like* implementation, a queue name is required.
-* This is a work in progress and subject to unannounced sporadic changes.
