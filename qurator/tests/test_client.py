@@ -10,7 +10,7 @@ class TestClient(TestCase):
 
     def test_payload_standard_rpc(self):
         """Test command for standard RPC."""
-        c = RpcClient(legacy=False)
+        c = RpcClient()
         c._send_command = MagicMock()
         c.retrieve_messages = MagicMock()
         call_payload = {"test": 2}
@@ -34,7 +34,7 @@ class TestClient(TestCase):
             }
         )
         # This part shouldn't matter if legacy or not.
-        c = RpcClient(legacy=False, client_queue='test.my.queue')
+        c = RpcClient(client_queue='test.my.queue')
         c._send_command = MagicMock()
         c.retrieve_messages = MagicMock()
         c.rpc('whatever', {"data": "x"})
@@ -58,7 +58,7 @@ class TestClient(TestCase):
             declare_queue=False
         )
         # This part shouldn't matter if legacy or not.
-        c = RpcClient(legacy=False, client_queue='test.my.queue')
+        c = RpcClient(client_queue='test.my.queue')
         c._send_command = MagicMock()
         c.task('whatever', {"data": "x"})
         c._send_command.assert_called_with(

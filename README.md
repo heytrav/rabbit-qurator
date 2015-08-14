@@ -22,7 +22,7 @@ into RPC style endpoints or fire-and-forget tasks.
 
 ```python
 from qurator.queue import Qurator
-consumer = Qurator(legacy=False, exchange=some_exchange)
+consumer = Qurator(exchange=some_exchange)
 
 @consumer.rpc
 def do_something(*args, **kwargs):
@@ -51,8 +51,7 @@ for reply in client.retrieve_messages():
 Alternative method for defining queues:
 
 ```python
-consumer = Qurator(legacy=False,
-                      prefix='awesome')
+consumer = Qurator(prefix='awesome')
 
 @consumer.rpc
 def my_rpc_method(data);

@@ -42,8 +42,7 @@ class TestAbstractMQ(TestRabbitpy):
         self.pre_declare_queues(['qurator.moffa',
                                  'qurator.boffa',
                                  'boffa.moffa'])
-        consumer = Qurator(legacy=False,
-                           exchange=self._exchange)
+        consumer = Qurator(exchange=self._exchange)
 
         @consumer.rpc
         def moffa(msg):
@@ -73,8 +72,7 @@ class TestAbstractMQ(TestRabbitpy):
         """Check behaviour of wrapped function."""
 
         self.pre_declare_queues(['qurator.blah', 'blah.client'])
-        consumer = Qurator(legacy=False,
-                           exchange=self._exchange)
+        consumer = Qurator(exchange=self._exchange)
         checkit = MagicMock(return_value={"msg": "Got reply"})
         # Now mock it!
         consumer.respond_to_client = MagicMock()
@@ -107,8 +105,7 @@ class TestAbstractMQ(TestRabbitpy):
     def test_rpc_client(self):
         """Check behaviour of client """
         self.pre_declare_queues(['qurator.booya'])
-        consumer = Qurator(legacy=False,
-                           exchange=self._exchange)
+        consumer = Qurator(exchange=self._exchange)
 
         @consumer.rpc
         def booya(*args, **kwargs):

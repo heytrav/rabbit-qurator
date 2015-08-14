@@ -22,16 +22,12 @@ class Qurator(object):
     dispatch = {}
 
     def __init__(self,
-                 legacy=False,
                  queue=None,
                  prefix='qurator',
                  exchange=default_exchange,
                  task_exchange=default_task_exchange):
         """Constructor
 
-        :legacy: Boolean flag. If True (default) it should try to emulate hase
-        functionality by dispatching calls to a single queue to different
-        functions. If False, assume that each method is its own queue.
         :prefix: Prefix for consumer queues. Defaults to 'qurator'.
         :queue: Default name for queue
         :exchange: Exchange to use.
@@ -40,12 +36,6 @@ class Qurator(object):
         self._exchange = exchange
         self._task_exchange = task_exchange
         self._prefix = prefix
-        self._legacy = legacy
-        if legacy:
-            if queue is None:
-                raise Exception("'queue' is required "
-                                " for legacy implementation.")
-
         self._queue = queue
         logger.debug("Initialising Qurator class")
 
@@ -98,16 +88,7 @@ class Qurator(object):
             self.queues[name] = []
         if name not in self.callbacks:
             self.callbacks[name] = []
-        if self._legacy:
-            self.dispatch[name] = callback
-            # Expect that there will only be one callback with this particular
-            # name.
-            self.callbacks[name] = [self._hase_dispatch]
-            # Set queue_name to whatever class was instantiated with.
-            queue_name = self._queue
-        else:
-            self.callbacks[name].append(callback)
-
+        self.callbacks[name].append(callback)
         # If not set by instance, make same as function name.
         if queue_name is None:
             queue_name = '.'.join([self._prefix, name])

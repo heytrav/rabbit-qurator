@@ -1,3 +1,4 @@
+import uuid
 from kombu import Queue, Connection
 from kombu.pools import producers
 from kombu.common import uuid, collect_replies
@@ -20,18 +21,15 @@ class RpcClient(object):
     corr_id_server_queue = {}
 
     def __init__(self,
-                 legacy=False,
                  exchange=default_exchange,
                  prefix=None,
                  client_queue=None):
         """Constructor for client object.
 
-        :legacy: Boolean flag for hase-like (default) or standard rpc
         :exchange: Exchange to use
         :prefix: for automatic server routing key generation
         :client_queue: name for the client queue. Default is <command>.client
         """
-        self._legacy = legacy
         self._prefix = prefix
         self._exchange = exchange
         self.reply = None
@@ -95,7 +93,7 @@ class RpcClient(object):
 
         """
         if self._client_queue is None:
-            self._client_queue = '.'.join([command_name, 'client'])
+            self._client_queue = '.'.join([command_name, 'client', uuid.uuid4()])
 
     def rpc(self,
             command_name,
@@ -202,13 +200,3 @@ class RpcClient(object):
             logger.info("Published to exchange "
                         "{!r}".format(self._exchange))
             logger.info("Published request %r" % payload)
-
-if __name__ == '__main__':
-    from kombu.utils.debug import setup_logging
-    setup_logging(loglevel='INFO', loggers=[''])
-    c = RpcClient(legacy=False, prefix='qurator')
-    c.rpc('version')
-
-    gen = c.retrieve_messages()
-    for i in gen:
-        print("Response:\n\n{!r}".format(i))
