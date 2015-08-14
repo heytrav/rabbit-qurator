@@ -14,8 +14,9 @@ version.strip()
 
 setup(name='rabbit-qurator',
       author='Travis Holton',
+      url='https://github.com/heytrav/rpc-qurator',
       author_email='wtholton@gmail.com',
-      install_requires=reqs,
+      #install_requires=reqs,
       version=version,
       packages=['qurator',
                 'qurator.rpc',
