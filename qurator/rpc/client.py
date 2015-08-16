@@ -87,6 +87,16 @@ class RpcClient(object):
                 logger.exception(e)
                 logger.error("Malformed message: {!r}".format(body))
 
+    def _setup_payload(self, command_name, data):
+        """Setup the datastructure for either hase-like or standard.
+
+        :command_name: the name of the command
+        :data: data to be sent with the command
+        :returns: payload for the request
+
+        """
+        return data
+
     def _prepare_client_queue(self, command_name):
         """Setup a client queue based on the command.
 
@@ -109,9 +119,7 @@ class RpcClient(object):
         """
 
         self.reply_received = False
-        payload = {}
-        if data is not None:
-            payload = data
+        payload = self._setup_payload(command_name, data)
         logger.info("Preparing request {!r}".format(payload))
 
         if server_routing_key is None:
@@ -158,10 +166,10 @@ class RpcClient(object):
         to <command>.server
         """
 
-        payload = {}
-        if data is not None:
-            payload = {}
+        if data is None:
+            data = {}
         self.reply_received = False
+        payload = self._setup_payload(command_name, data)
         logger.info("Preparing request {!r}".format(payload))
 
         if server_routing_key is None:
