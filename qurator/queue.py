@@ -49,31 +49,6 @@ class Qurator(object):
         message.ack()
         self.respond_to_client(message, error)
 
-    def _hase_dispatch(self, body, message):
-        """Dispatch function calls to wrapped methods
-
-        :body: data for command. Note: this must contain  a key 'command'
-        which dispatch which callback will be called.
-        :returns: the data returned by the callback.
-        """
-        logger = get_logger(self._queue)
-        try:
-            command = body['data']['command']
-            callback = self.dispatch[command]
-            logger.debug("Calling {!r} with {!r}".format(command, body))
-        except KeyError:
-            error_message = "Malformed request"
-            logger.error(error_message, exc_info=True)
-            error = {"error": error_message, "sent": body}
-            self._error(error, message)
-        except Exception as e:
-            error_message = "Unable call method"
-            logger.error(error_message, exc_info=True)
-            error = {"error": error_message, "sent": body}
-            self._error(error, message)
-        else:
-            return callback(body, message)
-
     def _wrap_function(self, function, callback, queue_name, task=False):
         """Set up queue used in decorated function.
 
@@ -199,15 +174,6 @@ class Qurator(object):
         ))
         with Connection(**CONN_DICT) as conn:
             with producers[conn].acquire(block=True) as producer:
-                # Assume reply_to and correlation_id in message.
-
-                # Note this also assumes that the client has a bound queue
-                # on the same exchange as this worker.
-                #
-                # This is not the case for hase, since it uses a generated
-                # queue name and the default exchange which has an implicit
-                # binding from routing_key => queue name
-                #
                 try:
                     send_reply(
                         self._exchange,
@@ -237,8 +203,6 @@ class Qurator(object):
 
     def run(self):
         from kombu import Connection
-
-        from .settings import CONN_DICT
         from .worker import Worker
 
         with Connection(**CONN_DICT) as conn:
