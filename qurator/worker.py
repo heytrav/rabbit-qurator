@@ -29,7 +29,7 @@ class Worker(ConsumerMixin):
         :returns: array of Consumer objects
         """
         consumer_set = []
-        logger.info("called get_consumers with {!r}".format(self.consumer.queue))
+        logger.info("called get_consumers with {!r}".format(self.consumer.queues))
         for i in self.consumer.queues.keys():
             queues = self.consumer.queues[i]
             callbacks = self.consumer.callbacks[i]
