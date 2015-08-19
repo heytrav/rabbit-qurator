@@ -204,14 +204,14 @@ class Qurator(object):
                         __name__, correlation_id))
                     logger.info('Replied with response {!r}'.format(response))
 
-    def run(self):
-        from .worker import Worker
-        logger = get_logger(__name__)
-        logger.debug("running worker")
+    #def run(self):
+        #from .worker import Worker
+        #logger = get_logger(__name__)
+        #logger.debug("running worker")
 
-        with Connection(**CONN_DICT) as conn:
-            try:
-                worker = Worker(conn, self)
-                worker.run()
-            except KeyboardInterrupt:
-                print('bye bye')
+        #with Connection(**CONN_DICT) as conn:
+            #try:
+                #worker = Worker(conn, self)
+                #worker.run()
+            #except KeyboardInterrupt:
+                #print('bye bye')
