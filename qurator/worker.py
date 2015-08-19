@@ -19,6 +19,7 @@ class Worker(ConsumerMixin):
         logger.debug("Called constructor.")
         self.connection = connection
         self.consumer = consumer
+        logger.debug("Consumer has queues: {!r}".format(consumer.queues))
 
     def get_consumers(self, Consumer, channel):
         """Get a set of consumers.
