@@ -17,10 +17,6 @@ class Qurator(object):
 
     """Manage Queue and callbacks for a set of Consumers"""
 
-    queues = {}
-    callbacks = {}
-    dispatch = {}
-
     def __init__(self,
                  queue=None,
                  prefix='qurator',
@@ -32,12 +28,15 @@ class Qurator(object):
         :queue: Default name for queue
         :exchange: Exchange to use.
         """
+        self.queues = {}
+        self.callbacks = {}
+        self.dispatch = {}
         logger = get_logger(__name__)
         self._exchange = exchange
         self._task_exchange = task_exchange
         self._prefix = prefix
         self._queue = queue
-        logger.debug("Initialising Qurator class")
+        logger.debug("Initialised Qurator class")
 
     def _error(self, error, message):
         """Return an error if caller sent an unknown command.
@@ -202,7 +201,6 @@ class Qurator(object):
                     logger.info('Replied with response {!r}'.format(response))
 
     def run(self):
-        from kombu import Connection
         from .worker import Worker
 
         with Connection(**CONN_DICT) as conn:
