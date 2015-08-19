@@ -57,6 +57,8 @@ class Qurator(object):
         :returns: wrapped function
 
         """
+
+        logger = get_logger(__name__)
         name = function.__name__.lower()
         if name not in self.queues:
             self.queues[name] = []
@@ -67,9 +69,11 @@ class Qurator(object):
         if queue_name is None:
             queue_name = '.'.join([self._prefix, name])
 
+        logger.debug("Setting up %s" % queue_name)
         routing_key = queue_name
         # Create the queue.
         exchange = self._exchange
+
         if task:
             exchange = self._task_exchange
         queue = Queue(queue_name,
