@@ -27,7 +27,6 @@ class Worker(ConsumerMixin):
         :Consumer: Consumer object
         :channel: a channel
         :returns: array of Consumer objects
-
         """
         consumer_set = []
         for i in self.consumer.queues.keys():
