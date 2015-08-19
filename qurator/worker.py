@@ -11,14 +11,14 @@ class Worker(ConsumerMixin):
     This code is based on the examples on the Kombu website.
     """
 
-    def __init__(self, connection, iwmn_consumer):
+    def __init__(self, connection, consumer):
         """Worker(connection)
 
         :connection: Connection object
         """
         logger.debug("Called constructor.")
         self.connection = connection
-        self.iwmn_consumer = iwmn_consumer
+        self.consumer = consumer
 
     def get_consumers(self, Consumer, channel):
         """Get a set of consumers.
@@ -29,9 +29,9 @@ class Worker(ConsumerMixin):
 
         """
         consumer_set = []
-        for i in self.iwmn_consumer.queues.keys():
-            queues = self.iwmn_consumer.queues[i]
-            callbacks = self.iwmn_consumer.callbacks[i]
+        for i in self.consumer.queues.keys():
+            queues = self.consumer.queues[i]
+            callbacks = self.consumer.callbacks[i]
             logger.info("Queues: {!r}".format(queues))
             c = Consumer(queues, callbacks=callbacks)
             consumer_set.append(c)
