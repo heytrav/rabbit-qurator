@@ -45,6 +45,11 @@ LOGGING_CONFIG = {
             "handlers": ["consoleHandler"],
             "propagate": 0
         },
+        "qurator.rpc.client": {
+            "level": "DEBUG",
+            "handlers": ["consoleHandler"],
+            "propagate": 0
+        },
         "qurator.utilities": {
             "level": "DEBUG",
             "handlers": ["consoleHandler"],
