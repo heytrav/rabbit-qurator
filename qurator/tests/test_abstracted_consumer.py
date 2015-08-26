@@ -14,7 +14,7 @@ class TestAbstractMQ(TestRabbitpy):
 
     def setUp(self):
         """Setup unit tests """
-        TestRabbitpy.setUp(self)
+        super().setUp()
         self.queues = []
 
     def pre_declare_queues(self, queues):
