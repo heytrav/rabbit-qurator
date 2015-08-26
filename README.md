@@ -1,7 +1,7 @@
 [![Circle CI](https://circleci.com/gh/heytrav/rpc-qurator.svg?style=svg)](https://circleci.com/gh/heytrav/rpc-qurator)
 #rpc-qurator
 
-A library for creating RPC tools
+Create RabbitMQ based remote procedure call (RPC) endpoints using decorators.
 
 
 #Description
@@ -12,7 +12,9 @@ into RPC style endpoints or fire-and-forget tasks.
 
 #Installation
 
-
+```
+pip install rabbit-qurator
+```
 
 #Usage
 
@@ -22,14 +24,45 @@ into RPC style endpoints or fire-and-forget tasks.
 
 ```python
 from qurator.queue import Qurator
-consumer = Qurator(exchange=some_exchange)
 
-@consumer.rpc
-def do_something(*args, **kwargs):
-    # some logic
+q = Qurator()
+
+@q.rpc
+def do_something(data):
+    """
+    Process data and return a response
+
+    :data: dict
+    :return: dict
+    """
     return {"message": "Hello"}
 
 ```
+* By default this will create a queue called `qurator.do_something` attached
+  to a direct durable exchange called `qurator`.
+
+```
+from kombu import Exchange
+from qurator.queue import Qurator
+
+exchange = Exchange('myexchange',
+                    type='direct',
+                    durable=False)
+
+q = Qurator(prefix='my_queue', exchange=exchange)
+
+@q.rpc(queue_name='test_queue')
+def do_something(data):
+    """
+    Process data and return a response
+
+    :data: dict
+    :return: dict
+    """
+    return {"message": "Hello"}
+```
+
+* This will create a queue called `my_queue.test_queue` bound to `myexchange`.
 
 ##Client
 
