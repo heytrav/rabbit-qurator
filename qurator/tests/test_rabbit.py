@@ -9,11 +9,14 @@ class TestRabbitpy(TestCase):
 
     """Superclass for qurator testing stuff"""
 
+    exchange_name = 'testqurator'
+    conn_dict = CONN_DICT
+
     def setUp(self):
         """Constructor """
         self._connection = self.connection_factory()
         try:
-            self._exchange = Exchange('testqurator',
+            self._exchange = Exchange(self.exchange_name,
                                       channel=self._connection,
                                       type='direct',
                                       durable=False)
@@ -36,8 +39,8 @@ class TestRabbitpy(TestCase):
         :returns: Connection object
 
         """
-        print("Connection: {!r}".format(CONN_DICT))
-        c = Connection(**CONN_DICT)
+        print("Connection: {!r}".format(self.conn_dict))
+        c = Connection(**self.conn_dict)
         return c
 
     def pre_declare_queues(self, queues):

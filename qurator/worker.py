@@ -16,10 +16,12 @@ class Worker(ConsumerMixin):
 
         :connection: Connection object
         """
-        logger.debug("Called constructor.")
+        logger.debug("Called constructor. " 
+                     "Connection: {!r} Consumer {!r}" 
+                     .format(connection, consumer))
+        logger.debug("Consumer has queues: {!r}".format(consumer.queues))
         self.connection = connection
         self.consumer = consumer
-        logger.debug("Consumer has queues: {!r}".format(consumer.queues))
 
     def get_consumers(self, Consumer, channel):
         """Get a set of consumers.
