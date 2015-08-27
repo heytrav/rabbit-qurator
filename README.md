@@ -21,7 +21,6 @@ pip install rabbit-qurator
 ##Consumer
 
 
-
 ```python
 from qurator.queue import Qurator
 
@@ -41,7 +40,7 @@ def do_something(data):
 * By default this will create a queue called `qurator.do_something` attached
   to a direct durable exchange called `qurator`.
 
-```
+```python
 from kombu import Exchange
 from qurator.queue import Qurator
 
@@ -66,45 +65,17 @@ def do_something(data):
 
 ##Client
 
-You can implement clients however you like. Here is an example:
+I've included a client for posting to the RPC consumer, however it should be
+possible to use any RPC client.
+
 ```python
 from qurator.rpc.client import RpcClient
 
 client = RpcClient(exchange=some_exchange)
 client.rpc('do_something', {"msg": "Test"})
-for reply in client.retrieve_messages():
-    # reply somewhere in here
+reply = client.retrieve_messages()
 
 ```
-
-
-#Synopsis
-
-
-Alternative method for defining queues:
-
-```python
-consumer = Qurator(prefix='awesome')
-
-@consumer.rpc
-def my_rpc_method(data);
-    try:
-        # do some stuff
-        response = do_stuff(data)
-        return response
-    except Exception as e:
-        return {"error": "There was an error! {!r}".format(e)}
-```
-
-This expects the client to send the following to the `awesome.my_rpc_method` queue:
-```javascript
-{
-    "domain": "something.com",
-    ...
-}
-```
-
-* `prefix` parameter to the constructor defaults to `qurator`.
 
 #General Notes
 
@@ -115,6 +86,6 @@ environment variables are set when using qurator:
 
 1. `RABBITMQ_TRANSPORT_SERVICE_HOST` (default: `localhost`)
 1. `RABBITMQ_TRANSPORT_SERVICE_PORT` (default: `5672`)
-1. `RABBITMQ_USER`
-1. `RABBITMQ_PASS`
-1. `RABBITMQ_VHOST`
+1. `RABBITMQ_USER` (default: `guest`)
+1. `RABBITMQ_PASSWORD`(default: `guest`)
+1. `RABBITMQ_VHOST` (default: `/`)
