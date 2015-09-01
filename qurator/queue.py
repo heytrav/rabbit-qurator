@@ -17,21 +17,24 @@ class Qurator(object):
 
     """Manage Queue and callbacks for a set of Consumers"""
 
+    queues = {}
+    callbacks = {}
+    dispatch = {}
+
     def __init__(self,
                  queue=None,
                  prefix='qurator',
                  exchange=default_exchange,
-                 task_exchange=default_task_exchange):
+                 task_exchange=default_task_exchange,
+                 conn_dict=CONN_DICT):
         """Constructor
 
         :prefix: Prefix for consumer queues. Defaults to 'qurator'.
         :queue: Default name for queue
         :exchange: Exchange to use.
         """
-        self.queues = {}
-        self.callbacks = {}
-        self.dispatch = {}
         logger = get_logger(__name__)
+        self.conn_dict = CONN_DICT
         self._exchange = exchange
         self._task_exchange = task_exchange
         self._prefix = prefix
@@ -209,7 +212,7 @@ class Qurator(object):
         logger = get_logger(__name__)
         logger.debug("running worker")
 
-        with Connection(**CONN_DICT) as conn:
+        with Connection(**self.conn_dict) as conn:
             try:
                 conn.connect()
                 worker = Worker(conn, self)
