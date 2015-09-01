@@ -210,7 +210,7 @@ class Qurator(object):
     def run(self):
         from .worker import Worker
         logger = get_logger(__name__)
-        logger.debug("running worker")
+        logger.info("running worker with connection: {!r}".format(self.conn_dict))
 
         with Connection(**self.conn_dict) as conn:
             try:
