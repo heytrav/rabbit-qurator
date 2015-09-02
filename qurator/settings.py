@@ -31,7 +31,7 @@ LOGGING_CONFIG = {
     },
     "loggers": {
         "root": {
-            "level": "INFO",
+            "level": "ERROR",
             "handlers": ["consoleHandler"],
         },
         "qurator": {
