@@ -57,7 +57,7 @@ class RpcClient(object):
                                  timeout=1,
                                  limit=1,
                                  callbacks=[self.ack_message]):
-            logger.info("Received {!r}".format(i))
+            logger.debug("Received {!r}".format(i))
             if self.reply is not None:
                 response = self.reply
                 self.reply = None

@@ -18,7 +18,4 @@ def get_logger(name=None, config=None):
         LOGGING_CONFIG['loggers'][name] = config
     logging.config.dictConfig(LOGGING_CONFIG)
     logger = logging.getLogger(name)
-    adapter = LoggerAdapter(logger, {"deploy_environment": DEPLOY_ENVIRONMENT})
-    adapter.debug(
-        "Just created logger with config {!r}".format(LOGGING_CONFIG))
-    return adapter
+    return logger

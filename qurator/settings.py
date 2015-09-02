@@ -19,41 +19,24 @@ LOGGING_CONFIG = {
     "version": 1,
     "formatters": {
         "simple": {
-            "format": "[%(deploy_environment)s] %(pathname)s:line %(lineno)d [%(levelname)s]: %(name)s - %(message)s"
+            "format": "[%(levelname)] %(pathname)s:line %(lineno)d: %(name)s - %(message)s"
         }
     },
     "handlers": {
         "consoleHandler": {
             "class": "logging.StreamHandler",
             "formatter": "simple",
-            "level": "DEBUG",
+            "level": "INFO",
         }
     },
     "loggers": {
         "root": {
-            "level": "DEBUG",
+            "level": "INFO",
             "handlers": ["consoleHandler"],
-            "propagate": 0
         },
         "qurator": {
-            "level": "DEBUG",
-            "handlers": ["consoleHandler"],
-            "propagate": 0
-        },
-        "qurator.rpc": {
-            "level": "DEBUG",
-            "handlers": ["consoleHandler"],
-            "propagate": 0
-        },
-        "qurator.rpc.client": {
-            "level": "DEBUG",
-            "handlers": ["consoleHandler"],
-            "propagate": 0
-        },
-        "qurator.utilities": {
-            "level": "DEBUG",
-            "handlers": ["consoleHandler"],
-            "propagate": 0
+            "level": "INFO",
+            "propagate": True
         }
     }
 }
