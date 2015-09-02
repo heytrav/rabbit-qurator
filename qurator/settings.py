@@ -19,7 +19,7 @@ LOGGING_CONFIG = {
     "version": 1,
     "formatters": {
         "simple": {
-            "format": "[level=%(levelname)] %(pathname)s:line %(lineno)d: %(name)s - %(message)s"
+            "format": "[level=%(levelname)s] %(pathname)s:line %(lineno)d: %(name)s - %(message)s"
         }
     },
     "handlers": {
