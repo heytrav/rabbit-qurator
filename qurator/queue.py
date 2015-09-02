@@ -158,7 +158,7 @@ class Qurator(object):
                              " {!r}".format(body),
                              exc_info=True)
             response = func(body)
-            logger.debug("Wrapped method returned:  {!r}".format(response))
+            logger.info("Wrapped method returned:  {!r}".format(response))
             self.respond_to_client(message, response, queue_name)
             message.ack()
 
@@ -174,7 +174,7 @@ class Qurator(object):
         if queue_name is None:
             queue_name = __name__
         logger = get_logger(queue_name)
-        logger.debug("Replying to queue {!r} with properties: {!r}".format(
+        logger.info("Replying to queue {!r} with properties: {!r}".format(
             message.properties['reply_to'],
             message.properties['correlation_id']
         ))
