@@ -19,23 +19,23 @@ LOGGING_CONFIG = {
     "version": 1,
     "formatters": {
         "simple": {
-            "format": "[%(levelname)] %(pathname)s:line %(lineno)d: %(name)s - %(message)s"
+            "format": "[level=%(levelname)] %(pathname)s:line %(lineno)d: %(name)s - %(message)s"
         }
     },
     "handlers": {
         "consoleHandler": {
             "class": "logging.StreamHandler",
             "formatter": "simple",
-            "level": "INFO",
+            "level": "DEBUG",
         }
     },
     "loggers": {
         "root": {
-            "level": "INFO",
+            "level": "DEBUG",
             "handlers": ["consoleHandler"],
         },
         "qurator": {
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": True
         }
     }
