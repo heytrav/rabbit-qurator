@@ -35,7 +35,7 @@ LOGGING_CONFIG = {
             "handlers": ["consoleHandler"],
         },
         "qurator": {
-            "level": "DEBUG,
+            "level": "DEBUG",
             "propagate": True
         }
     }
