@@ -31,11 +31,11 @@ LOGGING_CONFIG = {
     },
     "loggers": {
         "root": {
-            "level": "DEBUG",
+            "level": "INFO",
             "handlers": ["consoleHandler"],
         },
         "qurator": {
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": True
         }
     }
