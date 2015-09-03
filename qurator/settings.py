@@ -15,32 +15,6 @@ RABBITMQ_PASSWORD = os.environ.get('RABBITMQ_PASSWORD', 'guest')
 RABBITMQ_VHOST = os.environ.get('RABBITMQ_VHOST', '/')
 RABBITMQ_SSL = os.environ.get('RABBITMQ_SSL', False)
 
-LOGGING_CONFIG = {
-    "version": 1,
-    "formatters": {
-        "simple": {
-            "format": "[%(levelname)s] %(pathname)s:line %(lineno)d: %(name)s - %(message)s"
-        }
-    },
-    "handlers": {
-        "quratorNullHandler": {
-            "class": "logging.NullHandler",
-            "formatter": "simple",
-            "level": "DEBUG",
-        }
-    },
-    "loggers": {
-        "root": {
-            "level": "DEBUG",
-            "handlers": ["quratorNullHandler"],
-        },
-        "qurator": {
-            "level": "DEBUG",
-            "propagate": True
-        }
-    }
-}
-
 for mq_key in [RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_VHOST]:
     if mq_key is None:
         raise Exception('Must define RABBITMQ_USER, RABBITMQ_PASSWORD and '
