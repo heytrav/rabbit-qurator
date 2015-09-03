@@ -1,7 +1,7 @@
+import logging
 from kombu.mixins import ConsumerMixin
-from . import get_logger
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Worker(ConsumerMixin):

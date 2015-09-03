@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 from functools import wraps, partial
 
 from kombu import Queue, Connection
@@ -7,7 +8,6 @@ from kombu.pools import producers
 from kombu.common import send_reply
 from amqp import exceptions
 
-from . import get_logger
 from .settings import CONN_DICT
 from .exchange import exchange as default_exchange
 from .exchange import task_exchange as default_task_exchange
@@ -33,7 +33,7 @@ class Qurator(object):
         :queue: Default name for queue
         :exchange: Exchange to use.
         """
-        logger = get_logger(__name__)
+        logger = logging.getLogger(__name__)
         self.conn_dict = CONN_DICT
         self._exchange = exchange
         self._task_exchange = task_exchange
@@ -61,7 +61,7 @@ class Qurator(object):
 
         """
 
-        logger = get_logger(__name__)
+        logger = logging.getLogger(__name__)
         name = function.__name__.lower()
         if name not in self.queues:
             self.queues[name] = []
@@ -102,9 +102,9 @@ class Qurator(object):
         The client should not expect anything to be returned.
 
         """
-        logger = get_logger(__name__)
+        logger = logging.getLogger(__name__)
         if queue_name:
-            logger = get_logger(queue_name)
+            logger = logging.getLogger(queue_name)
         if not self._task_exchange.durable:
             raise Exception('Task exchange should be durable.')
         if func is None:
@@ -137,9 +137,9 @@ class Qurator(object):
 
         """
         if queue_name:
-            logger = get_logger(queue_name)
+            logger = logging.getLogger(queue_name)
         else:
-            logger = get_logger(__name__)
+            logger = logging.getLogger(__name__)
         if func is None:
             return partial(self.rpc, queue_name=queue_name)
 
@@ -173,7 +173,7 @@ class Qurator(object):
             response = {}
         if queue_name is None:
             queue_name = __name__
-        logger = get_logger(queue_name)
+        logger = logging.getLogger(queue_name)
         logger.info("Replying to queue {!r} with properties: {!r}".format(
             message.properties['reply_to'],
             message.properties['correlation_id']
@@ -209,7 +209,7 @@ class Qurator(object):
 
     def run(self):
         from .worker import Worker
-        logger = get_logger(__name__)
+        logger = logging.getLogger(__name__)
         logger.info("running worker with connection: {!r}".format(self.conn_dict))
 
         with Connection(**self.conn_dict) as conn:

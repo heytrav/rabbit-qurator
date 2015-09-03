@@ -23,8 +23,8 @@ LOGGING_CONFIG = {
         }
     },
     "handlers": {
-        "consoleHandler": {
-            "class": "logging.StreamHandler",
+        "quratorNullHandler": {
+            "class": "logging.NullHandler",
             "formatter": "simple",
             "level": "DEBUG",
         }
@@ -32,7 +32,7 @@ LOGGING_CONFIG = {
     "loggers": {
         "root": {
             "level": "DEBUG",
-            "handlers": ["consoleHandler"],
+            "handlers": ["quratorNullHandler"],
         },
         "qurator": {
             "level": "DEBUG",
@@ -40,17 +40,6 @@ LOGGING_CONFIG = {
         }
     }
 }
-
-# Copy pasted (with impunity) from domainsage.settings
-try:
-    if 'QURATOR_SETTINGS_DIR' in os.environ:
-        local_settings_dir = os.path.realpath(
-            os.path.expanduser(
-                os.environ['QURATOR_SETTINGS_DIR']))
-        sys.path.insert(0, local_settings_dir)
-    from local_settings import *
-except ImportError:
-    pass
 
 for mq_key in [RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_VHOST]:
     if mq_key is None:

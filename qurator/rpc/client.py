@@ -1,14 +1,14 @@
+import logging
 from kombu import Queue, Connection
 from kombu.pools import producers
 from kombu.common import uuid, collect_replies
 from amqp import exceptions
 
 
-from .. import get_logger
 from ..settings import CONN_DICT
 from ..exchange import exchange as default_exchange
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RpcClient(object):
