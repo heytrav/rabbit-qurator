@@ -146,10 +146,10 @@ class RpcClient(object):
             self.messages[message_correlation_id] = True
             self._send_command(payload, server_routing_key, properties)
             result = self.retrieve_messages()
-        except Exception as e:
-            logger.debug("Whoa...something happened.")
-            logger.exception(e)
-            raise e
+        except Exception:
+            logger.error("Sending message to consumer queue failed.", 
+                         exc_info=True)
+            raise
         # Successful so store message correlation id for retrieval.
         return result
 
@@ -170,7 +170,7 @@ class RpcClient(object):
             data = {}
         self.reply_received = False
         payload = self._setup_payload(command_name, data)
-        logger.info("Preparing request {!r}".format(payload))
+        logger.debug("Preparing request {!r}".format(payload))
 
         if server_routing_key is None:
             server_routing_key = command_name
@@ -187,8 +187,7 @@ class RpcClient(object):
         if properties is None:
             properties = {}
         self.reply = None
-        logger.info("Reply info: {!r}".format(properties))
-        logger.info("Using connection: {!r}".format(CONN_DICT))
+        logger.debug("Using connection: {!r}".format(CONN_DICT))
         logger.info("Declaring queue %s." % self._client_queue)
         queue = Queue(self._client_queue,
                       channel=self._conn,
@@ -205,6 +204,5 @@ class RpcClient(object):
                              declare=[self._exchange],
                              routing_key=server_routing_key,
                              **properties)
-            logger.info("Published to exchange "
-                        "{!r}".format(self._exchange))
-            logger.info("Published request %r" % payload)
+            logger.info("Published {!r} to exchange "
+                        "{!r}".format(payload, self._exchange))

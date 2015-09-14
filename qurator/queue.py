@@ -1,5 +1,5 @@
 import os
-import uuid
+from uuid import uuid4
 import logging
 from functools import wraps, partial
 
@@ -150,7 +150,7 @@ class Qurator(object):
                 properties = message.properties
                 correlation_id = properties.setdefault(
                     'correlation_id',
-                    uuid.uuid4())
+                    uuid4.hex())
                 logger.info('STARTSERVICE:%s;CORRELATION_ID:%s' % (queue_name,
                                                                    correlation_id))
             except Exception:
