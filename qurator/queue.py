@@ -4,13 +4,13 @@ import logging
 from functools import wraps, partial
 
 from kombu import Queue, Connection
+from kombu import Exchange as default_exchange
+from kombu import Exchange as default_task_exchange
 from kombu.pools import producers
 from kombu.common import send_reply
 from amqp import exceptions
 
 from .settings import CONN_DICT
-from .exchange import exchange as default_exchange
-from .exchange import task_exchange as default_task_exchange
 
 
 class Qurator(object):
