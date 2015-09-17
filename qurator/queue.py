@@ -3,8 +3,7 @@ from uuid import uuid4
 import logging
 from functools import wraps, partial
 
-from kombu import Queue, Connection
-from kombu import Exchange
+from kombu import Queue, Connection, Exchange
 from kombu.pools import producers
 from kombu.common import send_reply
 from amqp import exceptions
