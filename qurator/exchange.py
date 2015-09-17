@@ -1,5 +1,6 @@
 from kombu import Exchange
 
-exchange = Exchange(type='direct',
+exchange = Exchange(name='amq.direct', 
+                    type='direct',
                     durable=False)
-task_exchange = Exchange(type='direct')
+task_exchange = Exchange(name='amq.direct', type='direct')
