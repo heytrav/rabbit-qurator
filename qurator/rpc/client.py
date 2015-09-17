@@ -6,7 +6,7 @@ from amqp import exceptions
 
 
 from ..settings import CONN_DICT
-from ..exchange import exchange as default_exchange
+from kombu import Exchange as default_exchange
 
 logger = logging.getLogger(__name__)
 

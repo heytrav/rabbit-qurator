@@ -1,6 +1,6 @@
 
 import time
-from qurator.exchange import task_exchange
+from kombu import Exchange as task_exchange
 from qurator.rpc.client import RpcClient
 
 if __name__ == '__main__':
