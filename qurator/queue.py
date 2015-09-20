@@ -10,7 +10,6 @@ from amqp import exceptions
 
 from .settings import CONN_DICT
 
-
 class Qurator(object):
 
     """Manage Queue and callbacks for a set of Consumers"""

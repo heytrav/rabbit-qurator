@@ -38,7 +38,7 @@ def do_something(data):
 
 ```
 * By default this will create a queue called `qurator.do_something` attached
-  to a direct durable exchange called `qurator`.
+  to the default exchange.
 
 ```python
 from kombu import Exchange
