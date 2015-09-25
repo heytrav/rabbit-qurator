@@ -35,7 +35,7 @@ class Worker(ConsumerMixin):
         for i in self.consumer.queues.keys():
             queues = self.consumer.queues[i]
             callbacks = self.consumer.callbacks[i]
-            logger.info("Queues: {!r}".format(queues))
+            logger.debug("Queues: {!r}".format(queues))
             c = Consumer(queues, callbacks=callbacks)
             consumer_set.append(c)
             logger.info("Added consumer: {!r}".format(c))

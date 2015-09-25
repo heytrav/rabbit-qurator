@@ -153,7 +153,7 @@ class Qurator(object):
                              " {!r}".format(body),
                              exc_info=True)
             response = func(body)
-            logger.info("Wrapped method returned:  {!r}".format(response))
+            logger.debug("Wrapped method returned:  {!r}".format(response))
             self.respond_to_client(message, response, queue_name)
             message.ack()
 
@@ -169,7 +169,7 @@ class Qurator(object):
         if queue_name is None:
             queue_name = __name__
         logger = logging.getLogger(queue_name)
-        logger.info("Replying to queue {!r} with properties: {!r}".format(
+        logger.debug("Replying to queue {!r} with properties: {!r}".format(
             message.properties['reply_to'],
             message.properties['correlation_id']
         ))
@@ -200,7 +200,7 @@ class Qurator(object):
                     correlation_id = message.properties['correlation_id']
                     logger.info('STOPSERVICE:%s;CORRELATION_ID:%s' % (
                         __name__, correlation_id))
-                    logger.info('Replied with response {!r}'.format(response))
+                    logger.debug('Replied with response {!r}'.format(response))
 
     def run(self):
         from .worker import Worker
