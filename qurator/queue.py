@@ -9,6 +9,7 @@ from kombu.common import send_reply
 from amqp import exceptions
 
 from .settings import CONN_DICT
+logger = logging.getLogger(__name__)
 
 class Qurator(object):
 
@@ -30,7 +31,6 @@ class Qurator(object):
         :queue: Default name for queue
         :exchange: Exchange to use.
         """
-        logger = logging.getLogger(__name__)
         self.conn_dict = CONN_DICT
         self._exchange = exchange
         self._task_exchange = task_exchange
@@ -58,7 +58,6 @@ class Qurator(object):
 
         """
 
-        logger = logging.getLogger(__name__)
         name = function.__name__.lower()
         if name not in self.queues:
             self.queues[name] = []
@@ -99,9 +98,6 @@ class Qurator(object):
         The client should not expect anything to be returned.
 
         """
-        logger = logging.getLogger(__name__)
-        if queue_name:
-            logger = logging.getLogger(queue_name)
         if not self._task_exchange.durable:
             raise Exception('Task exchange should be durable.')
         if func is None:
@@ -133,10 +129,6 @@ class Qurator(object):
         :queue_name: defaults to "qurator.<func.__name__>"
 
         """
-        if queue_name:
-            logger = logging.getLogger(queue_name)
-        else:
-            logger = logging.getLogger(__name__)
         if func is None:
             return partial(self.rpc, queue_name=queue_name)
 
@@ -168,7 +160,6 @@ class Qurator(object):
             response = {}
         if queue_name is None:
             queue_name = __name__
-        logger = logging.getLogger(queue_name)
         logger.debug("Replying to queue {!r} with properties: {!r}".format(
             message.properties['reply_to'],
             message.properties['correlation_id']
@@ -204,7 +195,6 @@ class Qurator(object):
 
     def run(self):
         from .worker import Worker
-        logger = logging.getLogger(__name__)
         logger.info("running worker with connection: {!r}".format(self.conn_dict))
 
         with Connection(**self.conn_dict) as conn:
