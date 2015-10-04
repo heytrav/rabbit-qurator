@@ -11,7 +11,7 @@ setup(name='rabbit-qurator',
       install_requires=reqs,
       description='Create RabbitMQ endpoints using decorators.',
       long_description='Create RabbitMQ endpoints for RPC and tasks using decorators based on kombu.',
-      version='1.3.0',
+      version='1.3.1',
       packages=['qurator',
                 'qurator.rpc',
                 'qurator.tests'])
