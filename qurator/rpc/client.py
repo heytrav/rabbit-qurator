@@ -9,6 +9,7 @@ from ..settings import CONN_DICT
 from kombu import Exchange as default_exchange
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class RpcClient(object):

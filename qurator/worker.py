@@ -2,6 +2,7 @@ import logging
 from kombu.mixins import ConsumerMixin
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 class Worker(ConsumerMixin):

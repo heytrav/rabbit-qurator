@@ -10,6 +10,7 @@ from amqp import exceptions
 
 from .settings import CONN_DICT
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 class Qurator(object):
 
