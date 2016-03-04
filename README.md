@@ -1,7 +1,7 @@
 [![Circle CI](https://circleci.com/gh/heytrav/rpc-qurator.svg?style=svg)](https://circleci.com/gh/heytrav/rpc-qurator)
 #rpc-qurator
 
-Create RabbitMQ based remote procedure call (RPC) endpoints using decorators.
+Use a Python decorator to convert a function into a RabbitMQ consumer.
 
 
 #Description
