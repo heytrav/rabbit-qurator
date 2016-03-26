@@ -1,12 +1,12 @@
 [![Circle CI](https://circleci.com/gh/heytrav/rpc-qurator.svg?style=svg)](https://circleci.com/gh/heytrav/rpc-qurator)
 #rpc-qurator
 
-Use a Python decorator to convert a function into a RabbitMQ consumer.
+A decorator for turning a Python function into a RabbitMQ consumer
 
 
 #Description
 
-This library is intended to support microservices that need to interface with
+This library is intended to support Python microservices that need to interface with
 RabbitMQ.  It provides a couple wrappers that can be used to turn functions
 into RPC style endpoints or fire-and-forget tasks.
 
