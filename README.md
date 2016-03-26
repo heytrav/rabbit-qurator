@@ -1,5 +1,5 @@
 [![Circle CI](https://circleci.com/gh/heytrav/rpc-qurator.svg?style=svg)](https://circleci.com/gh/heytrav/rpc-qurator)
-#rpc-qurator
+#rabbit-qurator
 
 A decorator for turning a Python function into a RabbitMQ consumer
 
