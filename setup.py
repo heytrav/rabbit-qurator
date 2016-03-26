@@ -6,12 +6,12 @@ reqs = [str(ir.req) for ir in install_reqs]
 
 setup(name='rabbit-qurator',
       author='Travis Holton',
-      url='https://github.com/heytrav/rpc-qurator',
+      url='https://github.com/heytrav/rabbit-qurator',
       author_email='wtholton@gmail.com',
       install_requires=reqs,
       description='Create RabbitMQ endpoints using decorators.',
       long_description='Create RabbitMQ endpoints for RPC and tasks using decorators based on kombu.',
-      version='1.3.1',
+      version='1.3.2',
       packages=['qurator',
                 'qurator.rpc',
                 'qurator.tests'])
